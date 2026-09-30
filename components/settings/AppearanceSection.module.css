@@ -1,0 +1,289 @@
+.section {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--sf-radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  font-size: 1.125rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sf-color-text);
+}
+
+.engineBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #F3F4F6;
+  color: #4B5563;
+  letter-spacing: 0.05em;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #4B5563;
+}
+
+/* Theme Cards Grid */
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .themeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.themeCard {
+  background: #FFFFFF;
+  border: 1.5px solid #E5E7EB;
+  border-radius: var(--sf-radius-md);
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.15s ease-in-out;
+}
+
+.themeCard:hover {
+  border-color: #CBD5E1;
+}
+
+.themeCardActive {
+  border-color: var(--sf-color-primary);
+  box-shadow: 0 0 0 1px var(--sf-color-primary);
+}
+
+.themeCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.themeTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.themeName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sf-color-text);
+}
+
+.checkActive {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sf-color-primary);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+
+.radioInactive {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #D1D5DB;
+}
+
+/* Previews */
+.themePreviewLight {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  height: 48px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.previewBarLight {
+  width: 60%;
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 3px;
+}
+
+.previewBlockLight {
+  width: 30%;
+  height: 12px;
+  background: #4F46E5;
+  border-radius: 3px;
+}
+
+.themePreviewDark {
+  background: #0F172A;
+  border: 1px solid #1E293B;
+  border-radius: 6px;
+  height: 48px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.previewBarDark {
+  width: 60%;
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+}
+
+.previewBlockDark {
+  width: 30%;
+  height: 12px;
+  background: #6366F1;
+  border-radius: 3px;
+}
+
+.themePreviewSplit {
+  border-radius: 6px;
+  height: 48px;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+}
+
+.previewSplitLight {
+  flex: 1;
+  background: #F8FAFC;
+}
+
+.previewSplitDark {
+  flex: 1;
+  background: #0F172A;
+}
+
+/* Accent Spectrum */
+.accentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subtext {
+  margin: 2px 0 0 0;
+  font-size: 0.75rem;
+  color: var(--sf-color-text-secondary);
+}
+
+.colorPills {
+  display: flex;
+  gap: 8px;
+}
+
+.colorDot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+
+.colorIndigo {
+  background: #4F46E5;
+}
+
+.colorViolet {
+  background: #7C3AED;
+}
+
+.colorCobalt {
+  background: #2563EB;
+}
+
+.colorOrange {
+  background: #EA580C;
+}
+
+.dotActive {
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--sf-color-primary);
+}
+
+/* Typography Card */
+.typographyCard {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--sf-radius-md);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.typographyLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.typographyTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sf-color-text);
+}
+
+.typographyDesc {
+  font-size: 0.75rem;
+  color: var(--sf-color-text-secondary);
+}
+
+.hardwareBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #EEF2FF;
+  color: #4F46E5;
+  letter-spacing: 0.05em;
+}

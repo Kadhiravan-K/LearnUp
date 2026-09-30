@@ -1,0 +1,305 @@
+/* ==========================================================================
+   StudyFlow Design System — Global Tokens & Reset
+   ========================================================================== */
+
+:root {
+  /* ── Brand ── */
+  --sf-color-primary: #6366F1;
+  --sf-color-primary-hover: #4F46E5;
+  --sf-color-primary-active: #4338CA;
+  --sf-color-primary-light: #EEF2FF;
+  --sf-color-primary-border: #C7D2FE;
+
+  /* ── Semantic (Light Theme Default) ── */
+  --sf-color-bg: #F8FAFC;
+  --sf-color-bg-elevated: #FFFFFF;
+  
+  --sf-color-surface: #FFFFFF;
+  --sf-color-surface-hover: #F1F5F9;
+  --sf-color-surface-active: #E2E8F0;
+  
+  --sf-color-border: #E2E8F0;
+  --sf-color-border-hover: #CBD5E1;
+  --sf-color-border-focus: #6366F1;
+
+  --sf-color-text-primary: #0F172A;
+  --sf-color-text-secondary: #475569;
+  --sf-color-text-tertiary: #64748B;
+  --sf-color-text-muted: #94A3B8;
+  --sf-color-text-inverse: #FFFFFF;
+  --sf-color-text-on-primary: #FFFFFF;
+
+  /* ── Status Colors ── */
+  --sf-color-error: #EF4444;
+  --sf-color-error-bg: #FEF2F2;
+  --sf-color-error-border: #FCA5A5;
+  --sf-color-error-text: #B91C1C;
+
+  --sf-color-success: #16A34A;
+  --sf-color-success-bg: #F0FDF4;
+  --sf-color-success-border: #86EFAC;
+  --sf-color-success-text: #15803D;
+
+  --sf-color-warning: #F59E0B;
+  --sf-color-warning-bg: #FFFBEB;
+  --sf-color-warning-border: #FDE68A;
+  --sf-color-warning-text: #B45309;
+
+  /* ── Cards & Inputs ── */
+  --sf-color-card-bg: #FFFFFF;
+  --sf-color-card-border: #E2E8F0;
+  --sf-color-input-bg: #FFFFFF;
+  --sf-color-input-border: #CBD5E1;
+
+  /* ── Typography ── */
+  --sf-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --sf-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Font Sizes */
+  --sf-text-xs: 0.75rem;      /* 12px */
+  --sf-text-sm: 0.875rem;     /* 14px */
+  --sf-text-base: 1rem;       /* 16px */
+  --sf-text-lg: 1.125rem;     /* 18px */
+  --sf-text-xl: 1.25rem;      /* 20px */
+  --sf-text-2xl: 1.5rem;      /* 24px */
+  --sf-text-3xl: 1.875rem;    /* 30px */
+
+  /* Font Weights */
+  --sf-font-normal: 400;
+  --sf-font-medium: 500;
+  --sf-font-semibold: 600;
+  --sf-font-bold: 700;
+
+  /* Line Heights */
+  --sf-leading-tight: 1.25;
+  --sf-leading-normal: 1.5;
+  --sf-leading-relaxed: 1.625;
+
+  /* ── Spacing Scale (4px base) ── */
+  --sf-space-1: 0.25rem;   /* 4px */
+  --sf-space-2: 0.5rem;    /* 8px */
+  --sf-space-3: 0.75rem;   /* 12px */
+  --sf-space-4: 1rem;      /* 16px */
+  --sf-space-5: 1.25rem;   /* 20px */
+  --sf-space-6: 1.5rem;    /* 24px */
+  --sf-space-8: 2rem;      /* 32px */
+  --sf-space-10: 2.5rem;   /* 40px */
+  --sf-space-12: 3rem;     /* 48px */
+  --sf-space-16: 4rem;     /* 64px */
+
+  /* ── Borders & Radius ── */
+  --sf-radius-sm: 4px;
+  --sf-radius-md: 6px;
+  --sf-radius-lg: 8px;
+  --sf-radius-xl: 12px;
+  --sf-radius-2xl: 16px;
+  --sf-radius-full: 9999px;
+  --sf-border-width: 1px;
+
+  /* ── Shadows ── */
+  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --sf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --sf-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+
+  /* ── Focus ── */
+  --sf-focus-ring-color: rgba(99, 102, 241, 0.5);
+  --sf-focus-ring: 0 0 0 2px var(--sf-color-bg), 0 0 0 4px var(--sf-color-primary);
+
+  /* ── Motion & Transitions ── */
+  --sf-duration-fast: 150ms;
+  --sf-duration-normal: 250ms;
+  --sf-duration-slow: 400ms;
+  --sf-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sf-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sf-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sf-glow: none;
+
+  /* ── Z-Index Scale ── */
+  --sf-z-dropdown: 10;
+  --sf-z-sticky: 20;
+  --sf-z-modal-backdrop: 40;
+  --sf-z-modal: 50;
+  --sf-z-toast: 60;
+}
+
+/* ==========================================================================
+   Light Theme Explicit Override (matches :root)
+   ========================================================================== */
+
+[data-theme="light"] {
+  --sf-color-bg: #F8FAFC;
+  --sf-color-bg-elevated: #FFFFFF;
+  --sf-color-surface: #FFFFFF;
+  --sf-color-surface-hover: #F1F5F9;
+  --sf-color-surface-active: #E2E8F0;
+  --sf-color-border: #E2E8F0;
+  --sf-color-border-hover: #CBD5E1;
+  --sf-color-border-focus: #6366F1;
+  --sf-color-text-primary: #0F172A;
+  --sf-color-text-secondary: #475569;
+  --sf-color-text-tertiary: #64748B;
+  --sf-color-text-muted: #94A3B8;
+  --sf-color-text-inverse: #FFFFFF;
+  --sf-color-text-on-primary: #FFFFFF;
+  --sf-color-card-bg: #FFFFFF;
+  --sf-color-card-border: #E2E8F0;
+  --sf-color-input-bg: #FFFFFF;
+  --sf-color-input-border: #CBD5E1;
+}
+
+/* ==========================================================================
+   Dark Theme Overrides
+   ========================================================================== */
+
+[data-theme="dark"] {
+  /* ── Brand ── */
+  --sf-color-primary: #818CF8;
+  --sf-color-primary-hover: #6366F1;
+  --sf-color-primary-active: #4F46E5;
+  --sf-color-primary-light: #1E1B4B;
+  --sf-color-primary-border: #3730A3;
+
+  /* ── Backgrounds & Surfaces ── */
+  --sf-color-bg: #0B0F19;
+  --sf-color-bg-elevated: #111827;
+  
+  --sf-color-surface: #111827;
+  --sf-color-surface-hover: #1E293B;
+  --sf-color-surface-active: #283548;
+  
+  --sf-color-border: #1E293B;
+  --sf-color-border-hover: #334155;
+  --sf-color-border-focus: #818CF8;
+
+  --sf-color-text-primary: #F8FAFC;
+  --sf-color-text-secondary: #94A3B8;
+  --sf-color-text-tertiary: #64748B;
+  --sf-color-text-muted: #475569;
+  --sf-color-text-inverse: #0F172A;
+  --sf-color-text-on-primary: #FFFFFF;
+
+  /* ── Status Colors ── */
+  --sf-color-error: #F87171;
+  --sf-color-error-bg: #451A1A;
+  --sf-color-error-border: #7F1D1D;
+  --sf-color-error-text: #FCA5A5;
+
+  --sf-color-success: #4ADE80;
+  --sf-color-success-bg: #052E16;
+  --sf-color-success-border: #14532D;
+  --sf-color-success-text: #86EFAC;
+
+  --sf-color-warning: #FBBF24;
+  --sf-color-warning-bg: #451A03;
+  --sf-color-warning-border: #78350F;
+  --sf-color-warning-text: #FDE68A;
+
+  /* ── Cards & Inputs ── */
+  --sf-color-card-bg: #111827;
+  --sf-color-card-border: #1E293B;
+  --sf-color-input-bg: #1E293B;
+  --sf-color-input-border: #334155;
+
+  /* ── Shadows ── */
+  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --sf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --sf-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   Modern CSS Reset
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-inter), var(--sf-font-sans);
+  background-color: var(--sf-color-bg);
+  color: var(--sf-color-text-primary);
+  line-height: var(--sf-leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--sf-transition-normal), color var(--sf-transition-normal);
+}
+
+/* Improve media defaults */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Remove default list styles */
+ol, ul {
+  list-style: none;
+}
+
+/* Inherit fonts for inputs and buttons */
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Consistent anchor styling */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Better table defaults */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ==========================================================================
+   Accessibility & Focus Defaults
+   ========================================================================== */
+
+/* Universal focus-visible styling */
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-focus-ring);
+  border-radius: inherit;
+}
+
+/* Hide focus ring on mouse click, but preserve for keyboard */
+*:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Custom Scrollbar
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sf-color-border);
+  border-radius: var(--sf-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sf-color-text-tertiary);
+}

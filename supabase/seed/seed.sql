@@ -1,0 +1,4 @@
+-- StudyFlow Zero-Seed Baseline
+-- Fresh database resets and production deployments intentionally start with ZERO user/content data.
+-- If you need sample content for local development, run:
+-- npm run seed:demo

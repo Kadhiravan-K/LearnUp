@@ -1,0 +1,31 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sf-space-4);
+  background-color: var(--sf-color-bg);
+}
+
+.cardWrapper {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--sf-color-surface);
+  border: var(--sf-border-width) solid var(--sf-color-border);
+  border-radius: var(--sf-radius-xl);
+  padding: var(--sf-space-8);
+  box-shadow: var(--sf-shadow-xl);
+}
+
+/* Ensure maximum usability on small devices like iPhone SE (320px/375px) */
+@media (max-width: 640px) {
+  .cardWrapper {
+    padding: var(--sf-space-6);
+  }
+}
+
+@media (max-width: 375px) {
+  .cardWrapper {
+    padding: var(--sf-space-4);
+  }
+}

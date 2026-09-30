@@ -1,0 +1,377 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-5, 20px);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--sf-space-6, 24px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sf-space-4, 16px);
+  flex-wrap: wrap;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--sf-text-muted, #94a3b8);
+  margin-bottom: 6px;
+}
+
+.activeCourseBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--sf-text-primary, #0f172a);
+  margin: 0;
+}
+
+.engineBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--sf-bg-surface, #ffffff);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  color: var(--sf-accent-primary, #6366f1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Mode Switcher Nav Tabs */
+.modeTabs {
+  display: flex;
+  gap: 8px;
+  background: var(--sf-bg-surface, #ffffff);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 10px;
+  padding: 4px;
+  overflow-x: auto;
+}
+
+.modeTabBtn {
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--sf-text-secondary, #64748b);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.modeTabBtnActive {
+  background: var(--sf-accent-primary, #6366f1);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* 2-Column Main Workspace */
+.workspaceGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--sf-space-5, 20px);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .workspaceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Context Column */
+.contextPane {
+  background: var(--sf-bg-surface, #ffffff);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+.contextHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contextTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sf-text-primary, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.liveLinkedBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.courseCard {
+  background: var(--sf-bg-canvas, #f8fafc);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.playheadBox {
+  background: var(--sf-bg-surface, #ffffff);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jumpBtn {
+  background: var(--sf-accent-primary, #6366f1);
+  color: #ffffff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Right Main Content Pane */
+.mainPane {
+  background: var(--sf-bg-surface, #ffffff);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Prompt Shortcuts */
+.shortcutsRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.shortcutBtn {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: var(--sf-bg-canvas, #f1f5f9);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  color: var(--sf-text-primary, #0f172a);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.shortcutBtn:hover {
+  background: var(--sf-accent-subtle, rgba(99, 102, 241, 0.1));
+  border-color: var(--sf-accent-primary, #6366f1);
+  color: var(--sf-accent-primary, #6366f1);
+}
+
+/* Chat Messages */
+.chatStream {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.messageCard {
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.userMessage {
+  background: var(--sf-bg-canvas, #f8fafc);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.aiMessage {
+  background: var(--sf-bg-surface, #ffffff);
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  width: 100%;
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--sf-text-muted, #94a3b8);
+}
+
+.groundedTag {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.messageBody {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--sf-text-primary, #0f172a);
+}
+
+.codeBlock {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.8125rem;
+  overflow-x: auto;
+}
+
+.messageActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.msgActionBtn {
+  background: transparent;
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  color: var(--sf-text-secondary, #64748b);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Chat Input Bar */
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--sf-bg-canvas, #f8fafc);
+}
+
+.chatTextarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--sf-text-primary, #0f172a);
+  resize: none;
+  outline: none;
+  min-height: 50px;
+  font-family: inherit;
+}
+
+.inputControlsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sendBtn {
+  background: var(--sf-accent-primary, #6366f1);
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Quiz UI Components */
+.quizCard {
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.optionItem {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--sf-border-subtle, #e2e8f0);
+  background: var(--sf-bg-canvas, #f8fafc);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.optionItem:hover {
+  border-color: var(--sf-accent-primary, #6366f1);
+}
+
+.optionSelectedCorrect {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+  font-weight: 600;
+}

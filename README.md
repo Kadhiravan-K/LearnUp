@@ -1,0 +1,175 @@
+# StudyFlow
+
+StudyFlow is a focused, distraction-free personal learning platform that allows users to organize, structure, and watch educational YouTube content (videos and playlists) in a dedicated private library.
+
+---
+
+## Features (MVP-0.1)
+
+- **Authentication**: Secure email and password signup, signin, and signout powered by Supabase Auth with SSR session handling.
+- **Personal Library**: Private collection of learning items isolated per user with Row-Level Security (RLS).
+- **YouTube Import**:
+  - Direct video import.
+  - Full playlist import with pagination.
+  - Idempotent imports preventing accidental duplicate entries.
+  - Robust error handling for private, deleted, or invalid sources.
+- **Ordered Playlist Playback**: Preserves original playlist sequence (`source_position`) with an interactive sidebar to switch videos seamlessly.
+- **Distraction-Free Player**: Responsive 16:9 embedded YouTube player adhering to official terms without third-party recommendations or ads.
+- **Library Management**: Soft-touch confirmation modal to safely remove items and cleanup associated child records without affecting the original YouTube source.
+- **Community Templates & Catalog**: Pre-built study templates and learning blueprints for rapid course setup.
+- **Zero-Seed Guarantee**: Clean-slate initialization with zero fabricated user rows on fresh installations.
+- **Accessibility & Design**: Built with WCAG AA compliant contrast, full keyboard navigation, visible focus rings, and CSS Module design tokens ready for theme switching.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | [Next.js 14](https://nextjs.org/) (App Router) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) (Strict mode) |
+| **UI & Styling** | React 18, CSS Modules, CSS Custom Properties (Tokens) |
+| **Backend & Database** | Next.js Route Handlers, Supabase (@supabase/ssr, PostgreSQL with RLS) |
+| **External Integration**| YouTube Data API v3, YouTube IFrame Player Embed |
+| **Validation** | [Zod](https://zod.dev/) |
+| **Testing** | [Vitest](https://vitest.dev/) (Unit & Integration), [Playwright](https://playwright.dev/) (E2E) |
+| **Linting & CI** | ESLint (`next/core-web-vitals`), GitHub Actions |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js**: `v20.x` or higher
+- **npm**: `v10.x` or higher
+- **Supabase Project**: Either local Supabase CLI or hosted project
+- **YouTube Data API v3 Key**: Obtained from Google Cloud Console
+
+### 1. Clone & Install Dependencies
+
+```bash
+git clone https://github.com/Kadhiravan-K/studyflow.git
+cd studyflow
+npm install
+```
+
+### 2. Environment Configuration
+
+Copy the example environment configuration:
+
+```bash
+cp .env.example .env.local
+```
+
+Populate the required environment variables:
+
+```ini
+# Supabase Configuration (Client + Server)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# YouTube Integration (Server-side only — never exposed to client)
+YOUTUBE_API_KEY=your-youtube-api-key
+```
+
+### 3. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. Unauthenticated visits will redirect to `/login`.
+
+---
+
+## Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Starts local Next.js development server on port 3000 |
+| `npm run build` | Builds optimized production bundle |
+| `npm run start` | Runs production build locally |
+| `npm run lint` | Runs ESLint checks |
+| `npx tsc --noEmit` | Validates TypeScript types across the entire codebase |
+| `npm test` | Runs all Vitest unit and integration tests |
+| `npm run seed:demo` | Seeds local development database with sample courses (opt-in) |
+| `npm run test:e2e` | Runs Playwright end-to-end browser tests |
+| `npm run test:all` | Complete CI verification (`lint` → `typecheck` → `test` → `build`) |
+
+---
+
+## Project Structure
+
+```
+studyflow/
+├── .github/workflows/ci.yml       # GitHub Actions automated CI pipeline
+├── app/
+│   ├── (auth)/                    # Public auth pages (login, signup)
+│   ├── (app)/                     # Protected application pages (library, [id], calendar, etc.)
+│   ├── api/learning-items/        # Protected REST API routes
+│   ├── globals.css                # Semantic CSS tokens & theme architecture
+│   ├── layout.tsx                 # Root application shell
+│   └── page.tsx                   # Landing redirector
+├── components/
+│   ├── auth/                      # LoginForm, SignupForm
+│   ├── library/                   # LibraryGrid, LibraryCard, ImportModal, DeleteConfirmModal
+│   ├── player/                    # YouTubePlayer, PlaylistSidebar
+│   ├── layout/                    # Authenticated Header & Sidebar
+│   └── ui/                        # Reusable primitives (Button, Input, Card, Modal, Alert, etc.)
+├── lib/
+│   ├── api/                       # Typed client-side API wrappers
+│   ├── connectors/                # Third-party plugin integrations (Anki, Notion, Obsidian, etc.)
+│   ├── db/                        # Database repository and query abstractions
+│   ├── hooks/                     # Custom React hooks (useLibrary, useImport, useDelete, etc.)
+│   ├── services/                  # Business logic (ImportService, LibraryService)
+│   ├── supabase/                  # Browser, server, and middleware Supabase clients
+│   ├── templates/                 # Static community learning templates
+│   ├── types/                     # Shared domain interfaces and schemas
+│   ├── utils/                     # Helper utilities (URL validation)
+│   └── youtube/                   # YouTube Data API adapter
+├── tests/
+│   ├── unit/                      # Unit tests (parsers, metadata mapping, zero-seed invariant)
+│   ├── integration/               # Integration tests (API endpoints, QA suite, auth hooks)
+│   └── e2e/                       # Playwright E2E tests (auth, library, import, player, delete)
+├── docs/                          # PRD, Architecture, API specification, and MVP contracts
+└── supabase/migrations/           # PostgreSQL DDL migrations & Row-Level Security policies
+```
+
+---
+
+## Architecture & Security Boundaries
+
+1. **Authentication & Data Isolation**: All library operations derive the current user identity from the trusted session token (`requireAuth`). Client-supplied `user_id` values are never trusted. Row-Level Security (RLS) ensures users cannot read, mutate, or delete another user's records.
+2. **Credential Separation**: `YOUTUBE_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` remain strictly server-side. The frontend only communicates with Next.js route handlers (`/api/*`) via standard Bearer tokens.
+3. **YouTube Integration Adapter**: All external provider communication is isolated in `lib/youtube/` behind structured domain interfaces, converting external provider failures into stable internal error codes (`SOURCE_NOT_FOUND`, `SOURCE_UNAVAILABLE`, `IMPORT_FAILED`).
+4. **Media Integrity**: StudyFlow strictly embeds videos via the official YouTube IFrame player and never proxies or downloads video stream bytes.
+5. **Zero-Seed Guarantee**: Database migrations create schemas, tables, views, and RLS policies only. A fresh install contains zero pre-seeded user records.
+
+---
+
+## Documentation
+
+- [Product Requirements Document (PRD)](docs/PRD.md)
+- [MVP Specification](docs/MVP.md)
+- [System Architecture](docs/ARCHITECTURE.md)
+- [API Contract Specification](docs/API.md)
+- [Community Templates Guide](docs/COMMUNITY_TEMPLATES.md)
+- [Plugins & Connectors Architecture](docs/PLUGINS.md)
+- [Demo Data & Zero-Seed Invariant](docs/DEMO_DATA.md)
+- [AI Coding Agent Guidelines](AGENTS.md)
+
+---
+
+## Contributing & Governance
+
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+
+---
+
+## License
+
+StudyFlow is open-source software licensed under the [MIT License](LICENSE).
