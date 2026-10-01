@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
-import { useTheme } from '@/lib/hooks/useTheme';
+import { useLearnUpTheme } from '@/lib/theme/ThemeProvider';
 import styles from './Header.module.css';
 
 export interface BreadcrumbItem {
@@ -60,7 +60,7 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
   const router = useRouter();
   const pathname = usePathname() || '';
   const supabase = createClient();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme } = useLearnUpTheme();
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [focusTimeDisplay, setFocusTimeDisplay] = useState('25:00');

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ThemeMode, AccentColor } from '@/lib/types';
-import { useTheme } from '@/lib/hooks/useTheme';
+import { useLearnUpTheme } from '@/lib/theme/ThemeProvider';
 import { ThemeSwitcher } from '@/lib/theme';
 import styles from './AppearanceSection.module.css';
 
@@ -19,7 +19,7 @@ export function AppearanceSection({
   onChangeTheme,
   onChangeAccent
 }: AppearanceSectionProps) {
-  const { setTheme } = useTheme();
+  const { setTheme } = useLearnUpTheme();
 
   const handleSelectTheme = (mode: ThemeMode) => {
     setTheme(mode);

@@ -12,6 +12,6 @@ test.describe('Authentication Journey', () => {
     // 2. Navigate to Login via Link
     await page.getByRole('link', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/.*login.*/);
-    await expect(page.getByRole('heading', { name: /Who is studying today\?|Welcome back/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Who's learning today\?|Who is studying today\?|Welcome back/i })).toBeVisible();
   });
 });

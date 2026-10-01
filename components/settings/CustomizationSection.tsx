@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePlayerShortcuts, PlayerShortcuts, DEFAULT_PLAYER_SHORTCUTS } from '@/lib/hooks/usePlayerShortcuts';
-import { useTheme, Theme } from '@/lib/hooks/useTheme';
+import { useLearnUpTheme } from '@/lib/theme/ThemeProvider';
+import { ExtendedThemeId } from '@/lib/theme';
 import { useIsPluginEnabled, setPluginStatus, getPluginStatus } from '@/lib/hooks/useIsPluginEnabled';
 import { Button } from '@/components/ui/Button/Button';
 import styles from './CustomizationSection.module.css';
@@ -12,7 +13,7 @@ export interface CustomizationSectionProps {
 }
 
 interface ThemeOption {
-  id: Theme;
+  id: ExtendedThemeId;
   pluginId?: string;
   name: string;
   category: 'core' | 'premium_plugin';
@@ -50,7 +51,7 @@ export const THEME_OPTIONS: ThemeOption[] = [
 export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
   const [activeSubTab, setActiveSubTab] = useState<'player' | 'theme'>('theme');
   const { shortcuts, saveShortcuts, resetShortcuts } = usePlayerShortcuts();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useLearnUpTheme();
 
   // Check Workspace Customization Studio plugin state
   const isCustomizationPluginEnabled = useIsPluginEnabled('workspace_customization_studio', true);

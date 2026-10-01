@@ -1,3 +1,27 @@
+.card {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--sf-color-surface);
+  border: var(--sf-border-width) solid var(--sf-color-border);
+  border-radius: var(--sf-radius-xl);
+  padding: var(--sf-space-8);
+  box-shadow: var(--sf-shadow-lg);
+  box-sizing: border-box;
+  transition: background-color var(--sf-transition-normal), border-color var(--sf-transition-normal);
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: var(--sf-space-6);
+  }
+}
+
+@media (max-width: 375px) {
+  .card {
+    padding: var(--sf-space-4);
+  }
+}
+
 .form {
   display: flex;
   flex-direction: column;

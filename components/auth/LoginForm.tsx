@@ -14,7 +14,13 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProps) {
-  const supabase = createClient();
+  let supabase: ReturnType<typeof createClient> | null = null;
+  let initError: string | null = null;
+  try {
+    supabase = createClient();
+  } catch (e: any) {
+    initError = e.message;
+  }
 
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
@@ -24,6 +30,12 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (initError) {
+      setError(initError);
+      return;
+    }
+    if (!supabase) return;
 
     if (!email || !password) {
       setError('Please enter both email and password.');
@@ -39,18 +51,20 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
       });
 
       if (signInError) {
-        setError(signInError.message);
-        setIsLoading(false);
+        import('@/lib/supabase/browser').then(({ formatAuthError }) => {
+          setError(formatAuthError(signInError));
+          setIsLoading(false);
+        });
         return;
       }
 
       if (data.session) {
-        // Save to browser saved profiles for Chrome-like profile picker
+        // Save to browser saved profiles for profile chooser
         try {
           const namePart = email.split('@')[0];
           const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
           const existing = JSON.parse(localStorage.getItem('LearnUp_saved_profiles') || '[]');
-          const filtered = existing.filter((p: { email: string }) => p.email.toLowerCase() !== email.toLowerCase());
+          const filtered = existing.filter((p: { email: string }) => p.email?.toLowerCase() !== email.toLowerCase());
           const newProfile = {
             id: data.session.user.id || String(Date.now()),
             name: displayName,
@@ -81,63 +95,65 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form} noValidate>
-      {onBackToProfiles && (
-        <button
-          type="button"
-          onClick={onBackToProfiles}
-          className={styles.link}
-          style={{ alignSelf: 'flex-start', marginBottom: '0.75rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}
-        >
-          &larr; Back to Profiles
-        </button>
-      )}
+    <div className={styles.card}>
+      <form onSubmit={handleSubmit} className={styles.form} noValidate>
+        {onBackToProfiles && (
+          <button
+            type="button"
+            onClick={onBackToProfiles}
+            className={styles.backBtn}
+            aria-label="Back to Profiles"
+          >
+            &larr; Back to Profiles
+          </button>
+        )}
 
-      <div className={styles.header}>
-        <h1 className={styles.title}>Welcome back</h1>
-        <p className={styles.subtitle}>Sign in to your LearnUp workspace</p>
-      </div>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Welcome back</h1>
+          <p className={styles.subtitle}>Sign in to your LearnUp workspace</p>
+        </div>
 
-      {error && (
-        <Alert variant="error" className={styles.alert}>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="error" className={styles.alert}>
+            {error}
+          </Alert>
+        )}
 
-      <div className={styles.fields}>
-        <Input
-          label="Email address"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          autoComplete="email"
-          disabled={isLoading}
-          autoFocus={!initialEmail}
-          required
-        />
-        <Input
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          disabled={isLoading}
-          autoFocus={Boolean(initialEmail)}
-          required
-        />
-      </div>
+        <div className={styles.fields}>
+          <Input
+            label="Email address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            disabled={isLoading}
+            autoFocus={!initialEmail}
+            required
+          />
+          <Input
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            disabled={isLoading}
+            autoFocus={Boolean(initialEmail)}
+            required
+          />
+        </div>
 
-      <Button type="submit" className={styles.submitBtn} isLoading={isLoading}>
-        Sign In
-      </Button>
+        <Button type="submit" className={styles.submitBtn} isLoading={isLoading}>
+          Sign In
+        </Button>
 
-      <div className={styles.footer}>
-        Don&apos;t have an account?{' '}
-        <Link href="/signup" className={styles.link}>
-          Sign up
-        </Link>
-      </div>
-    </form>
+        <div className={styles.footer}>
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" className={styles.link}>
+            Sign up
+          </Link>
+        </div>
+      </form>
+    </div>
   );
 }
