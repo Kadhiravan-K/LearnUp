@@ -220,8 +220,8 @@ describe('Manual Testing Verification Matrix (All 8 Required Scenarios)', () => 
   let importService: ImportService;
   let libraryService: LibraryService;
 
-  const userA: AuthenticatedUser = { id: 'user-aaa-111', email: 'userA@studyflow.internal' };
-  const userB: AuthenticatedUser = { id: 'user-bbb-222', email: 'userB@studyflow.internal' };
+  const userA: AuthenticatedUser = { id: 'user-aaa-111', email: 'userA@LearnUp.internal' };
+  const userB: AuthenticatedUser = { id: 'user-bbb-222', email: 'userB@LearnUp.internal' };
   const mockDbClient = {} as any;
 
   beforeEach(() => {

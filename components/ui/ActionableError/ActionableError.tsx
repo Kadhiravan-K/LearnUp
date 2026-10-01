@@ -57,7 +57,7 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
       icon: '🔐',
       title: 'Authentication Required (Missing Bearer Token)',
       summary:
-        'StudyFlow protects your learning vault with secure sessions. Your browser session was not detected or needs to be refreshed.',
+        'LearnUp protects your learning vault with secure sessions. Your browser session was not detected or needs to be refreshed.',
       primaryActionLabel: '🔑 Sign In / Open Account',
       primaryAction: (router) => {
         router.push('/login');
@@ -65,13 +65,13 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
       secondaryActionLabel: '🚀 Quick Guest Mode',
       secondaryAction: (router) => {
         if (typeof window !== 'undefined') {
-          localStorage.setItem('studyflow_guest_mode', 'true');
+          localStorage.setItem('LearnUp_guest_mode', 'true');
           window.location.href = '/dashboard';
         }
       },
       blog: {
         overview:
-          'StudyFlow enforces strict ownership boundaries. Every learning ingestion and playlist parsing operation checks for an authenticated user session to associate courses with your private curriculum vault.',
+          'LearnUp enforces strict ownership boundaries. Every learning ingestion and playlist parsing operation checks for an authenticated user session to associate courses with your private curriculum vault.',
         whyItHappens:
           'This typically occurs when accessing the application in a fresh browser session, following a cookie expiration, or when calling backend endpoints without an active session header.',
         steps: [
@@ -87,11 +87,11 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
             stepNumber: 2,
             title: 'Or Activate Local-First Guest Mode',
             description:
-              'If you are exploring StudyFlow locally without a cloud backend, you can enable Instant Guest Mode with 1 click.',
+              'If you are exploring LearnUp locally without a cloud backend, you can enable Instant Guest Mode with 1 click.',
             buttonText: 'Activate Guest Mode',
             onClick: () => {
               if (typeof window !== 'undefined') {
-                localStorage.setItem('studyflow_guest_mode', 'true');
+                localStorage.setItem('LearnUp_guest_mode', 'true');
                 window.location.href = '/dashboard';
               }
             }
@@ -104,7 +104,7 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
             onClick: (_, onRetry) => onRetry?.()
           }
         ],
-        proTip: 'StudyFlow retains all your imported courses offline in local storage when guest mode is active.'
+        proTip: 'LearnUp retains all your imported courses offline in local storage when guest mode is active.'
       }
     };
   }
@@ -134,7 +134,7 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
       },
       blog: {
         overview:
-          'StudyFlow accepts direct YouTube Video URLs, Playlist URLs, and Shorts links. Channel homepages (@handle) or invalid web domains cannot be converted into curriculum lessons.',
+          'LearnUp accepts direct YouTube Video URLs, Playlist URLs, and Shorts links. Channel homepages (@handle) or invalid web domains cannot be converted into curriculum lessons.',
         whyItHappens:
           'The link might contain extra tracking parameters, be missing the standard "v=" identifier, or belong to an unsupported video host.',
         steps: [
@@ -179,7 +179,7 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
       },
       blog: {
         overview:
-          'StudyFlow features zero-auth public fallback, but videos marked Private by their creator or heavy batch playlist imports require personal API keys.',
+          'LearnUp features zero-auth public fallback, but videos marked Private by their creator or heavy batch playlist imports require personal API keys.',
         whyItHappens:
           'The target video might be set to Private, or the shared Google Cloud API quota threshold was temporarily reached.',
         steps: [
@@ -214,7 +214,7 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
       category: 'Network & Connectivity',
       icon: '📡',
       title: 'Network Communication Error',
-      summary: 'Could not communicate with the StudyFlow server or YouTube services.',
+      summary: 'Could not communicate with the LearnUp server or YouTube services.',
       primaryActionLabel: '🔄 Retry Connection',
       primaryAction: (_, onRetry) => onRetry?.(),
       blog: {

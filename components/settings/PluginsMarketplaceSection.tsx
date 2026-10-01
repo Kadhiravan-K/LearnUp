@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { StudyFlowPlugin, PluginCategory, PluginKind } from '@/lib/types';
+import { LearnUpPlugin, PluginCategory, PluginKind } from '@/lib/types';
 import styles from './PluginsMarketplaceSection.module.css';
 
-interface MergedPlugin extends StudyFlowPlugin {
+interface MergedPlugin extends LearnUpPlugin {
   isEnabled: boolean;
   isInstalled?: boolean;
   config: Record<string, any>;
@@ -32,7 +32,7 @@ export function PluginsMarketplaceSection() {
         const json = await res.json();
         if (json.data) {
           // Read local uninstalled plugins if any
-          const uninstalledRaw = typeof window !== 'undefined' ? localStorage.getItem('studyflow_uninstalled_plugins') : null;
+          const uninstalledRaw = typeof window !== 'undefined' ? localStorage.getItem('LearnUp_uninstalled_plugins') : null;
           const uninstalledSet = new Set(uninstalledRaw ? JSON.parse(uninstalledRaw) : []);
 
           const enhanced: MergedPlugin[] = json.data.map((p: any) => ({
@@ -60,8 +60,8 @@ export function PluginsMarketplaceSection() {
     );
 
     try {
-      localStorage.setItem(`studyflow_plugin_${pluginId}_enabled`, String(newEnabled));
-      window.dispatchEvent(new CustomEvent('studyflow_plugins_updated', { detail: { pluginId, enabled: newEnabled } }));
+      localStorage.setItem(`LearnUp_plugin_${pluginId}_enabled`, String(newEnabled));
+      window.dispatchEvent(new CustomEvent('LearnUp_plugins_updated', { detail: { pluginId, enabled: newEnabled } }));
 
       await fetch('/api/plugins', {
         method: 'PATCH',
@@ -81,12 +81,12 @@ export function PluginsMarketplaceSection() {
     setInstallingId(pluginId);
     setTimeout(() => {
       // Update local storage uninstalled list
-      const uninstalledRaw = localStorage.getItem('studyflow_uninstalled_plugins');
+      const uninstalledRaw = localStorage.getItem('LearnUp_uninstalled_plugins');
       const uninstalledSet = new Set(uninstalledRaw ? JSON.parse(uninstalledRaw) : []);
       uninstalledSet.delete(pluginId);
-      localStorage.setItem('studyflow_uninstalled_plugins', JSON.stringify(Array.from(uninstalledSet)));
-      localStorage.setItem(`studyflow_plugin_${pluginId}_enabled`, 'true');
-      window.dispatchEvent(new CustomEvent('studyflow_plugins_updated', { detail: { pluginId, enabled: true } }));
+      localStorage.setItem('LearnUp_uninstalled_plugins', JSON.stringify(Array.from(uninstalledSet)));
+      localStorage.setItem(`LearnUp_plugin_${pluginId}_enabled`, 'true');
+      window.dispatchEvent(new CustomEvent('LearnUp_plugins_updated', { detail: { pluginId, enabled: true } }));
 
       setPlugins((prev) =>
         prev.map((p) => (p.id === pluginId ? { ...p, isInstalled: true, isEnabled: true } : p))
@@ -100,12 +100,12 @@ export function PluginsMarketplaceSection() {
   const handleDelete = (pluginId: string) => {
     setDeletingId(pluginId);
     setTimeout(() => {
-      const uninstalledRaw = localStorage.getItem('studyflow_uninstalled_plugins');
+      const uninstalledRaw = localStorage.getItem('LearnUp_uninstalled_plugins');
       const uninstalledSet = new Set(uninstalledRaw ? JSON.parse(uninstalledRaw) : []);
       uninstalledSet.add(pluginId);
-      localStorage.setItem('studyflow_uninstalled_plugins', JSON.stringify(Array.from(uninstalledSet)));
-      localStorage.setItem(`studyflow_plugin_${pluginId}_enabled`, 'false');
-      window.dispatchEvent(new CustomEvent('studyflow_plugins_updated', { detail: { pluginId, enabled: false } }));
+      localStorage.setItem('LearnUp_uninstalled_plugins', JSON.stringify(Array.from(uninstalledSet)));
+      localStorage.setItem(`LearnUp_plugin_${pluginId}_enabled`, 'false');
+      window.dispatchEvent(new CustomEvent('LearnUp_plugins_updated', { detail: { pluginId, enabled: false } }));
 
       setPlugins((prev) =>
         prev.map((p) => (p.id === pluginId ? { ...p, isInstalled: false, isEnabled: false } : p))

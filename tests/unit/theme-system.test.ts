@@ -3,13 +3,13 @@ import {
   DEFAULT_THEME,
   LIGHT_THEME,
   DARK_THEME,
-  PRIMARY_STUDYFLOW_THEMES,
+  PRIMARY_LearnUp_THEMES,
   MOTION_TOKENS,
   SPACING_TOKENS,
   RADIUS_TOKENS
 } from '@/lib/theme';
 
-describe('StudyFlow Theme System — Architecture & Token Integrity', () => {
+describe('LearnUp Theme System — Architecture & Token Integrity', () => {
   let mockStore: Record<string, string> = {};
 
   beforeEach(() => {
@@ -29,14 +29,14 @@ describe('StudyFlow Theme System — Architecture & Token Integrity', () => {
   });
 
   it('provides the core light and dark themes', () => {
-    expect(PRIMARY_STUDYFLOW_THEMES).toHaveLength(2);
-    const themeIds = PRIMARY_STUDYFLOW_THEMES.map((t) => t.id);
+    expect(PRIMARY_LearnUp_THEMES).toHaveLength(2);
+    const themeIds = PRIMARY_LearnUp_THEMES.map((t) => t.id);
     expect(themeIds).toContain('default');
     expect(themeIds).toContain('dark');
   });
 
-  it('verifies StudyFlow Light / Default theme tokens and contrast', () => {
-    expect(DEFAULT_THEME.name).toBe('StudyFlow Default');
+  it('verifies LearnUp Light / Default theme tokens and contrast', () => {
+    expect(DEFAULT_THEME.name).toBe('LearnUp Default');
     expect(DEFAULT_THEME.tagline).toBe('Clean Productivity');
     expect(DEFAULT_THEME.colors.primary).toBe('#6366F1');
     expect(DEFAULT_THEME.colors.bg).toBe('#F8FAFC');
@@ -44,8 +44,8 @@ describe('StudyFlow Theme System — Architecture & Token Integrity', () => {
     expect(LIGHT_THEME.colors.surface).toBe('#FFFFFF');
   });
 
-  it('verifies StudyFlow Dark theme tokens and contrast', () => {
-    expect(DARK_THEME.name).toBe('StudyFlow Dark');
+  it('verifies LearnUp Dark theme tokens and contrast', () => {
+    expect(DARK_THEME.name).toBe('LearnUp Dark');
     expect(DARK_THEME.tagline).toBe('Midnight Void (OLED Focus)');
     expect(DARK_THEME.category).toBe('core');
     expect(DARK_THEME.colors.primary).toBe('#818CF8');
@@ -69,13 +69,13 @@ describe('StudyFlow Theme System — Architecture & Token Integrity', () => {
   });
 
   it('handles theme persistence in localStorage correctly', () => {
-    localStorage.setItem('studyflow_theme', 'light');
-    expect(localStorage.getItem('studyflow_theme')).toBe('light');
+    localStorage.setItem('LearnUp_theme', 'light');
+    expect(localStorage.getItem('LearnUp_theme')).toBe('light');
 
-    localStorage.setItem('studyflow_theme', 'dark');
-    expect(localStorage.getItem('studyflow_theme')).toBe('dark');
+    localStorage.setItem('LearnUp_theme', 'dark');
+    expect(localStorage.getItem('LearnUp_theme')).toBe('dark');
 
-    localStorage.setItem('studyflow_theme', 'system');
-    expect(localStorage.getItem('studyflow_theme')).toBe('system');
+    localStorage.setItem('LearnUp_theme', 'system');
+    expect(localStorage.getItem('LearnUp_theme')).toBe('system');
   });
 });

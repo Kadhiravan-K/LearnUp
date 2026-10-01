@@ -78,7 +78,7 @@ describe('External App Connectors & Local Vault Sync System', () => {
       expect(markdown).toContain('course: "Advanced Dynamic Programming Masterclass"');
       expect(markdown).toContain('video: "Lecture 1: Intro to Dynamic Programming"');
       expect(markdown).toContain('tags:');
-      expect(markdown).toContain('- studyflow');
+      expect(markdown).toContain('- LearnUp');
       expect(markdown).toContain('- note');
       expect(markdown).toContain('# Lecture 1: Intro to Dynamic Programming');
       expect(markdown).toContain('[[Advanced Dynamic Programming Masterclass]]');
@@ -111,14 +111,14 @@ describe('External App Connectors & Local Vault Sync System', () => {
   describe('2. GitHub Automated Backup & Commit Engine', () => {
     it('packages study data into GitHub git tree payload with commit metadata', async () => {
       const result = await syncToGitHub([mockNote], [mockCourse], [mockBookmark], {
-        repo: 'example-user/studyflow-vault',
+        repo: 'example-user/LearnUp-vault',
         branch: 'main'
       });
 
       expect(result.success).toBe(true);
       expect(result.connectorType).toBe('github');
       expect(result.syncedCount).toBe(3); // 1 note + 1 course + 1 bookmark
-      expect(result.details?.repo).toBe('example-user/studyflow-vault');
+      expect(result.details?.repo).toBe('example-user/LearnUp-vault');
       expect(result.details?.branch).toBe('main');
       expect(result.details?.manifest.totalCourses).toBe(1);
       expect(result.details?.manifest.totalNotes).toBe(1);

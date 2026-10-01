@@ -1,4 +1,4 @@
-# StudyFlow — Complete System Overview & Documentation
+# LearnUp — Complete System Overview & Documentation
 
 **Version:** 0.1.0 (MVP)  
 **Stack:** Next.js 14 (App Router), TypeScript, React, CSS Modules, Supabase (PostgreSQL + Auth + RLS), YouTube Data API v3  
@@ -8,7 +8,7 @@
 
 ## 1. Product Mission & Purpose
 
-StudyFlow is a private, distraction-free YouTube learning library designed to help users curate and study YouTube educational content without the distraction algorithms, comments, recommendations, or autoplay loops of YouTube.
+LearnUp is a private, distraction-free YouTube learning library designed to help users curate and study YouTube educational content without the distraction algorithms, comments, recommendations, or autoplay loops of YouTube.
 
 ---
 
@@ -34,7 +34,7 @@ StudyFlow is a private, distraction-free YouTube learning library designed to he
   - **Empty State**: Informative onboarding graphic with a direct "Add Learning Item" button.
   - **Error State**: User-friendly error message with a "Try Again" retry trigger.
 - **Item Deletion & Confirmation Modal (`DeleteModal`)**:
-  - Deleting an item removes the StudyFlow record and its child videos safely without altering anything on YouTube.
+  - Deleting an item removes the LearnUp record and its child videos safely without altering anything on YouTube.
   - Confirmation dialog prevents accidental deletions.
 
 ---

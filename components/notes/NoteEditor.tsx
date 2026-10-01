@@ -262,7 +262,7 @@ export function NoteEditor({
               <button
                 type="button"
                 className={styles.exportBtn}
-                onClick={() => downloadAsMarkdownFile('studyflow_note', content)}
+                onClick={() => downloadAsMarkdownFile('LearnUp_note', content)}
                 title="Download note as .md file"
               >
                 ⬇️ .md
@@ -270,7 +270,7 @@ export function NoteEditor({
               <button
                 type="button"
                 className={styles.exportBtn}
-                onClick={() => downloadAsTexFile('studyflow_note', content)}
+                onClick={() => downloadAsTexFile('LearnUp_note', content)}
                 title="Download note as .tex LaTeX file"
               >
                 ⬇️ .tex

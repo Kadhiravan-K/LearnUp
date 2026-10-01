@@ -2,7 +2,7 @@ import { ThemeDefinition } from './types';
 
 export const LIGHT_THEME: ThemeDefinition = {
   id: 'light',
-  name: 'StudyFlow Light',
+  name: 'LearnUp Light',
   tagline: 'Daylight Minimal',
   description: 'Crisp high-readability design with snow white cards, balanced visual weight, and deep slate typography.',
   category: 'core',
@@ -44,13 +44,13 @@ export const LIGHT_THEME: ThemeDefinition = {
 export const DEFAULT_THEME: ThemeDefinition = {
   ...LIGHT_THEME,
   id: 'default',
-  name: 'StudyFlow Default',
+  name: 'LearnUp Default',
   tagline: 'Clean Productivity'
 };
 
 export const DARK_THEME: ThemeDefinition = {
   id: 'dark',
-  name: 'StudyFlow Dark',
+  name: 'LearnUp Dark',
   tagline: 'Midnight Void (OLED Focus)',
   description: 'Low-strain OLED dark mode with deep navy slate surfaces, crisp contrast, and neon indigo accents.',
   category: 'core',

@@ -1,4 +1,4 @@
--- StudyFlow Optional Development Demo Seed
+-- LearnUp Optional Development Demo Seed
 -- WARNING: This file is for LOCAL DEVELOPMENT ONLY.
 -- Do NOT execute this file in production environments.
 -- To apply this seed manually in development: npm run seed:demo
@@ -35,7 +35,7 @@ BEGIN
     now(),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"name":"StudyFlow Demo Learner"}',
+    '{"name":"LearnUp Demo Learner"}',
     false
   )
   ON CONFLICT (id) DO NOTHING;
@@ -52,7 +52,7 @@ BEGIN
     'dQw4w9WgXcQ',
     'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     'video:dQw4w9WgXcQ',
-    'StudyFlow Demo: Systems Architecture (Sample)',
+    'LearnUp Demo: Systems Architecture (Sample)',
     'Synthetic demo lecture on distributed memory architecture and high-throughput systems.',
     'engineering',
     ARRAY['demo', 'systems', 'architecture'],
@@ -74,7 +74,7 @@ BEGIN
     'PL1234567890ABCDEFGHIJ',
     'https://www.youtube.com/playlist?list=PL1234567890ABCDEFGHIJ',
     'playlist:PL1234567890ABCDEFGHIJ',
-    'StudyFlow Demo: Distributed Computing Track (Sample)',
+    'LearnUp Demo: Distributed Computing Track (Sample)',
     'A sample multi-module course exploring consensus protocols, Raft, and replication.',
     'distributed_systems',
     ARRAY['demo', 'distributed', 'consensus'],

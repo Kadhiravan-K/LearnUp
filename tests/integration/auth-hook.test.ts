@@ -22,7 +22,7 @@ describe('useAuth Hook Integration', () => {
     mockGetSession.mockResolvedValue({
       data: {
         session: {
-          user: { id: 'usr_test_123', email: 'test@studyflow.dev' },
+          user: { id: 'usr_test_123', email: 'test@LearnUp.dev' },
           access_token: 'mock-access-token',
         },
       },
@@ -52,6 +52,6 @@ describe('useAuth Hook Integration', () => {
     const { createClient } = await import('@/lib/supabase/browser');
     const supabase = createClient();
     const result = await supabase.auth.getSession();
-    expect(result.data.session?.user.email).toBe('test@studyflow.dev');
+    expect(result.data.session?.user.email).toBe('test@LearnUp.dev');
   });
 });

@@ -29,7 +29,7 @@ export const AVAILABLE_CONNECTORS: AvailableConnector[] = [
     defaultEnabled: true,
     fields: [
       { key: 'vaultPath', label: 'Vault Directory Path', placeholder: '/path/to/Obsidian/Vault', type: 'text' },
-      { key: 'notesFolder', label: 'Notes Subfolder', placeholder: 'StudyFlow/Notes', type: 'text' }
+      { key: 'notesFolder', label: 'Notes Subfolder', placeholder: 'LearnUp/Notes', type: 'text' }
     ]
   },
   {
@@ -40,7 +40,7 @@ export const AVAILABLE_CONNECTORS: AvailableConnector[] = [
     category: 'Developer',
     defaultEnabled: false,
     fields: [
-      { key: 'repo', label: 'Repository (owner/repo)', placeholder: 'username/studyflow-vault', type: 'text' },
+      { key: 'repo', label: 'Repository (owner/repo)', placeholder: 'username/LearnUp-vault', type: 'text' },
       { key: 'branch', label: 'Branch', placeholder: 'main', type: 'text' }
     ]
   },

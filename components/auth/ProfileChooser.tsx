@@ -51,7 +51,7 @@ export function ProfileChooser({
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('studyflow_saved_profiles');
+      const stored = localStorage.getItem('LearnUp_saved_profiles');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -66,7 +66,7 @@ export function ProfileChooser({
   const saveProfilesToStorage = (updated: SavedProfile[]) => {
     setProfiles(updated);
     try {
-      localStorage.setItem('studyflow_saved_profiles', JSON.stringify(updated));
+      localStorage.setItem('LearnUp_saved_profiles', JSON.stringify(updated));
     } catch {
       // Ignore
     }
@@ -104,9 +104,9 @@ export function ProfileChooser({
 
   const handleStartGuestMode = () => {
     // Set guest session cookie for server middleware
-    document.cookie = 'studyflow_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+    document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
     try {
-      localStorage.setItem('studyflow_is_guest', 'true');
+      localStorage.setItem('LearnUp_is_guest', 'true');
     } catch {
       // Ignore
     }
@@ -143,7 +143,7 @@ export function ProfileChooser({
         <div className={styles.brandHeader}>
           <div className={styles.logoBadge}>
             <span className={styles.logoDot} />
-            <span>StudyFlow Workspace</span>
+            <span>LearnUp Workspace</span>
           </div>
           <h1 className={styles.title}>Who is studying today?</h1>
           <p className={styles.subtitle}>
@@ -162,7 +162,7 @@ export function ProfileChooser({
         )}
 
         {/* Profile Chooser Grid */}
-        <div className={styles.profilesGrid} role="list" aria-label="Available StudyFlow Profiles">
+        <div className={styles.profilesGrid} role="list" aria-label="Available LearnUp Profiles">
           {/* Saved Profiles */}
           {profiles.map((p, idx) => (
             <div

@@ -144,7 +144,7 @@ export function ConnectorsSection() {
       <div className={styles.banner}>
         <span className={styles.bannerTitle}>Zero Cloud Lock-in Philosophy</span>
         <p className={styles.bannerDesc}>
-          StudyFlow runs offline-first with all notes, course syllabi, and telemetry persisted in your local vault. Cloud connectors are optional bridges to your existing knowledge tools (Obsidian, GitHub, Notion, Google Calendar).
+          LearnUp runs offline-first with all notes, course syllabi, and telemetry persisted in your local vault. Cloud connectors are optional bridges to your existing knowledge tools (Obsidian, GitHub, Notion, Google Calendar).
         </p>
       </div>
 

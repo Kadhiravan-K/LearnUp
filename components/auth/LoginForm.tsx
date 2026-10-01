@@ -49,7 +49,7 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
         try {
           const namePart = email.split('@')[0];
           const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-          const existing = JSON.parse(localStorage.getItem('studyflow_saved_profiles') || '[]');
+          const existing = JSON.parse(localStorage.getItem('LearnUp_saved_profiles') || '[]');
           const filtered = existing.filter((p: { email: string }) => p.email.toLowerCase() !== email.toLowerCase());
           const newProfile = {
             id: data.session.user.id || String(Date.now()),
@@ -59,14 +59,14 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
             color: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
             lastActive: new Date().toISOString()
           };
-          localStorage.setItem('studyflow_saved_profiles', JSON.stringify([newProfile, ...filtered]));
-          localStorage.removeItem('studyflow_is_guest');
+          localStorage.setItem('LearnUp_saved_profiles', JSON.stringify([newProfile, ...filtered]));
+          localStorage.removeItem('LearnUp_is_guest');
         } catch {
           // Ignore
         }
 
         // Clear guest mode cookie
-        document.cookie = 'studyflow_guest_mode=; path=/; max-age=0; SameSite=Lax';
+        document.cookie = 'LearnUp_guest_mode=; path=/; max-age=0; SameSite=Lax';
 
         // Full page navigation so middleware reads cookies
         window.location.href = '/dashboard';
@@ -95,7 +95,7 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
 
       <div className={styles.header}>
         <h1 className={styles.title}>Welcome back</h1>
-        <p className={styles.subtitle}>Sign in to your StudyFlow workspace</p>
+        <p className={styles.subtitle}>Sign in to your LearnUp workspace</p>
       </div>
 
       {error && (

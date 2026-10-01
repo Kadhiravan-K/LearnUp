@@ -22,7 +22,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const { data: { session } } = await supabase.auth.getSession();
   const cookieStore = cookies();
-  const isGuest = cookieStore.get('studyflow_guest_mode')?.value === 'true';
+  const isGuest = cookieStore.get('LearnUp_guest_mode')?.value === 'true';
 
   if (session || isGuest) {
     redirect('/dashboard');

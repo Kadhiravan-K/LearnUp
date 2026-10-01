@@ -21,7 +21,7 @@ export function useRoadmaps() {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       } else if (
         typeof window !== 'undefined' &&
-        (localStorage.getItem('studyflow_is_guest') === 'true' || localStorage.getItem('studyflow_guest_mode') === 'true')
+        (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
       ) {
         headers['Authorization'] = 'Bearer guest-session';
       }

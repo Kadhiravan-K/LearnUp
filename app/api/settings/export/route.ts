@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         status: 200,
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="studyflow-telemetry-${user.id}.csv"`
+          'Content-Disposition': `attachment; filename="LearnUp-telemetry-${user.id}.csv"`
         }
       });
     }

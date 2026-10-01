@@ -83,7 +83,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
-      } else if (typeof window !== 'undefined' && (localStorage.getItem('studyflow_is_guest') === 'true' || localStorage.getItem('studyflow_guest_mode') === 'true')) {
+      } else if (typeof window !== 'undefined' && (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')) {
         headers['Authorization'] = 'Bearer guest-session';
       }
 
@@ -166,7 +166,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
-      } else if (typeof window !== 'undefined' && (localStorage.getItem('studyflow_is_guest') === 'true' || localStorage.getItem('studyflow_guest_mode') === 'true')) {
+      } else if (typeof window !== 'undefined' && (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')) {
         headers['Authorization'] = 'Bearer guest-session';
       }
 

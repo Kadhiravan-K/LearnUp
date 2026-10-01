@@ -11,7 +11,7 @@ export * from './GlowStatus';
 import { DEFAULT_THEME, DARK_THEME } from './default';
 import { ThemeDefinition } from './types';
 
-export const PRIMARY_STUDYFLOW_THEMES: ThemeDefinition[] = [
+export const PRIMARY_LearnUp_THEMES: ThemeDefinition[] = [
   DEFAULT_THEME,
   DARK_THEME
 ];

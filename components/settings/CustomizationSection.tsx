@@ -71,8 +71,8 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
   useEffect(() => {
     refreshPluginStatuses();
     const handleUpdate = () => refreshPluginStatuses();
-    window.addEventListener('studyflow_plugins_updated', handleUpdate);
-    return () => window.removeEventListener('studyflow_plugins_updated', handleUpdate);
+    window.addEventListener('LearnUp_plugins_updated', handleUpdate);
+    return () => window.removeEventListener('LearnUp_plugins_updated', handleUpdate);
   }, []);
 
   // Media Player Engine Preference
@@ -91,21 +91,21 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
 
   useEffect(() => {
     try {
-      const storedEngine = localStorage.getItem('studyflow_player_engine');
+      const storedEngine = localStorage.getItem('LearnUp_player_engine');
       if (storedEngine === 'youtube_native' || storedEngine === 'custom_player') {
         setPlayerEngine(storedEngine);
       }
-      const storedAccent = localStorage.getItem('studyflow_custom_accent');
+      const storedAccent = localStorage.getItem('LearnUp_custom_accent');
       if (storedAccent) setCustomAccent(storedAccent);
-      const storedGlass = localStorage.getItem('studyflow_glass_intensity');
+      const storedGlass = localStorage.getItem('LearnUp_glass_intensity');
       if (storedGlass) setGlassIntensity(storedGlass);
-      const storedRadius = localStorage.getItem('studyflow_corner_radius');
+      const storedRadius = localStorage.getItem('LearnUp_corner_radius');
       if (storedRadius) setCornerRadius(storedRadius);
-      const storedFontScale = localStorage.getItem('studyflow_font_scale');
+      const storedFontScale = localStorage.getItem('LearnUp_font_scale');
       if (storedFontScale) setFontScale(storedFontScale);
-      const storedContrast = localStorage.getItem('studyflow_high_contrast_video');
+      const storedContrast = localStorage.getItem('LearnUp_high_contrast_video');
       if (storedContrast) setHighContrastVideo(storedContrast === 'true');
-      const storedGlow = localStorage.getItem('studyflow_ambient_glow');
+      const storedGlow = localStorage.getItem('LearnUp_ambient_glow');
       if (storedGlow) setAmbientGlow(storedGlow === 'true');
     } catch {}
   }, []);
@@ -143,7 +143,7 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
   const handleSavePlayerConfig = () => {
     saveShortcuts(localShortcuts);
     try {
-      localStorage.setItem('studyflow_player_engine', playerEngine);
+      localStorage.setItem('LearnUp_player_engine', playerEngine);
     } catch {}
     setSavedSuccess(true);
     if (onNotify) onNotify('Player shortcuts & engine saved successfully!');
@@ -188,12 +188,12 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
 
   const handleSaveThemeConfig = () => {
     try {
-      localStorage.setItem('studyflow_custom_accent', customAccent);
-      localStorage.setItem('studyflow_glass_intensity', glassIntensity);
-      localStorage.setItem('studyflow_corner_radius', cornerRadius);
-      localStorage.setItem('studyflow_font_scale', fontScale);
-      localStorage.setItem('studyflow_high_contrast_video', String(highContrastVideo));
-      localStorage.setItem('studyflow_ambient_glow', String(ambientGlow));
+      localStorage.setItem('LearnUp_custom_accent', customAccent);
+      localStorage.setItem('LearnUp_glass_intensity', glassIntensity);
+      localStorage.setItem('LearnUp_corner_radius', cornerRadius);
+      localStorage.setItem('LearnUp_font_scale', fontScale);
+      localStorage.setItem('LearnUp_high_contrast_video', String(highContrastVideo));
+      localStorage.setItem('LearnUp_ambient_glow', String(ambientGlow));
 
       // Apply CSS variables live
       document.documentElement.style.setProperty('--sf-color-primary', customAccent);

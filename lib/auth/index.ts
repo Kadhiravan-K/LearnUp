@@ -47,12 +47,12 @@ export async function requireAuth(req: Request): Promise<AuthContext> {
   }
 
   // Handle guest mode session
-  if (token === 'guest-session' || (!token && cookieHeader.includes('studyflow_guest_mode=true'))) {
+  if (token === 'guest-session' || (!token && cookieHeader.includes('LearnUp_guest_mode=true'))) {
     const anonClient = createAnonClient();
     return {
       user: {
         id: '00000000-0000-0000-0000-000000000001',
-        email: 'guest@studyflow.local'
+        email: 'guest@LearnUp.local'
       },
       accessToken: 'guest-session',
       supabase: anonClient

@@ -1,4 +1,4 @@
-# StudyFlow — API Documentation
+# LearnUp — API Documentation
 
 **Version:** MVP-0.1  
 **Base URL:** `/api`  
@@ -8,7 +8,7 @@
 
 ## 1. Overview & Architectural Boundaries
 
-The StudyFlow backend provides an HTTP JSON API for managing a user's private YouTube learning library.
+The LearnUp backend provides an HTTP JSON API for managing a user's private YouTube learning library.
 
 ### Security Guarantees
 - **Authentication Required:** All protected endpoints require a valid Supabase Auth session token via the `Authorization: Bearer <token>` header.

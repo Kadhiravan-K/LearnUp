@@ -3,7 +3,7 @@ import { ThemeProvider } from '@/lib/theme';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'StudyFlow',
+  title: 'LearnUp',
   description: 'Your private YouTube learning library.',
 };
 

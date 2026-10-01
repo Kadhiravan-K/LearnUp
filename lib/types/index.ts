@@ -184,7 +184,7 @@ export interface PomodoroCycleConfig {
   autoStartSprints: boolean;
 }
 
-// Community & StudyFlow Templates
+// Community & LearnUp Templates
 export type TemplateCategory = 'roadmap' | 'playlist' | 'focus' | 'workflow';
 
 export interface CommunityTemplate {
@@ -276,7 +276,7 @@ export type PluginCategory =
 
 export type PluginKind = 'plugin' | 'skill';
 
-export interface StudyFlowPlugin {
+export interface LearnUpPlugin {
   id: string;
   name: string;
   description: string;

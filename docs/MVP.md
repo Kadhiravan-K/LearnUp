@@ -1,4 +1,4 @@
-# StudyFlow — MVP Definition
+# LearnUp — MVP Definition
 
 **Release:** MVP-0.1
 **Scope:** Authentication + YouTube import + library + embedded playback + removal
@@ -7,7 +7,7 @@
 
 Validate one behavior end-to-end:
 
-> A signed-in learner can bring a YouTube learning source into StudyFlow and watch it from a private StudyFlow library.
+> A signed-in learner can bring a YouTube learning source into LearnUp and watch it from a private LearnUp library.
 
 The MVP must be small enough for a first production release and complete enough to test real user behavior.
 
@@ -21,14 +21,14 @@ The MVP must be small enough for a first production release and complete enough 
 | Library | List current user's imported items | No recommendations |
 | Playlist contents | Show imported videos in source order | No reorder/edit feature |
 | Playback | YouTube embedded player | No video download/rehosting |
-| Removal | Remove owned StudyFlow item | Does not delete YouTube content |
+| Removal | Remove owned LearnUp item | Does not delete YouTube content |
 | Data isolation | User-owned data only | No shared/public library |
 
 ## 3. User Stories
 
 ### US-001 — Create account
 
-As a new learner, I want to create an account so my StudyFlow library is private and persistent.
+As a new learner, I want to create an account so my LearnUp library is private and persistent.
 
 **Acceptance:** Valid signup creates/authenticates a user; invalid input produces a clear error; no library data is created for an unauthenticated identity.
 
@@ -40,19 +40,19 @@ As a returning learner, I want to sign in so I can access my library.
 
 ### US-003 — Import video
 
-As a learner, I want to paste a YouTube video URL so I can add that video to StudyFlow.
+As a learner, I want to paste a YouTube video URL so I can add that video to LearnUp.
 
 **Acceptance:** A valid supported URL creates one owned item and the item can be opened.
 
 ### US-004 — Import playlist
 
-As a learner, I want to paste a YouTube playlist URL so I can access its videos as one StudyFlow learning item.
+As a learner, I want to paste a YouTube playlist URL so I can access its videos as one LearnUp learning item.
 
 **Acceptance:** The playlist and its available child videos are stored and displayed in source order.
 
 ### US-005 — Watch content
 
-As a learner, I want to open an imported item and watch the YouTube content inside StudyFlow.
+As a learner, I want to open an imported item and watch the YouTube content inside LearnUp.
 
 **Acceptance:** Selecting an imported video displays the corresponding embedded YouTube player.
 
@@ -76,7 +76,7 @@ Minimum logical fields:
 
 ### Learning Item
 
-Represents one imported StudyFlow source.
+Represents one imported LearnUp source.
 
 Minimum logical fields:
 

@@ -1,5 +1,5 @@
 /**
- * StudyFlow Theme System — Motion & Global Design Tokens
+ * LearnUp Theme System — Motion & Global Design Tokens
  */
 
 import { MotionTokens } from './types';

@@ -1,6 +1,6 @@
 import { CommunityTemplate } from '../types';
 
-const CONTRIBUTED_TEMPLATES_KEY = 'studyflow_contributed_templates';
+const CONTRIBUTED_TEMPLATES_KEY = 'LearnUp_contributed_templates';
 
 export const CURATED_TEMPLATES: CommunityTemplate[] = [
   {
@@ -130,7 +130,7 @@ export const CURATED_TEMPLATES: CommunityTemplate[] = [
     title: 'Classic Pomodoro 25/5 Deep Work Interval',
     description: 'Standard 25-minute sprint with 5-minute restorative micro-breaks, 4-cycle long break, and rain audio soundscape.',
     category: 'focus',
-    author: 'StudyFlow Ergonomics',
+    author: 'LearnUp Ergonomics',
     tags: ['Pomodoro', '25min Sprint', 'Productivity', 'Rain Soundscape'],
     downloadsCount: 5490,
     rating: 4.85,

@@ -20,7 +20,7 @@ export interface NavItem {
   isActive: (pathname: string) => boolean;
 }
 
-// Approved navigation items for StudyFlow
+// Approved navigation items for LearnUp
 export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Dashboard',
@@ -236,7 +236,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
-              <span>StudyFlow</span>
+              <span>LearnUp</span>
               <button
                 type="button"
                 className={styles.proBadgeBtn}
@@ -435,7 +435,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               </div>
               <div className={styles.userInfo}>
                 <span className={styles.userName}>{userName}</span>
-                <span className={styles.userEmail}>{userEmail || 'learner@studyflow.local'}</span>
+                <span className={styles.userEmail}>{userEmail || 'learner@LearnUp.local'}</span>
               </div>
             </div>
             <button
@@ -466,7 +466,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <div className={styles.upgradeModalHeader}>
               <div className={styles.upgradeIcon}>⚡</div>
               <div>
-                <h3 className={styles.upgradeTitle}>StudyFlow Pro Workspace</h3>
+                <h3 className={styles.upgradeTitle}>LearnUp Pro Workspace</h3>
                 <p className={styles.upgradeSubtitle}>Unlimited personal & domain-agnostic workspaces, cloud sync, and AI copilot.</p>
               </div>
             </div>

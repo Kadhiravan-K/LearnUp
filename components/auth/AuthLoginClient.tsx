@@ -30,9 +30,9 @@ export function AuthLoginClient() {
 
   const handleSelectGuest = () => {
     // Set guest session cookie for server middleware
-    document.cookie = 'studyflow_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+    document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
     try {
-      localStorage.setItem('studyflow_is_guest', 'true');
+      localStorage.setItem('LearnUp_is_guest', 'true');
     } catch {
       // Ignore
     }

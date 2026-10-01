@@ -1,7 +1,7 @@
 import { BinItem, BinSettings, BinItemType, BinRetentionUnit } from '../types';
 
-const BIN_STORAGE_KEY = 'studyflow_bin_items';
-const BIN_SETTINGS_KEY = 'studyflow_bin_settings';
+const BIN_STORAGE_KEY = 'LearnUp_bin_items';
+const BIN_SETTINGS_KEY = 'LearnUp_bin_settings';
 
 export const DEFAULT_BIN_SETTINGS: BinSettings = {
   retentionValue: 10,

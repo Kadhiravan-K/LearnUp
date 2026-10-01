@@ -3,12 +3,12 @@ import {
   DEFAULT_THEME,
   LIGHT_THEME,
   DARK_THEME,
-  PRIMARY_STUDYFLOW_THEMES,
+  PRIMARY_LearnUp_THEMES,
   MOTION_TOKENS
 } from '@/lib/theme';
 import { THEME_OPTIONS } from '@/components/settings/CustomizationSection';
 
-describe('StudyFlow Theme System — Visual QA & Integration Verification', () => {
+describe('LearnUp Theme System — Visual QA & Integration Verification', () => {
   let mockStorageStore: Record<string, string> = {};
 
   beforeEach(() => {
@@ -27,10 +27,10 @@ describe('StudyFlow Theme System — Visual QA & Integration Verification', () =
     vi.restoreAllMocks();
   });
 
-  describe('1. StudyFlow Light Theme Baseline Verification', () => {
+  describe('1. LearnUp Light Theme Baseline Verification', () => {
     it('preserves clean productivity tokens and high contrast ratios', () => {
       expect(DEFAULT_THEME.id).toBe('default');
-      expect(DEFAULT_THEME.name).toBe('StudyFlow Default');
+      expect(DEFAULT_THEME.name).toBe('LearnUp Default');
       expect(DEFAULT_THEME.tagline).toBe('Clean Productivity');
       expect(DEFAULT_THEME.colors.bg).toBe('#F8FAFC');
       expect(DEFAULT_THEME.colors.surface).toBe('#FFFFFF');
@@ -44,10 +44,10 @@ describe('StudyFlow Theme System — Visual QA & Integration Verification', () =
     });
   });
 
-  describe('2. StudyFlow Dark Theme Verification (OLED Focus)', () => {
+  describe('2. LearnUp Dark Theme Verification (OLED Focus)', () => {
     it('uses deep dark surfaces and low-strain indigo accents', () => {
       expect(DARK_THEME.id).toBe('dark');
-      expect(DARK_THEME.name).toBe('StudyFlow Dark');
+      expect(DARK_THEME.name).toBe('LearnUp Dark');
       expect(DARK_THEME.tagline).toBe('Midnight Void (OLED Focus)');
       expect(DARK_THEME.colors.bg).toBe('#0B0F19');
       expect(DARK_THEME.colors.surface).toBe('#1E293B');
@@ -65,17 +65,17 @@ describe('StudyFlow Theme System — Visual QA & Integration Verification', () =
 
   describe('3. Theme Persistence & Safe Fallback', () => {
     it('persists selected theme to localStorage and reads back correctly', () => {
-      localStorage.setItem('studyflow_theme', 'light');
-      expect(localStorage.getItem('studyflow_theme')).toBe('light');
+      localStorage.setItem('LearnUp_theme', 'light');
+      expect(localStorage.getItem('LearnUp_theme')).toBe('light');
 
-      localStorage.setItem('studyflow_theme', 'dark');
-      expect(localStorage.getItem('studyflow_theme')).toBe('dark');
+      localStorage.setItem('LearnUp_theme', 'dark');
+      expect(localStorage.getItem('LearnUp_theme')).toBe('dark');
     });
 
     it('handles invalid or corrupted stored themes safely', () => {
-      localStorage.setItem('studyflow_theme', 'corrupted_theme_xyz');
-      const saved = localStorage.getItem('studyflow_theme');
-      const validThemeIds = PRIMARY_STUDYFLOW_THEMES.map((t) => t.id as string);
+      localStorage.setItem('LearnUp_theme', 'corrupted_theme_xyz');
+      const saved = localStorage.getItem('LearnUp_theme');
+      const validThemeIds = PRIMARY_LearnUp_THEMES.map((t) => t.id as string);
       const isKnown = validThemeIds.includes(saved || '');
       const effective = isKnown ? saved : 'default';
       expect(effective).toBe('default');

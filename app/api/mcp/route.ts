@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     // 3. resources/read
     if (method === 'resources/read') {
       const uri = params?.uri;
-      if (uri === 'studyflow://courses') {
+      if (uri === 'LearnUp://courses') {
         const courses = await learningRepo.listItems(supabase, user.id);
         return NextResponse.json({
           jsonrpc: '2.0',
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
           result: { contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(courses) }] }
         });
       }
-      if (uri === 'studyflow://notes') {
+      if (uri === 'LearnUp://notes') {
         const notes = await notesRepo.listByUser(supabase, user.id);
         return NextResponse.json({
           jsonrpc: '2.0',
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
           result: { contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(notes) }] }
         });
       }
-      if (uri === 'studyflow://telemetry') {
+      if (uri === 'LearnUp://telemetry') {
         const settings = await settingsRepository.getByUserId(supabase, user.id);
         return NextResponse.json({
           jsonrpc: '2.0',
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       const toolName = params?.name;
       const toolArgs = params?.arguments || {};
 
-      if (toolName === 'studyflow_search_notes') {
+      if (toolName === 'LearnUp_search_notes') {
         const notes = await notesRepo.listByUser(supabase, user.id, { learningItemId: toolArgs.learningItemId });
         const filtered = toolArgs.query
           ? notes.filter((n) => n.content.toLowerCase().includes(toolArgs.query.toLowerCase()))
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (toolName === 'studyflow_create_note') {
+      if (toolName === 'LearnUp_create_note') {
         const created = await notesRepo.insert(supabase, {
           userId: user.id,
           learningItemId: toolArgs.learningItemId,
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (toolName === 'studyflow_get_courses') {
+      if (toolName === 'LearnUp_get_courses') {
         const courses = await learningRepo.listItems(supabase, user.id);
         return NextResponse.json({
           jsonrpc: '2.0',
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (toolName === 'studyflow_get_telemetry') {
+      if (toolName === 'LearnUp_get_telemetry') {
         return NextResponse.json({
           jsonrpc: '2.0',
           id,
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (toolName === 'studyflow_sync_connector') {
+      if (toolName === 'LearnUp_sync_connector') {
         const notes = await notesRepo.listByUser(supabase, user.id);
         const courses = await learningRepo.listItems(supabase, user.id);
         const bookmarks = await bookmarksRepo.listByUser(supabase, user.id);

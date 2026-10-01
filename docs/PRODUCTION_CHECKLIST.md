@@ -1,7 +1,7 @@
-# StudyFlow Production Pre-Flight Checklist
+# LearnUp Production Pre-Flight Checklist
 
 Use this checklist before authorizing the MVP-0.1 release to the public.
-Design Reference: StudyFlow design system reference — private design source omitted from the public repository.
+Design Reference: LearnUp design system reference — private design source omitted from the public repository.
 
 ## 1. Environment Variables Configured (Vercel)
 Ensure the following variables are set correctly across **Preview** and **Production** environments in Vercel:
@@ -14,8 +14,8 @@ Ensure the following variables are set correctly across **Preview** and **Produc
 ## 2. Supabase Configuration (Database & Auth)
 - [ ] **Database Migrations:** `npx supabase db push` successfully applied `20230924000100_init.sql` (and any subsequent migrations) to the production project.
 - [ ] **Row Level Security (RLS):** Policies are active. `learning_items` and `learning_item_videos` tables strictly filter by `auth.uid() = user_id`. No policies permit cross-user access.
-- [ ] **Site URL:** Supabase Auth > URL Configuration > Site URL is set to the primary production domain (e.g., `https://studyflow.app`).
-- [ ] **Redirect URIs:** Added exactly `https://studyflow.app/auth/callback`.
+- [ ] **Site URL:** Supabase Auth > URL Configuration > Site URL is set to the primary production domain (e.g., `https://LearnUp.app`).
+- [ ] **Redirect URIs:** Added exactly `https://LearnUp.app/auth/callback`.
 - [ ] **Email Confirmations:** Confirm whether Email Verification is required (`enable_confirmations` in `config.toml`). For MVP, if it is disabled, users can log in immediately. If enabled, ensure a custom SMTP is configured.
 - [ ] **SMTP Provider:** Default Supabase SMTP is heavily rate-limited (3 emails/hour). Configure Resend, SendGrid, or AWS SES before a public launch.
 

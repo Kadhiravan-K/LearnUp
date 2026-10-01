@@ -185,8 +185,8 @@ export function downloadAsTexFile(title: string, content: string): void {
 \\usepackage{amssymb}
 \\usepackage{hyperref}
 
-\\title{${title || 'StudyFlow Lecture Note'}}
-\\author{StudyFlow Learner}
+\\title{${title || 'LearnUp Lecture Note'}}
+\\author{LearnUp Learner}
 \\date{\\today}
 
 \\begin{document}

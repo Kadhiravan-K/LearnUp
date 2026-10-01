@@ -1,6 +1,6 @@
 # Security Policy
 
-StudyFlow takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose your findings.
+LearnUp takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose your findings.
 
 ---
 
@@ -20,7 +20,7 @@ Only the latest release and the current `main` branch are actively supported wit
 **Please do NOT report security vulnerabilities through public GitHub issues or discussions.**
 
 Instead, please report security issues using GitHub's **Private Vulnerability Reporting**:
-1. Navigate to the **Security** tab of the StudyFlow repository.
+1. Navigate to the **Security** tab of the LearnUp repository.
 2. Select **Advisories** and click **Report a vulnerability**.
 3. Provide detailed steps to reproduce the issue, potential impact, and proposed remediations if available.
 
@@ -37,7 +37,7 @@ If private vulnerability reporting is unavailable, you can contact the project m
 
 ---
 
-## Security Invariants in StudyFlow
+## Security Invariants in LearnUp
 
 - **Row-Level Security (RLS)**: Enforced on all user-scoped data tables with zero client-side bypass.
 - **No Secret Leaks**: Client bundles never contain server secrets, service role keys, or sensitive third-party credentials.

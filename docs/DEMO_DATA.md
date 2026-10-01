@@ -1,6 +1,6 @@
 # Demo Data & Fresh Installation Invariants
 
-StudyFlow enforces a strict **Zero-Seed Invariant** across all public releases and deployment pipelines.
+LearnUp enforces a strict **Zero-Seed Invariant** across all public releases and deployment pipelines.
 
 ---
 
@@ -14,7 +14,7 @@ StudyFlow enforces a strict **Zero-Seed Invariant** across all public releases a
 
 ## Local Development Demo Seeding
 
-For testing, review, or local development where sample learning items and focus sessions are desired, StudyFlow provides an explicit, opt-in seed script:
+For testing, review, or local development where sample learning items and focus sessions are desired, LearnUp provides an explicit, opt-in seed script:
 
 ```bash
 npm run seed:demo

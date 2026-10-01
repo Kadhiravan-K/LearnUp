@@ -66,7 +66,7 @@ export function DeleteConfirmModal({
           }
         } catch {}
         // Notify library grid to re-fetch and show the restored item
-        window.dispatchEvent(new CustomEvent('studyflow_library_refresh'));
+        window.dispatchEvent(new CustomEvent('LearnUp_library_refresh'));
       }
     });
 

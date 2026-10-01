@@ -166,7 +166,7 @@ export default function RoadmapsPage() {
                     handleAttachCourseSubmit(selectedNode.id, {
                       id: `course_${Date.now()}`,
                       title: courseTitle,
-                      provider: 'StudyFlow Catalog',
+                      provider: 'LearnUp Catalog',
                       total_lectures: 12,
                       completed_lectures: 0,
                       progress_percentage: 0,

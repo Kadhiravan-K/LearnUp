@@ -409,7 +409,7 @@ export default function RewardsPage() {
             <div className={styles.certBorder}>
               <div style={{ fontSize: '2rem' }}>🎓</div>
               <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6366f1' }}>
-                StudyFlow Verifiable Credential Registry
+                LearnUp Verifiable Credential Registry
               </div>
               <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--sf-text-primary)' }}>{selectedCert.title}</h2>
               <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--sf-text-secondary)' }}>{selectedCert.course}</p>

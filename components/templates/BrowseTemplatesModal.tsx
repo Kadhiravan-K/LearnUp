@@ -97,7 +97,7 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ url: urlToImport })
             });
-            window.dispatchEvent(new CustomEvent('studyflow_library_refresh'));
+            window.dispatchEvent(new CustomEvent('LearnUp_library_refresh'));
           } catch {}
         }
         showToast(`Course "${tpl.title}" imported to your Library!`);
@@ -109,7 +109,7 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
       } else if (tpl.category === 'focus') {
         try {
           localStorage.setItem(
-            'studyflow_pomodoro_config',
+            'LearnUp_pomodoro_config',
             JSON.stringify({
               focusDurationMinutes: tpl.data?.focusMinutes || 90,
               shortBreakMinutes: tpl.data?.shortBreakMinutes || 20,

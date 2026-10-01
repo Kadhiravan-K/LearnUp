@@ -19,7 +19,7 @@ export function NotesSection({ learningItemId, youtubeVideoId }: NotesSectionPro
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const localKey = `studyflow_local_notes_${learningItemId}_${youtubeVideoId}`;
+  const localKey = `LearnUp_local_notes_${learningItemId}_${youtubeVideoId}`;
 
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -30,7 +30,7 @@ export function NotesSection({ learningItemId, youtubeVideoId }: NotesSectionPro
         headers['Authorization'] = `Bearer ${session.access_token}`;
       } else if (
         typeof window !== 'undefined' &&
-        (localStorage.getItem('studyflow_is_guest') === 'true' || localStorage.getItem('studyflow_guest_mode') === 'true')
+        (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
       ) {
         headers['Authorization'] = 'Bearer guest-session';
       }
@@ -245,8 +245,8 @@ export function NotesSection({ learningItemId, youtubeVideoId }: NotesSectionPro
 
   useEffect(() => {
     const handleNotesRefresh = () => fetchNotes();
-    window.addEventListener('studyflow_notes_refresh', handleNotesRefresh);
-    return () => window.removeEventListener('studyflow_notes_refresh', handleNotesRefresh);
+    window.addEventListener('LearnUp_notes_refresh', handleNotesRefresh);
+    return () => window.removeEventListener('LearnUp_notes_refresh', handleNotesRefresh);
   }, [fetchNotes]);
 
   return (

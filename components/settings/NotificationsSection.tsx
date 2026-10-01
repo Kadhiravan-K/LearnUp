@@ -99,7 +99,7 @@ export function NotificationsSection({
         <div className={styles.toggleRow}>
           <div className={styles.toggleText}>
             <span className={styles.toggleTitle}>Weekly marketing &amp; product release digest</span>
-            <p className={styles.toggleDesc}>Occasional emails regarding new StudyFlow runtime features.</p>
+            <p className={styles.toggleDesc}>Occasional emails regarding new LearnUp runtime features.</p>
           </div>
           <button
             type="button"

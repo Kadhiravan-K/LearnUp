@@ -57,7 +57,7 @@ describe('SF-051 — Zero-Seed Production Invariants', () => {
     expect(fs.existsSync(demoSqlPath)).toBe(true);
 
     const demoContent = fs.readFileSync(demoSqlPath, 'utf8');
-    expect(demoContent).toContain('StudyFlow Demo');
+    expect(demoContent).toContain('LearnUp Demo');
   });
 
   it('verifies calendar system migration contains zero auto-inserted default rows', () => {

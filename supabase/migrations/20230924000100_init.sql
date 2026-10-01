@@ -1,4 +1,4 @@
--- 20230924000100_init.sql – StudyFlow MVP‑0.1 schema
+-- 20230924000100_init.sql – LearnUp MVP‑0.1 schema
 -- This migration is idempotent and safe to run on a fresh Supabase project.
 
 -- Enable UUID generation extension

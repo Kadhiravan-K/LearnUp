@@ -1,6 +1,6 @@
-import { StudyFlowPlugin } from '../types';
+import { LearnUpPlugin } from '../types';
 
-export const CORE_PLUGINS: StudyFlowPlugin[] = [
+export const CORE_PLUGINS: LearnUpPlugin[] = [
   {
     id: 'vibe_code_generator',
     name: 'Vibe Code Generator (Alpha & Bravo)',
@@ -8,7 +8,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'coding_vibe',
     kind: 'plugin',
     version: '2.4.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '⚡',
@@ -26,7 +26,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'engineering',
     kind: 'plugin',
     version: '1.5.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '📐',
@@ -44,7 +44,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'ai_skills',
     kind: 'skill',
     version: '1.2.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '🤖',
@@ -57,7 +57,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'learning_science',
     kind: 'skill',
     version: '2.0.1',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '🧠',
@@ -70,7 +70,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'coding_vibe',
     kind: 'plugin',
     version: '1.4.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '💻',
@@ -83,7 +83,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'learning_science',
     kind: 'skill',
     version: '1.3.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: false,
     icon: '🎙️',
@@ -96,7 +96,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'engineering',
     kind: 'plugin',
     version: '2.1.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '📜',
@@ -114,7 +114,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'design_creative',
     kind: 'plugin',
     version: '1.4.0',
-    author: 'StudyFlow Core',
+    author: 'LearnUp Core',
     isCore: true,
     isDefaultEnabled: true,
     icon: '🎨',
@@ -132,7 +132,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
     category: 'design_creative',
     kind: 'plugin',
     version: '1.0.0',
-    author: 'StudyFlow Design Lab',
+    author: 'LearnUp Design Lab',
     isCore: true,
     isDefaultEnabled: true,
     icon: '🔮',
@@ -140,7 +140,7 @@ export const CORE_PLUGINS: StudyFlowPlugin[] = [
   }
 ];
 
-export const COMMUNITY_PLUGINS: StudyFlowPlugin[] = [
+export const COMMUNITY_PLUGINS: LearnUpPlugin[] = [
   {
     id: 'obsidian_notion_vault_sync',
     name: 'Obsidian & Notion Vault Bi-Directional Syncer',

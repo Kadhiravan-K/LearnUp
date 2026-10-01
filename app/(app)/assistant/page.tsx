@@ -230,7 +230,7 @@ uart_reg++; // Moves forward 4 bytes in physical memory to 0x4000C004`,
                     className={`${styles.messageCard} ${m.sender === 'user' ? styles.userMessage : styles.aiMessage}`}
                   >
                     <div className={styles.messageHeader}>
-                      <span>{m.sender === 'user' ? 'Learner' : 'StudyFlow Copilot'}</span>
+                      <span>{m.sender === 'user' ? 'Learner' : 'LearnUp Copilot'}</span>
                       {m.grounding && <span className={styles.groundedTag}>🔗 Grounded @ {m.grounding}</span>}
                     </div>
 

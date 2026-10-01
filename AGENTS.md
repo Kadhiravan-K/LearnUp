@@ -1,6 +1,6 @@
-# StudyFlow — AI Coding Agent Rules
+# LearnUp — AI Coding Agent Rules
 
-This file is the operating contract for AI coding agents working in the StudyFlow repository.
+This file is the operating contract for AI coding agents working in the LearnUp repository.
 
 ## 1. Mission
 
@@ -68,7 +68,7 @@ The agent must never silently override a higher-priority product requirement.
 5. Never trust a client-supplied `user_id` for authorization.
 6. Do not weaken or bypass row-level security to make a feature work.
 7. Do not delete user data as a side effect unless the issue explicitly requires it.
-8. A StudyFlow remove operation must not modify the original YouTube source.
+8. A LearnUp remove operation must not modify the original YouTube source.
 9. Test cross-user access for every new protected query/mutation.
 
 ## 6. YouTube Integration Rules
@@ -402,7 +402,7 @@ Create these as separate small issues.
 
 **Scope:** Prevent duplicate source imports per user.
 
-**Acceptance:** Repeating the same normalized import returns/exposes the existing StudyFlow item and creates no duplicate.
+**Acceptance:** Repeating the same normalized import returns/exposes the existing LearnUp item and creates no duplicate.
 
 **Labels:** `backend`, `database`, `test`
 
@@ -454,7 +454,7 @@ Create these as separate small issues.
 
 **Scope:** Render the official YouTube embed for a selected video.
 
-**Acceptance:** Correct video ID is used; player container renders; StudyFlow does not proxy video bytes.
+**Acceptance:** Correct video ID is used; player container renders; LearnUp does not proxy video bytes.
 
 **Labels:** `frontend`, `youtube`
 
@@ -470,7 +470,7 @@ Create these as separate small issues.
 
 ### SF-021 — Implement remove learning item service
 
-**Scope:** Delete owned StudyFlow item with correct child cleanup.
+**Scope:** Delete owned LearnUp item with correct child cleanup.
 
 **Acceptance:** User can remove own item; unauthorized removal fails; YouTube source remains unchanged.
 
@@ -520,7 +520,7 @@ Create these as separate small issues.
 
 ## Figma Implementation Rules
 
-Figma is the visual source of truth for the StudyFlow frontend.
+Figma is the visual source of truth for the LearnUp frontend.
 
 Before implementing any Figma-based UI:
 

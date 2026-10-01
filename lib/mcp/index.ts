@@ -2,7 +2,7 @@ import { McpTool, McpResource } from '../types';
 
 export const MCP_TOOLS: McpTool[] = [
   {
-    name: 'studyflow_search_notes',
+    name: 'LearnUp_search_notes',
     description: 'Search user study notes by query keyword or video identifier.',
     inputSchema: {
       type: 'object',
@@ -13,7 +13,7 @@ export const MCP_TOOLS: McpTool[] = [
     }
   },
   {
-    name: 'studyflow_create_note',
+    name: 'LearnUp_create_note',
     description: 'Create a new markdown note linked to a course and video timestamp.',
     inputSchema: {
       type: 'object',
@@ -26,7 +26,7 @@ export const MCP_TOOLS: McpTool[] = [
     }
   },
   {
-    name: 'studyflow_get_courses',
+    name: 'LearnUp_get_courses',
     description: 'List user enrolled courses, syllabus progress, and video completion rates.',
     inputSchema: {
       type: 'object',
@@ -34,7 +34,7 @@ export const MCP_TOOLS: McpTool[] = [
     }
   },
   {
-    name: 'studyflow_get_telemetry',
+    name: 'LearnUp_get_telemetry',
     description: 'Fetch multi-dimensional study telemetry, focus hours, streak status, and retention metrics.',
     inputSchema: {
       type: 'object',
@@ -42,7 +42,7 @@ export const MCP_TOOLS: McpTool[] = [
     }
   },
   {
-    name: 'studyflow_sync_connector',
+    name: 'LearnUp_sync_connector',
     description: 'Trigger synchronization for Obsidian, GitHub, Google Calendar, or Notion.',
     inputSchema: {
       type: 'object',
@@ -55,7 +55,7 @@ export const MCP_TOOLS: McpTool[] = [
 ];
 
 export const MCP_RESOURCES: McpResource[] = [
-  { uri: 'studyflow://courses', name: 'User Courses & Syllabus Index', mimeType: 'application/json' },
-  { uri: 'studyflow://notes', name: 'User Study Notes Repository', mimeType: 'application/json' },
-  { uri: 'studyflow://telemetry', name: 'Performance & Study Telemetry', mimeType: 'application/json' }
+  { uri: 'LearnUp://courses', name: 'User Courses & Syllabus Index', mimeType: 'application/json' },
+  { uri: 'LearnUp://notes', name: 'User Study Notes Repository', mimeType: 'application/json' },
+  { uri: 'LearnUp://telemetry', name: 'Performance & Study Telemetry', mimeType: 'application/json' }
 ];

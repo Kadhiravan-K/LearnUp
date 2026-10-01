@@ -1,6 +1,6 @@
-# StudyFlow
+# LearnUp
 
-StudyFlow is a focused, distraction-free personal learning platform that allows users to organize, structure, and watch educational YouTube content (videos and playlists) in a dedicated private library.
+LearnUp is a focused, distraction-free personal learning platform that allows users to organize, structure, and watch educational YouTube content (videos and playlists) in a dedicated private library.
 
 ---
 
@@ -49,8 +49,8 @@ StudyFlow is a focused, distraction-free personal learning platform that allows 
 ### 1. Clone & Install Dependencies
 
 ```bash
-git clone https://github.com/Kadhiravan-K/studyflow.git
-cd studyflow
+git clone https://github.com/Kadhiravan-K/LearnUp.git
+cd LearnUp
 npm install
 ```
 
@@ -103,7 +103,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Unauthentic
 ## Project Structure
 
 ```
-studyflow/
+LearnUp/
 ├── .github/workflows/ci.yml       # GitHub Actions automated CI pipeline
 ├── app/
 │   ├── (auth)/                    # Public auth pages (login, signup)
@@ -144,7 +144,7 @@ studyflow/
 1. **Authentication & Data Isolation**: All library operations derive the current user identity from the trusted session token (`requireAuth`). Client-supplied `user_id` values are never trusted. Row-Level Security (RLS) ensures users cannot read, mutate, or delete another user's records.
 2. **Credential Separation**: `YOUTUBE_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` remain strictly server-side. The frontend only communicates with Next.js route handlers (`/api/*`) via standard Bearer tokens.
 3. **YouTube Integration Adapter**: All external provider communication is isolated in `lib/youtube/` behind structured domain interfaces, converting external provider failures into stable internal error codes (`SOURCE_NOT_FOUND`, `SOURCE_UNAVAILABLE`, `IMPORT_FAILED`).
-4. **Media Integrity**: StudyFlow strictly embeds videos via the official YouTube IFrame player and never proxies or downloads video stream bytes.
+4. **Media Integrity**: LearnUp strictly embeds videos via the official YouTube IFrame player and never proxies or downloads video stream bytes.
 5. **Zero-Seed Guarantee**: Database migrations create schemas, tables, views, and RLS policies only. A fresh install contains zero pre-seeded user records.
 
 ---
@@ -172,4 +172,4 @@ studyflow/
 
 ## License
 
-StudyFlow is open-source software licensed under the [MIT License](LICENSE).
+LearnUp is open-source software licensed under the [MIT License](LICENSE).

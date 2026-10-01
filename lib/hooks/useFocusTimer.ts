@@ -38,7 +38,7 @@ export function useFocusTimer(initialMode: FocusMode = 'sprint') {
   // Load custom Pomodoro configuration from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('studyflow_pomodoro_config');
+      const stored = localStorage.getItem('LearnUp_pomodoro_config');
       if (stored) {
         const parsed: PomodoroCycleConfig = JSON.parse(stored);
         setPomodoroConfig(parsed);
@@ -135,7 +135,7 @@ export function useFocusTimer(initialMode: FocusMode = 'sprint') {
       const s = secondsLeft % 60;
       const formatted = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
       localStorage.setItem(
-        'studyflow_active_focus_state',
+        'LearnUp_active_focus_state',
         JSON.stringify({
           secondsLeft,
           totalSeconds,
@@ -147,7 +147,7 @@ export function useFocusTimer(initialMode: FocusMode = 'sprint') {
         })
       );
       // Dispatch custom window event for instant local component sync
-      window.dispatchEvent(new Event('studyflow_focus_sync'));
+      window.dispatchEvent(new Event('LearnUp_focus_sync'));
     } catch {}
   }, [secondsLeft, totalSeconds, timerState, mode, intervalNumber]);
 
@@ -237,7 +237,7 @@ export function useFocusTimer(initialMode: FocusMode = 'sprint') {
     const merged = { ...pomodoroConfig, ...newConfig };
     setPomodoroConfig(merged);
     try {
-      localStorage.setItem('studyflow_pomodoro_config', JSON.stringify(merged));
+      localStorage.setItem('LearnUp_pomodoro_config', JSON.stringify(merged));
     } catch {}
 
     if (mode === 'sprint') {

@@ -64,7 +64,7 @@ export function RoadmapActiveInspector({
                 <h4 className={styles.courseTitle}>{course.title}</h4>
                 <span className={styles.activeTag}>Active</span>
               </div>
-              <span className={styles.providerName}>Provider: {course.provider || 'StudyFlow Library'}</span>
+              <span className={styles.providerName}>Provider: {course.provider || 'LearnUp Library'}</span>
             </div>
           </div>
 

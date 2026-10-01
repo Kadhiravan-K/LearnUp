@@ -1719,7 +1719,7 @@ export default function CalendarPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Link StudyFlow Course / Item</label>
+                <label className={styles.formLabel}>Link LearnUp Course / Item</label>
                 <select
                   className={styles.formSelect}
                   value={formData.learning_item_id}

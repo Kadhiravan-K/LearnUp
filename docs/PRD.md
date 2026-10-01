@@ -1,13 +1,13 @@
-# StudyFlow — Product Requirements Document
+# LearnUp — Product Requirements Document
 
 **Version:** MVP-0.1
 **Status:** Draft for implementation
-**Product owner:** StudyFlow team
+**Product owner:** LearnUp team
 **Primary implementation model:** AI-assisted development with human review
 
 ## 1. Product Goal
 
-StudyFlow MVP-0.1 gives a learner one simple place to collect YouTube learning content and watch it without losing the source structure.
+LearnUp MVP-0.1 gives a learner one simple place to collect YouTube learning content and watch it without losing the source structure.
 
 The product succeeds when a signed-in user can:
 
@@ -15,10 +15,10 @@ The product succeeds when a signed-in user can:
 2. Submit a valid YouTube video URL or playlist URL.
 3. Import that content into a private personal library.
 4. See playlist videos in the same order as the source playlist.
-5. Open a learning item and watch the selected YouTube video inside StudyFlow.
-6. Remove a learning item from the StudyFlow library.
+5. Open a learning item and watch the selected YouTube video inside LearnUp.
+6. Remove a learning item from the LearnUp library.
 
-**Core product promise:** “Paste YouTube learning content, keep it organized in your library, and watch it from StudyFlow.”
+**Core product promise:** “Paste YouTube learning content, keep it organized in your library, and watch it from LearnUp.”
 
 ## 2. Target User
 
@@ -36,7 +36,7 @@ A learner who already uses YouTube for education and wants a dedicated library f
 
 ### Primary problem
 
-Learning content is often scattered across YouTube watch history, saved playlists, bookmarks, and external notes. MVP-0.1 focuses only on one narrow problem: importing and watching selected YouTube learning content from a personal StudyFlow library.
+Learning content is often scattered across YouTube watch history, saved playlists, bookmarks, and external notes. MVP-0.1 focuses only on one narrow problem: importing and watching selected YouTube learning content from a personal LearnUp library.
 
 ## 3. Product Scope
 
@@ -71,7 +71,7 @@ Learning content is often scattered across YouTube watch history, saved playlist
 - Course authoring.
 - Downloading YouTube videos.
 - Rehosting YouTube videos.
-- Uploading videos to StudyFlow.
+- Uploading videos to LearnUp.
 - YouTube account/channel management.
 - Editing the source YouTube playlist.
 
@@ -79,7 +79,7 @@ Learning content is often scattered across YouTube watch history, saved playlist
 
 ### Journey A — New user signup
 
-1. User opens StudyFlow.
+1. User opens LearnUp.
 2. User selects Sign Up.
 3. User submits valid credentials according to the authentication provider's rules.
 4. Account is created.
@@ -89,7 +89,7 @@ Learning content is often scattered across YouTube watch history, saved playlist
 
 ### Journey B — Existing user login
 
-1. User opens StudyFlow.
+1. User opens LearnUp.
 2. User selects Sign In.
 3. User submits valid credentials.
 4. User is authenticated.
@@ -100,24 +100,24 @@ Learning content is often scattered across YouTube watch history, saved playlist
 1. Authenticated user opens Add Learning Item.
 2. User pastes a supported YouTube video URL.
 3. User submits the URL.
-4. StudyFlow validates and normalizes the URL.
-5. StudyFlow resolves the YouTube video ID and retrieves the minimum metadata required by the UI.
-6. StudyFlow creates a library item owned by the authenticated user.
+4. LearnUp validates and normalizes the URL.
+5. LearnUp resolves the YouTube video ID and retrieves the minimum metadata required by the UI.
+6. LearnUp creates a library item owned by the authenticated user.
 7. The imported video appears in the user's library.
-8. Opening the item loads the YouTube video inside StudyFlow.
+8. Opening the item loads the YouTube video inside LearnUp.
 
 ### Journey D — Import a playlist
 
 1. Authenticated user opens Add Learning Item.
 2. User pastes a supported YouTube playlist URL.
 3. User submits the URL.
-4. StudyFlow validates and normalizes the URL.
-5. StudyFlow resolves the playlist ID.
-6. StudyFlow retrieves playlist metadata and all available playlist items using pagination where required.
-7. StudyFlow persists the videos with their source positions.
+4. LearnUp validates and normalizes the URL.
+5. LearnUp resolves the playlist ID.
+6. LearnUp retrieves playlist metadata and all available playlist items using pagination where required.
+7. LearnUp persists the videos with their source positions.
 8. The playlist appears in the user's library.
 9. Opening the playlist shows imported videos in the original source order.
-10. Selecting a video plays that video inside StudyFlow.
+10. Selecting a video plays that video inside LearnUp.
 
 The YouTube Data API exposes playlist item `position`, which is a zero-based indication of playlist order; implementation should preserve that ordering rather than relying on response arrival order. citeturn421196search0turn421196search3
 
@@ -125,10 +125,10 @@ The YouTube Data API exposes playlist item `position`, which is a zero-based ind
 
 1. Authenticated user opens their library.
 2. User chooses Remove on a learning item.
-3. StudyFlow asks for confirmation.
+3. LearnUp asks for confirmation.
 4. User confirms.
-5. StudyFlow removes the item from the user's library.
-6. If the item is a playlist, its StudyFlow-owned child records are removed as part of the same logical operation.
+5. LearnUp removes the item from the user's library.
+6. If the item is a playlist, its LearnUp-owned child records are removed as part of the same logical operation.
 7. The original YouTube content is not modified.
 
 ## 5. Functional Requirements
@@ -161,7 +161,7 @@ The system shall accept a supported YouTube playlist URL and resolve one canonic
 
 The system shall preserve the source playlist order at import time.
 
-**Test:** If the YouTube source reports items with positions 0, 1, 2, the StudyFlow UI displays them in positions 0, 1, 2 even if the API response was paginated or returned in a different processing order.
+**Test:** If the YouTube source reports items with positions 0, 1, 2, the LearnUp UI displays them in positions 0, 1, 2 even if the API response was paginated or returned in a different processing order.
 
 ### FR-006 Library display
 
@@ -187,7 +187,7 @@ The system shall allow an authenticated user to remove a library item they own.
 
 ### FR-011 Ownership enforcement
 
-All read, create, and delete operations affecting StudyFlow library data shall be enforced server-side and at the persistence layer where supported.
+All read, create, and delete operations affecting LearnUp library data shall be enforced server-side and at the persistence layer where supported.
 
 ### FR-012 Idempotent import
 
@@ -217,7 +217,7 @@ The implementation shall use a transaction or equivalent compensating strategy s
 
 ### FR-015 No source mutation
 
-StudyFlow shall never modify the user's YouTube video, playlist, channel, or account as part of MVP-0.1 library import or removal.
+LearnUp shall never modify the user's YouTube video, playlist, channel, or account as part of MVP-0.1 library import or removal.
 
 ## 6. Non-Functional Requirements
 
@@ -231,7 +231,7 @@ StudyFlow shall never modify the user's YouTube video, playlist, channel, or acc
 
 ### NFR-002 Reliability
 
-- Import operations shall be safe to retry without creating duplicate StudyFlow records.
+- Import operations shall be safe to retry without creating duplicate LearnUp records.
 - Partial playlist imports shall not be presented as successful complete imports.
 - Database migrations shall be versioned and reproducible.
 
@@ -266,7 +266,7 @@ The MVP shall support the latest stable versions of Chrome, Edge, Firefox, and S
 
 ### NFR-008 Legal/content handling
 
-StudyFlow shall use YouTube's supported embed mechanism and shall not download, cache, or redistribute copyrighted video media.
+LearnUp shall use YouTube's supported embed mechanism and shall not download, cache, or redistribute copyrighted video media.
 
 ## 7. Acceptance Criteria
 
@@ -286,7 +286,7 @@ Given a valid supported public YouTube video URL, when the user imports it, then
 
 ### AC-004 Video playback
 
-Given an imported video, when the user opens it, then StudyFlow renders the corresponding YouTube video in an embedded player.
+Given an imported video, when the user opens it, then LearnUp renders the corresponding YouTube video in an embedded player.
 
 ### AC-005 Playlist import
 
@@ -294,7 +294,7 @@ Given a valid accessible public YouTube playlist URL, when the user imports it, 
 
 ### AC-006 Playlist order
 
-Given a playlist whose source order is A, B, C, when imported, then StudyFlow displays A, B, C in that order.
+Given a playlist whose source order is A, B, C, when imported, then LearnUp displays A, B, C in that order.
 
 ### AC-007 Playlist playback
 
@@ -310,7 +310,7 @@ Given an owned video item, when the user confirms removal, then it no longer app
 
 ### AC-010 Remove playlist
 
-Given an owned playlist item, when the user confirms removal, then the playlist and its StudyFlow-owned child records are no longer available through the user's library.
+Given an owned playlist item, when the user confirms removal, then the playlist and its LearnUp-owned child records are no longer available through the user's library.
 
 ### AC-011 Authorization
 
@@ -322,7 +322,7 @@ Given an unsupported or malformed URL, when the user attempts import, then no li
 
 ### AC-013 External failure
 
-Given the YouTube integration returns an error, when the import is attempted, then StudyFlow does not create a false-success library item and shows a recoverable error state.
+Given the YouTube integration returns an error, when the import is attempted, then LearnUp does not create a false-success library item and shows a recoverable error state.
 
 ## 8. Success Criteria for MVP-0.1
 
@@ -339,15 +339,15 @@ MVP-0.1 is ready for limited real-user validation when:
 
 ### Decision: YouTube is the content source
 
-StudyFlow stores references and metadata needed for its library experience. It does not become a video hosting platform.
+LearnUp stores references and metadata needed for its library experience. It does not become a video hosting platform.
 
 ### Decision: Playlist order is source-defined
 
 The imported order is based on the YouTube playlist item position at import time.
 
-### Decision: Removal is StudyFlow-only
+### Decision: Removal is LearnUp-only
 
-Removing an item changes only the user's StudyFlow library. It does not delete or edit YouTube content.
+Removing an item changes only the user's LearnUp library. It does not delete or edit YouTube content.
 
 ### Decision: MVP does not track watch progress
 
@@ -355,7 +355,7 @@ The user can watch content, but progress persistence is intentionally excluded f
 
 ## 10. References
 
-- Design System: StudyFlow design system reference — private design source omitted from the public repository.
+- Design System: LearnUp design system reference — private design source omitted from the public repository.
 - YouTube Data API — Playlist Items: https://developers.google.com/youtube/v3/docs/playlistItems/list
 - YouTube IFrame Player / Embed parameters: https://developers.google.com/youtube/player_parameters
 - YouTube IFrame Player API reference: https://developers.google.com/youtube/iframe_api_reference

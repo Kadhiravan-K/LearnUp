@@ -16,8 +16,8 @@ export function ContinueLearningCard({ item }: ContinueLearningCardProps) {
 
   // Derive tags from item title
   const tags = item.type === 'playlist'
-    ? ['#FullCourse', '#Playlist', '#StudyFlow']
-    : ['#VideoLecture', '#StudyFlow'];
+    ? ['#FullCourse', '#Playlist', '#LearnUp']
+    : ['#VideoLecture', '#LearnUp'];
 
   return (
     <article className={styles.card} aria-labelledby={`card-title-${item.id}`}>

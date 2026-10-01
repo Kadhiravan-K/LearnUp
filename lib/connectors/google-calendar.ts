@@ -28,14 +28,14 @@ export function generateStudyEvents(): CalendarStudyEvent[] {
 
   return [
     {
-      summary: '🎯 StudyFlow Focus Sprint: Distributed Systems',
+      summary: '🎯 LearnUp Focus Sprint: Distributed Systems',
       description: 'Focus session on Raft Consensus Algorithm (50m block).',
       startTime: event1Start.toISOString(),
       endTime: event1End.toISOString(),
       colorId: '9' // Blueberry / Indigo
     },
     {
-      summary: '🧠 StudyFlow Spaced Repetition Review (Leitner Deck)',
+      summary: '🧠 LearnUp Spaced Repetition Review (Leitner Deck)',
       description: 'Review 18 cards in Weak Topics queue.',
       startTime: event2Start.toISOString(),
       endTime: event2End.toISOString(),

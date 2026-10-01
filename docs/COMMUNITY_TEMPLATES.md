@@ -1,6 +1,6 @@
-# Community Templates in StudyFlow
+# Community Templates in LearnUp
 
-StudyFlow includes a curated set of built-in community learning templates designed to help users quickly kickstart structured study paths across various disciplines (Computer Science, Mathematics, Machine Learning, Language Learning, System Design, etc.).
+LearnUp includes a curated set of built-in community learning templates designed to help users quickly kickstart structured study paths across various disciplines (Computer Science, Mathematics, Machine Learning, Language Learning, System Design, etc.).
 
 ---
 
@@ -12,7 +12,7 @@ StudyFlow includes a curated set of built-in community learning templates design
    - Users browse available templates via the `/templates` gallery interface.
 
 2. **Instantiation / Cloning Flow**:
-   - When a user selects **"Use Template"**, StudyFlow clones the template structure (course outline, playlist references, milestone structure) into the authenticated user's private library.
+   - When a user selects **"Use Template"**, LearnUp clones the template structure (course outline, playlist references, milestone structure) into the authenticated user's private library.
    - The instantiated copy receives a fresh unique `id`, assigned `user_id = auth.uid()`, and zero initial progress.
    - Changes made by the user to their cloned copy remain completely isolated to their private account via Row-Level Security (RLS).
 

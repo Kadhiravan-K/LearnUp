@@ -26,7 +26,7 @@ export const DEFAULT_PLAYER_SHORTCUTS: PlayerShortcuts = {
   volumeDown: 'ArrowDown'
 };
 
-const STORAGE_KEY = 'studyflow_custom_player_shortcuts';
+const STORAGE_KEY = 'LearnUp_custom_player_shortcuts';
 
 export function usePlayerShortcuts() {
   const [shortcuts, setShortcuts] = useState<PlayerShortcuts>(DEFAULT_PLAYER_SHORTCUTS);

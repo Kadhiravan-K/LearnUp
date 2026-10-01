@@ -47,7 +47,7 @@ describe('Header Title and Breadcrumb Resolution (SF-034)', () => {
 
   it('provides a safe default fallback for unmatched routes', () => {
     expect(getHeaderTitleAndBreadcrumbs('/unknown-route')).toEqual({
-      title: 'StudyFlow'
+      title: 'LearnUp'
     });
   });
 });

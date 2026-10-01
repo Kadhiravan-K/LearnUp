@@ -9,7 +9,7 @@ export interface ObsidianVaultConfig {
 }
 
 /**
- * Converts a StudyFlow note into an Obsidian-compatible Markdown document with YAML frontmatter and backlinks.
+ * Converts a LearnUp note into an Obsidian-compatible Markdown document with YAML frontmatter and backlinks.
  */
 export function formatNoteForObsidian(
   note: Note,
@@ -25,7 +25,7 @@ export function formatNoteForObsidian(
     `created_at: "${note.created_at}"`,
     `updated_at: "${note.updated_at}"`,
     'tags:',
-    '  - studyflow',
+    '  - LearnUp',
     '  - note',
     `  - "${(courseTitle || 'general').toLowerCase().replace(/\s+/g, '-')}"`,
     '---',
@@ -49,7 +49,7 @@ export function formatCourseMOCForObsidian(course: LearningItemWithVideos): stri
     `status: "${course.status}"`,
     `created_at: "${course.created_at}"`,
     'tags:',
-    '  - studyflow',
+    '  - LearnUp',
     '  - course',
     '  - moc',
     '---',

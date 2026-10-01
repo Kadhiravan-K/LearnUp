@@ -1,6 +1,6 @@
-# StudyFlow Deployment Guide
+# LearnUp Deployment Guide
 
-This document outlines the deployment architecture and standard operating procedures for StudyFlow from local development to production.
+This document outlines the deployment architecture and standard operating procedures for LearnUp from local development to production.
 
 ## Architecture
 
@@ -22,7 +22,7 @@ Every Pull Request to `main` or `develop` triggers a Vercel Preview deployment.
 1. **GitHub PR Created:** Vercel intercepts the PR and begins a build.
 2. **Quality Gate:** GitHub Actions runs `ci.yml` (Lint, Typecheck, Unit, E2E tests). E2E runs against the local Supabase instance.
 3. **Database (Preview):** Supabase provides database branching. Connect Vercel to a Supabase Preview Branch URL if testing schema changes, or test UI changes against a shared staging environment.
-4. **Auth Redirects:** Supabase must be configured to allow wildcard subdomains for Vercel preview branches (e.g., `https://*-studyflow.vercel.app/**`) in the redirect URIs list.
+4. **Auth Redirects:** Supabase must be configured to allow wildcard subdomains for Vercel preview branches (e.g., `https://*-LearnUp.vercel.app/**`) in the redirect URIs list.
 
 ### 3. Production Deployment
 Merging into `main` automatically triggers a Vercel Production deployment.
@@ -35,8 +35,8 @@ Merging into `main` automatically triggers a Vercel Production deployment.
    - Link the project: `npx supabase link --project-ref <your-project-ref>`.
    - Push migrations: `npx supabase db push`.
    - Set up Auth Redirects:
-     - **Site URL:** `https://studyflow.app` (or your custom domain).
-     - **Redirect URIs:** `https://studyflow.app/auth/callback`.
+     - **Site URL:** `https://LearnUp.app` (or your custom domain).
+     - **Redirect URIs:** `https://LearnUp.app/auth/callback`.
 
 2. **Vercel Production Project:**
    - Import the GitHub repository in Vercel.

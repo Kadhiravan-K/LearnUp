@@ -50,8 +50,8 @@ export default function LibraryPage() {
   // Listen for undo/restore events across the workspace
   React.useEffect(() => {
     const handleLibraryRefresh = () => refresh();
-    window.addEventListener('studyflow_library_refresh', handleLibraryRefresh);
-    return () => window.removeEventListener('studyflow_library_refresh', handleLibraryRefresh);
+    window.addEventListener('LearnUp_library_refresh', handleLibraryRefresh);
+    return () => window.removeEventListener('LearnUp_library_refresh', handleLibraryRefresh);
   }, [refresh]);
 
   return (

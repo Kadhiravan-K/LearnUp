@@ -47,7 +47,7 @@ function formatTime(seconds: number): string {
 }
 
 export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(function YouTubePlayer(
-  { videoId, title = 'StudyFlow Player', onCompleted },
+  { videoId, title = 'LearnUp Player', onCompleted },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);

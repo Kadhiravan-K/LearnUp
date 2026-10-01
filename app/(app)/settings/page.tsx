@@ -32,7 +32,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'local'>('saved');
   const [activeTab, setActiveTab] = useState<string>(initialTab);
-  const [userEmail, setUserEmail] = useState('learner@studyflow.local');
+  const [userEmail, setUserEmail] = useState('learner@LearnUp.local');
   const [userId, setUserId] = useState<string>('');
 
   const [settings, setSettings] = useState<UserSettings>({
@@ -58,7 +58,7 @@ export default function SettingsPage() {
         setIsLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user && isMounted) {
-          setUserEmail(session.user.email || 'learner@studyflow.local');
+          setUserEmail(session.user.email || 'learner@LearnUp.local');
           setUserId(session.user.id);
         }
 
@@ -138,7 +138,7 @@ export default function SettingsPage() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `studyflow-telemetry-${userId || 'export'}.csv`;
+        a.download = `LearnUp-telemetry-${userId || 'export'}.csv`;
         a.click();
       } else {
         const json = await res.json();
@@ -146,7 +146,7 @@ export default function SettingsPage() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `studyflow-telemetry-${userId || 'export'}.json`;
+        a.download = `LearnUp-telemetry-${userId || 'export'}.json`;
         a.click();
       }
     } catch {
@@ -223,7 +223,7 @@ export default function SettingsPage() {
             <h1 className={styles.heading}>{currentTabObj.icon} {currentTabObj.label}</h1>
           </div>
           <p className={styles.subheading}>
-            StudyFlow Settings &bull; Dedicated configuration screen for {currentTabObj.label.toLowerCase()}.
+            LearnUp Settings &bull; Dedicated configuration screen for {currentTabObj.label.toLowerCase()}.
           </p>
         </div>
 

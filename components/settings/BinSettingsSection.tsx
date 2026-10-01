@@ -72,7 +72,7 @@ export function BinSettingsSection({ onNotify }: BinSettingsSectionProps) {
             });
           }
         } catch {}
-        window.dispatchEvent(new CustomEvent('studyflow_library_refresh'));
+        window.dispatchEvent(new CustomEvent('LearnUp_library_refresh'));
       } else if (restored.itemType === 'note' && restored.data) {
         try {
           await fetch('/api/notes', {
@@ -85,7 +85,7 @@ export function BinSettingsSection({ onNotify }: BinSettingsSectionProps) {
             })
           });
         } catch {}
-        window.dispatchEvent(new CustomEvent('studyflow_notes_refresh'));
+        window.dispatchEvent(new CustomEvent('LearnUp_notes_refresh'));
       }
 
       showToast(`Restored "${restored.title}" successfully.`);

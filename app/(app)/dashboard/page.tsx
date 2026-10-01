@@ -34,7 +34,7 @@ export default function DashboardPage() {
           if (session?.user?.email) {
             const namePart = session.user.email.split('@')[0];
             setUserName(namePart.charAt(0).toUpperCase() + namePart.slice(1));
-          } else if (localStorage.getItem('studyflow_is_guest') === 'true') {
+          } else if (localStorage.getItem('LearnUp_is_guest') === 'true') {
             setUserName('Guest');
           }
         }
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             <h1 className={styles.heading}>{greeting}, {userName}</h1>
             <span className={styles.modePill}>
               <span className={styles.modeDot} />
-              STUDYFLOW &bull; DEEP WORK MODE
+              LearnUp &bull; DEEP WORK MODE
             </span>
           </div>
           <p className={styles.subheading}>

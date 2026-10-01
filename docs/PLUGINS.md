@@ -1,6 +1,6 @@
 # Plugin & Connector Architecture
 
-StudyFlow provides an extensible connector architecture to integrate external study tools and export destinations (such as Anki, Notion, Obsidian, Readwise, and Google Calendar) while preserving user privacy and strict credential isolation.
+LearnUp provides an extensible connector architecture to integrate external study tools and export destinations (such as Anki, Notion, Obsidian, Readwise, and Google Calendar) while preserving user privacy and strict credential isolation.
 
 ---
 
@@ -15,7 +15,7 @@ StudyFlow provides an extensible connector architecture to integrate external st
    - Secrets are never embedded into frontend JavaScript client bundles.
 
 3. **Pluggable Interface**:
-   - Connectors implement the `StudyFlowConnector` interface defined in `lib/connectors/`.
+   - Connectors implement the `LearnUpConnector` interface defined in `lib/connectors/`.
    - Each connector defines its capabilities:
      - `exportNotes`: Export markdown notes and summaries.
      - `syncBookmarks`: Sync timestamps and key learning milestones.

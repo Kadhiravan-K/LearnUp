@@ -8,7 +8,7 @@ describe('Profile Security & Lock Configuration', () => {
     sampleProfile = {
       id: 'prof-1',
       name: 'Alex Morgan',
-      email: 'alex@studyflow.io',
+      email: 'alex@LearnUp.io',
       color: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
       initials: 'AM',
       lastActive: new Date().toISOString(),

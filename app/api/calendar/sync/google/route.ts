@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
 /**
  * POST /api/calendar/sync/google
- * Trigger two-way sync between StudyFlow and Google Calendar.
+ * Trigger two-way sync between LearnUp and Google Calendar.
  */
 export async function POST(request: Request) {
   try {

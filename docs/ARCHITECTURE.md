@@ -1,4 +1,4 @@
-# StudyFlow — MVP Architecture
+# LearnUp — MVP Architecture
 
 **Version:** MVP-0.1
 **Purpose:** Define boundaries and contracts before application code is written.
@@ -12,7 +12,7 @@ Provide the smallest production-capable architecture that supports:
 - YouTube video/playlist import;
 - source-order preservation;
 - embedded YouTube playback;
-- removal of StudyFlow-owned library records.
+- removal of LearnUp-owned library records.
 
 The architecture intentionally does not contain AI, analytics, planning, social, recommendation, or gamification subsystems.
 
@@ -37,11 +37,11 @@ Browser
   |
   | HTTPS
   v
-StudyFlow Web App
+LearnUp Web App
   |
   +--> Authentication Boundary
   |
-  +--> StudyFlow Application/API Boundary
+  +--> LearnUp Application/API Boundary
           |
           +--> Database
           |
@@ -109,7 +109,7 @@ Responsible for:
 
 Responsible for:
 
-- durable StudyFlow state;
+- durable LearnUp state;
 - user-to-library ownership;
 - uniqueness constraints;
 - playlist child ordering;
@@ -134,7 +134,7 @@ The YouTube Data API `playlistItems.list` endpoint supports `playlistId`, return
 
 Responsible for actual video playback.
 
-StudyFlow owns the player container and UI around it, but YouTube remains the media provider. YouTube documents iframe embedding and the IFrame Player API for embedded playback. citeturn421196search1turn421196search2
+LearnUp owns the player container and UI around it, but YouTube remains the media provider. YouTube documents iframe embedding and the IFrame Player API for embedded playback. citeturn421196search1turn421196search2
 
 ## 5. Recommended Domain Model
 
@@ -194,7 +194,7 @@ The following invariants must be enforced by code, database constraints, or both
 1. Every learning item has exactly one owner.
 2. A user can only access their own learning items.
 3. A normalized source key is unique per owner.
-4. A playlist child belongs to exactly one StudyFlow playlist item.
+4. A playlist child belongs to exactly one LearnUp playlist item.
 5. Playlist `source_position` is deterministic and preserved.
 6. A successful playlist import has a consistent parent/child state.
 7. Remove does not modify YouTube content.
@@ -231,7 +231,7 @@ Fetch metadata
       +---- failure --> stable import error
       |
       v
-Persist StudyFlow records transactionally
+Persist LearnUp records transactionally
       |
       v
 Return ready library item
@@ -334,7 +334,7 @@ The application must:
 
 ## 12. Playback Architecture
 
-StudyFlow should use the official YouTube embed mechanism rather than proxying video bytes. The YouTube documentation supports iframe URLs of the form `https://www.youtube.com/embed/VIDEO_ID` and the IFrame Player API for player control/events. citeturn421196search1turn421196search2
+LearnUp should use the official YouTube embed mechanism rather than proxying video bytes. The YouTube documentation supports iframe URLs of the form `https://www.youtube.com/embed/VIDEO_ID` and the IFrame Player API for player control/events. citeturn421196search1turn421196search2
 
 For MVP-0.1, the player needs only enough integration to load the selected video reliably. Watch-progress synchronization is explicitly out of scope.
 
@@ -343,7 +343,7 @@ For MVP-0.1, the player needs only enough integration to load the selected video
 Recommended top-level organization:
 
 ```text
-studyflow/
+LearnUp/
 ├── app/                     # UI and route entry points
 ├── components/              # reusable UI
 ├── lib/

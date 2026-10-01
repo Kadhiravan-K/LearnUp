@@ -125,7 +125,7 @@ export default function NotesPage() {
   };
 
   const handleExportMarkdown = () => {
-    let md = `# StudyFlow Notes & Bookmarks Export\n\n`;
+    let md = `# LearnUp Notes & Bookmarks Export\n\n`;
     notes.forEach((n) => {
       md += `## ${n.title}\n`;
       md += `*Course: ${n.course} (${n.lecture} @ ${n.timestamp})*\n\n`;
@@ -140,7 +140,7 @@ export default function NotesPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'studyflow-notes-export.md';
+    a.download = 'LearnUp-notes-export.md';
     a.click();
     URL.revokeObjectURL(url);
   };

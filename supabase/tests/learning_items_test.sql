@@ -1,5 +1,5 @@
 -- supabase/tests/learning_items_test.sql
--- Automated tests for StudyFlow MVP schema security and integrity.
+-- Automated tests for LearnUp MVP schema security and integrity.
 -- Uses pgTAP (https://pgtap.org/) for assertions.
 
 -- Ensure pgTAP is available

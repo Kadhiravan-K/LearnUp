@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('studyflow_theme') as ExtendedThemeId | null;
+      const saved = localStorage.getItem('LearnUp_theme') as ExtendedThemeId | null;
       const initial = saved === 'dark' ? 'dark' : (saved === 'system' ? 'system' : 'light');
       setThemeState(initial);
       applyThemeToDOM(initial);
@@ -55,7 +55,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
       const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleColorChange = () => {
-        const current = localStorage.getItem('studyflow_theme') as ExtendedThemeId | null;
+        const current = localStorage.getItem('LearnUp_theme') as ExtendedThemeId | null;
         if (current === 'system') {
           applyThemeToDOM('system');
         }
@@ -73,8 +73,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const sanitized = newTheme === 'dark' ? 'dark' : (newTheme === 'system' ? 'system' : 'light');
     setThemeState(sanitized);
     try {
-      localStorage.setItem('studyflow_theme', sanitized);
-      window.dispatchEvent(new CustomEvent('studyflow_theme_changed', { detail: sanitized }));
+      localStorage.setItem('LearnUp_theme', sanitized);
+      window.dispatchEvent(new CustomEvent('LearnUp_theme_changed', { detail: sanitized }));
     } catch {
       // Ignore localStorage errors
     }
@@ -106,7 +106,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useStudyFlowTheme(): ThemeContextValue {
+export function useLearnUpTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {
     return {

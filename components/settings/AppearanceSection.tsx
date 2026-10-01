@@ -38,7 +38,7 @@ export function AppearanceSection({
 
       {/* Visual Experience Themes */}
       <div className={styles.group}>
-        <span className={styles.groupLabel}>STUDYFLOW EXPERIENCE THEME</span>
+        <span className={styles.groupLabel}>LearnUp EXPERIENCE THEME</span>
         <ThemeSwitcher onThemeSelect={(t) => onChangeTheme(t as ThemeMode)} />
       </div>
 

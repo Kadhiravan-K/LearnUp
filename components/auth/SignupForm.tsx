@@ -88,7 +88,7 @@ export function SignupForm() {
     <form onSubmit={handleSubmit} className={styles.form} noValidate>
       <div className={styles.header}>
         <h1 className={styles.title}>Create an account</h1>
-        <p className={styles.subtitle}>Start building your StudyFlow library</p>
+        <p className={styles.subtitle}>Start building your LearnUp library</p>
       </div>
 
       {error && (

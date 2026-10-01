@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useStudyFlowTheme } from './ThemeProvider';
+import { useLearnUpTheme } from './ThemeProvider';
 import { ExtendedThemeId, ThemeDefinition } from './types';
 import styles from './ThemeSwitcher.module.css';
 
@@ -11,7 +11,7 @@ export interface ThemeSwitcherProps {
 }
 
 export function ThemeSwitcher({ onThemeSelect, className = '' }: ThemeSwitcherProps) {
-  const { theme, setTheme, availableThemes } = useStudyFlowTheme();
+  const { theme, setTheme, availableThemes } = useLearnUpTheme();
 
   const handleSelect = (id: ExtendedThemeId) => {
     setTheme(id);
@@ -26,7 +26,7 @@ export function ThemeSwitcher({ onThemeSelect, className = '' }: ThemeSwitcherPr
   };
 
   return (
-    <div className={`${styles.container} ${className}`} role="radiogroup" aria-label="StudyFlow Visual Themes">
+    <div className={`${styles.container} ${className}`} role="radiogroup" aria-label="LearnUp Visual Themes">
       <div className={styles.themeGrid}>
         {availableThemes.map((t: ThemeDefinition) => {
           const isActive = theme === t.id || (t.id === 'light' && (theme === 'light' || theme === 'default'));

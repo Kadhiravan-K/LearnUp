@@ -31,7 +31,7 @@ export function useTheme() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('studyflow_theme') as Theme | null;
+      const saved = localStorage.getItem('LearnUp_theme') as Theme | null;
       const initial = saved === 'dark' ? 'dark' : (saved === 'system' ? 'system' : 'light');
       setThemeState(initial);
       applyTheme(initial);
@@ -42,7 +42,7 @@ export function useTheme() {
     if (typeof window !== 'undefined' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = () => {
-        const current = localStorage.getItem('studyflow_theme') as Theme | null;
+        const current = localStorage.getItem('LearnUp_theme') as Theme | null;
         if (current === 'system') {
           applyTheme('system');
         }
@@ -59,8 +59,8 @@ export function useTheme() {
     const sanitized = newTheme === 'dark' ? 'dark' : (newTheme === 'system' ? 'system' : 'light');
     setThemeState(sanitized);
     try {
-      localStorage.setItem('studyflow_theme', sanitized);
-      window.dispatchEvent(new CustomEvent('studyflow_theme_changed', { detail: sanitized }));
+      localStorage.setItem('LearnUp_theme', sanitized);
+      window.dispatchEvent(new CustomEvent('LearnUp_theme_changed', { detail: sanitized }));
     } catch {
       // Ignore
     }

@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/auth', () => ({
   requireAuth: vi.fn().mockResolvedValue({
-    user: { id: 'test-user-123', email: 'test@studyflow.io' },
+    user: { id: 'test-user-123', email: 'test@LearnUp.io' },
     supabase: {}
   })
 }));
@@ -69,11 +69,11 @@ describe('Model Context Protocol (MCP) Server Endpoint (SF-038)', () => {
       expect(MCP_TOOLS).toHaveLength(5);
       const names = MCP_TOOLS.map((t) => t.name);
       expect(names).toEqual([
-        'studyflow_search_notes',
-        'studyflow_create_note',
-        'studyflow_get_courses',
-        'studyflow_get_telemetry',
-        'studyflow_sync_connector'
+        'LearnUp_search_notes',
+        'LearnUp_create_note',
+        'LearnUp_get_courses',
+        'LearnUp_get_telemetry',
+        'LearnUp_sync_connector'
       ]);
     });
 
@@ -81,9 +81,9 @@ describe('Model Context Protocol (MCP) Server Endpoint (SF-038)', () => {
       expect(MCP_RESOURCES).toHaveLength(3);
       const uris = MCP_RESOURCES.map((r) => r.uri);
       expect(uris).toEqual([
-        'studyflow://courses',
-        'studyflow://notes',
-        'studyflow://telemetry'
+        'LearnUp://courses',
+        'LearnUp://notes',
+        'LearnUp://telemetry'
       ]);
     });
   });
@@ -125,7 +125,7 @@ describe('Model Context Protocol (MCP) Server Endpoint (SF-038)', () => {
       expect(json.result.resources).toHaveLength(3);
     });
 
-    it('handles tools/call for studyflow_search_notes', async () => {
+    it('handles tools/call for LearnUp_search_notes', async () => {
       const req = new NextRequest('http://localhost:3000/api/mcp', {
         method: 'POST',
         body: JSON.stringify({
@@ -133,7 +133,7 @@ describe('Model Context Protocol (MCP) Server Endpoint (SF-038)', () => {
           id: 3,
           method: 'tools/call',
           params: {
-            name: 'studyflow_search_notes',
+            name: 'LearnUp_search_notes',
             arguments: { query: 'Borrowing' }
           }
         })
@@ -146,7 +146,7 @@ describe('Model Context Protocol (MCP) Server Endpoint (SF-038)', () => {
       expect(json.result.content[0].text).toContain('Ownership and Borrowing');
     });
 
-    it('handles tools/call for studyflow_create_note', async () => {
+    it('handles tools/call for LearnUp_create_note', async () => {
       const req = new NextRequest('http://localhost:3000/api/mcp', {
         method: 'POST',
         body: JSON.stringify({
@@ -154,7 +154,7 @@ describe('Model Context Protocol (MCP) Server Endpoint (SF-038)', () => {
           id: 4,
           method: 'tools/call',
           params: {
-            name: 'studyflow_create_note',
+            name: 'LearnUp_create_note',
             arguments: {
               learningItemId: 'course-1',
               youtubeVideoId: 'vid-1',

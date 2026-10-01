@@ -21,11 +21,11 @@ import { Note, Bookmark, UserSettings } from '../../lib/types';
 describe('QA API Test Suite — Complete MVP Coverage', () => {
   const userA: AuthenticatedUser = {
     id: '11111111-1111-1111-1111-111111111111',
-    email: 'userA@studyflow.internal'
+    email: 'userA@LearnUp.internal'
   };
   const userB: AuthenticatedUser = {
     id: '22222222-2222-2222-2222-222222222222',
-    email: 'userB@studyflow.internal'
+    email: 'userB@LearnUp.internal'
   };
 
   const sampleVideoItem: LearningItem = {

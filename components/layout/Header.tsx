@@ -53,7 +53,7 @@ export function getHeaderTitleAndBreadcrumbs(pathname: string): {
   if (pathname.startsWith('/settings')) {
     return { title: 'Settings' };
   }
-  return { title: 'StudyFlow' };
+  return { title: 'LearnUp' };
 }
 
 export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) {
@@ -69,7 +69,7 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
   useEffect(() => {
     const syncFocusState = () => {
       try {
-        const raw = localStorage.getItem('studyflow_active_focus_state');
+        const raw = localStorage.getItem('LearnUp_active_focus_state');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed.formattedTime) setFocusTimeDisplay(parsed.formattedTime);
@@ -79,10 +79,10 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
     };
 
     syncFocusState();
-    window.addEventListener('studyflow_focus_sync', syncFocusState);
+    window.addEventListener('LearnUp_focus_sync', syncFocusState);
     window.addEventListener('storage', syncFocusState);
     return () => {
-      window.removeEventListener('studyflow_focus_sync', syncFocusState);
+      window.removeEventListener('LearnUp_focus_sync', syncFocusState);
       window.removeEventListener('storage', syncFocusState);
     };
   }, []);
@@ -95,8 +95,8 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
         const { data: { session } } = await supabase.auth.getSession();
         if (isMounted && session?.user?.email) {
           setUserEmail(session.user.email);
-        } else if (isMounted && typeof window !== 'undefined' && localStorage.getItem('studyflow_is_guest') === 'true') {
-          setUserEmail('guest@studyflow.local');
+        } else if (isMounted && typeof window !== 'undefined' && localStorage.getItem('LearnUp_is_guest') === 'true') {
+          setUserEmail('guest@LearnUp.local');
         }
       } catch {
         // Fallback gracefully if session retrieval encounters an error

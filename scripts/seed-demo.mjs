@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * StudyFlow Development Demo Seeder
+ * LearnUp Development Demo Seeder
  * 
  * Applies synthetic demo data to local development PostgreSQL database.
  * STRICTLY BLOCKED in production environments.
@@ -58,7 +58,7 @@ function verifySafeEnvironment() {
 }
 
 async function main() {
-  console.log('\n🌱 [StudyFlow] Validating environment safety...');
+  console.log('\n🌱 [LearnUp] Validating environment safety...');
   verifySafeEnvironment();
   console.log('   ✓ Safe local development environment confirmed.');
 
@@ -68,7 +68,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('🌱 [StudyFlow] Applying synthetic development demo fixtures...');
+  console.log('🌱 [LearnUp] Applying synthetic development demo fixtures...');
 
   try {
     // Execute SQL directly against local Supabase database via CLI
@@ -77,7 +77,7 @@ async function main() {
       stdio: 'inherit'
     });
 
-    console.log('\n✨ [StudyFlow] Synthetic demo data successfully seeded!');
+    console.log('\n✨ [LearnUp] Synthetic demo data successfully seeded!');
     console.log('   • 1 Demo Course & 1 Demo Playlist created');
     console.log('   • 3 Video Chapters, 1 LaTeX Note, 1 Bookmark generated');
     console.log('   • User ID: 00000000-0000-0000-0000-000000000001\n');

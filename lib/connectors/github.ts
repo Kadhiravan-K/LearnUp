@@ -16,7 +16,7 @@ export async function syncToGitHub(
   bookmarks: Bookmark[],
   config: GitHubConnectorConfig = {}
 ): Promise<ConnectorSyncResult> {
-  const repoName = config.repo || 'studyflow-backup-vault';
+  const repoName = config.repo || 'LearnUp-backup-vault';
   const branch = config.branch || 'main';
 
   const manifest = {

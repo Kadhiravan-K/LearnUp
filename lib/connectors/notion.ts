@@ -20,7 +20,7 @@ export async function syncToNotion(
     message: `Exported ${courses.length} courses and ${notes.length} notes into Notion syllabus workspace database.`,
     syncedAt: new Date().toISOString(),
     details: {
-      databaseId: config.databaseId || 'Notion StudyFlow Database',
+      databaseId: config.databaseId || 'Notion LearnUp Database',
       totalItems: syncedCount
     }
   };

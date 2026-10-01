@@ -1,7 +1,7 @@
-# StudyFlow — Database Design (MVP‑0.1)
+# LearnUp — Database Design (MVP‑0.1)
 
 ## Overview
-This document describes the PostgreSQL schema used by the StudyFlow MVP (version 0.1). The database is hosted on Supabase and follows the architecture outlined in `docs/ARCHITECTURE.md` and the product requirements in `docs/PRD.md`.
+This document describes the PostgreSQL schema used by the LearnUp MVP (version 0.1). The database is hosted on Supabase and follows the architecture outlined in `docs/ARCHITECTURE.md` and the product requirements in `docs/PRD.md`.
 
 The schema stores:
 - **Authenticated users** (managed by Supabase Auth – table `auth.users`).
@@ -163,4 +163,4 @@ The initial migration (`supabase/migrations/20230924000100_init.sql`) creates th
 
 ---
 
-*Prepared by the Database Architect for StudyFlow – MVP‑0.1*
+*Prepared by the Database Architect for LearnUp – MVP‑0.1*

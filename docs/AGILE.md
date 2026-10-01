@@ -1,4 +1,4 @@
-# StudyFlow — Agile Delivery Guide
+# LearnUp — Agile Delivery Guide
 
 **Release target:** MVP-0.1
 **Development model:** Small, independently reviewable GitHub issues implemented with AI coding agents and human approval.

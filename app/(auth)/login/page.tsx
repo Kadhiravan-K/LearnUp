@@ -3,8 +3,8 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Choose Profile & Sign In | StudyFlow',
-  description: 'Choose your learning profile, sign in, or browse StudyFlow in guest mode',
+  title: 'Choose Profile & Sign In | LearnUp',
+  description: 'Choose your learning profile, sign in, or browse LearnUp in guest mode',
 };
 
 export default function LoginPage() {

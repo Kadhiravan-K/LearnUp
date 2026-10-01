@@ -1,5 +1,5 @@
 /**
- * StudyFlow Theme System — Type Definitions
+ * LearnUp Theme System — Type Definitions
  * Centralized contracts for light and dark theme tokens, metadata, and provider context.
  */
 

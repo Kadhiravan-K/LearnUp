@@ -150,7 +150,7 @@ export function TokenUsageSection() {
               <span className={styles.mcpEndpoint}>/api/mcp</span>
             </div>
             <p className={styles.mcpDesc}>
-              Connect Claude Desktop, Cursor, Zed, or any MCP-compliant agent directly to your StudyFlow vault. JSON-RPC 2.0 tools &amp; resources are exposed with zero third-party telemetry.
+              Connect Claude Desktop, Cursor, Zed, or any MCP-compliant agent directly to your LearnUp vault. JSON-RPC 2.0 tools &amp; resources are exposed with zero third-party telemetry.
             </p>
           </div>
 

@@ -1,6 +1,6 @@
-# Contributing to StudyFlow
+# Contributing to LearnUp
 
-Thank you for your interest in contributing to StudyFlow! We welcome contributions from the community to help make StudyFlow the best distraction-free learning management and knowledge workspace.
+Thank you for your interest in contributing to LearnUp! We welcome contributions from the community to help make LearnUp the best distraction-free learning management and knowledge workspace.
 
 Please review this guide before submitting issues or pull requests.
 
@@ -24,8 +24,8 @@ All contributors and maintainers are expected to adhere to our [Code of Conduct]
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/Kadhiravan-K/studyflow.git
-   cd studyflow
+   git clone https://github.com/Kadhiravan-K/LearnUp.git
+   cd LearnUp
    ```
 
 2. **Install dependencies**:
@@ -117,4 +117,4 @@ npx playwright test
    - `docs: update connector configuration guide`
 6. Push your branch to your fork and submit a Pull Request against `main`.
 
-Thank you for contributing to StudyFlow!
+Thank you for contributing to LearnUp!
