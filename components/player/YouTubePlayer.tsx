@@ -35,6 +35,22 @@ export function isVideoCompleted(positionSeconds: number, durationSeconds: numbe
   return durationSeconds > 0 && (positionSeconds / durationSeconds) >= COMPLETION_THRESHOLD;
 }
 
+/**
+ * Sanitizes a raw video identifier to extract a valid YouTube video ID.
+ * Strips preview prefixes (video-, pv-) and extracts 11-character YouTube video IDs.
+ * Exported for unit testing.
+ */
+export function sanitizeVideoId(rawId: string): string {
+  if (!rawId) return '';
+  const trimmed = rawId.trim();
+  const stripped = trimmed.replace(/^(video-|pv-)/i, '');
+  const match = stripped.match(/^[a-zA-Z0-9_-]{11}/);
+  if (match) {
+    return match[0];
+  }
+  return stripped;
+}
+
 function formatTime(seconds: number): string {
   if (isNaN(seconds) || seconds < 0) return '0:00';
   const h = Math.floor(seconds / 3600);
@@ -50,6 +66,7 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
   { videoId, title = 'LearnUp Player', onCompleted },
   ref
 ) {
+  const cleanVideoId = sanitizeVideoId(videoId);
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const { shortcuts } = usePlayerShortcuts();
@@ -57,6 +74,8 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
   // Playback state
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [bufferedFraction, setBufferedFraction] = useState(0);
@@ -171,15 +190,23 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
     [currentTime]
   );
 
+  // Reset error when video changes
+  useEffect(() => {
+    setHasError(false);
+    setErrorMessage(null);
+  }, [cleanVideoId]);
+
   // Fetch initial user progress for resume
   useEffect(() => {
     setIsReady(false);
     setStartSeconds(0);
     lastSyncedPositionRef.current = -1;
 
+    if (!cleanVideoId) return;
+
     const abortController = new AbortController();
 
-    fetch(`/api/progress/${videoId}`, { signal: abortController.signal })
+    fetch(`/api/progress/${cleanVideoId}`, { signal: abortController.signal })
       .then((res) => res.json())
       .then((resJson) => {
         const data = resJson.data || resJson;
@@ -197,12 +224,12 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
       stopPolling();
       abortController.abort();
     };
-  }, [videoId]);
+  }, [cleanVideoId]);
 
   // Background progress sync
   const syncProgress = useCallback(
     async (player: any) => {
-      if (!player) return;
+      if (!player || !cleanVideoId) return;
       try {
         const pos = Math.floor(player.getCurrentTime() || 0);
         const dur = Math.floor(player.getDuration() || 0);
@@ -216,7 +243,7 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            youtubeVideoId: videoId,
+            youtubeVideoId: cleanVideoId,
             positionSeconds: pos,
             durationSeconds: dur,
             isCompleted: completed
@@ -226,7 +253,7 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
         console.error('Failed to sync progress:', error);
       }
     },
-    [videoId]
+    [cleanVideoId]
   );
 
   const startPolling = useCallback(
@@ -274,6 +301,7 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     playerRef.current = event.target;
     setIsReady(true);
+    setHasError(false);
     if (startSeconds > 0) {
       event.target.seekTo(startSeconds, true);
       setCurrentTime(startSeconds);
@@ -281,6 +309,20 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
     const dur = event.target.getDuration();
     if (dur) setDuration(dur);
     event.target.setVolume(volume);
+  };
+
+  // Player Error Handler
+  const onPlayerError: YouTubeProps['onError'] = (event) => {
+    setIsPlaying(false);
+    setHasError(true);
+    const errorCode = event.data;
+    let msg = 'Unable to play this video. It may be private, deleted, or restricted from embedded playback.';
+    if (errorCode === 101 || errorCode === 150) {
+      msg = 'The video owner does not allow embedding this video on external sites.';
+    } else if (errorCode === 100) {
+      msg = 'This video has been removed or marked as private.';
+    }
+    setErrorMessage(msg);
   };
 
   // Player State Change
@@ -664,27 +706,54 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
         className={styles.videoFilterWrapper}
         style={{ filter: `brightness(${brightness}%)` }}
       >
-        <YouTube
-          videoId={videoId}
-          className={styles.iframeWrapper}
-          iframeClassName={styles.iframe}
-          onReady={onPlayerReady}
-          onStateChange={onPlayerStateChange}
-          opts={{
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-              disablekb: 1,
-              enablejsapi: 1,
-              fs: 0,
-              iv_load_policy: annotationsEnabled ? 1 : 3,
-              modestbranding: 1,
-              rel: 0,
-              playsinline: 1
-            }
-          }}
-        />
+        {cleanVideoId ? (
+          <YouTube
+            videoId={cleanVideoId}
+            className={styles.iframeWrapper}
+            iframeClassName={styles.iframe}
+            onReady={onPlayerReady}
+            onStateChange={onPlayerStateChange}
+            onError={onPlayerError}
+            opts={{
+              playerVars: {
+                autoplay: 0,
+                controls: 0,
+                disablekb: 1,
+                enablejsapi: 1,
+                fs: 0,
+                iv_load_policy: annotationsEnabled ? 1 : 3,
+                modestbranding: 1,
+                rel: 0,
+                playsinline: 1,
+                origin: typeof window !== 'undefined' ? window.location.origin : undefined
+              }
+            }}
+          />
+        ) : null}
       </div>
+
+      {/* Error Overlay */}
+      {(hasError || !cleanVideoId) && (
+        <div className={styles.errorOverlay}>
+          <div className={styles.errorCard}>
+            <span className={styles.errorIcon}>⚠️</span>
+            <p className={styles.errorTitle}>Playback Unavailable</p>
+            <p className={styles.errorText}>
+              {errorMessage || (!cleanVideoId ? 'Invalid or missing YouTube Video ID.' : 'Unable to play this video.')}
+            </p>
+            {cleanVideoId && (
+              <a
+                href={`https://www.youtube.com/watch?v=${cleanVideoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.errorLink}
+              >
+                Watch directly on YouTube ↗
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Interactive Gesture Touch Surface */}
       <div

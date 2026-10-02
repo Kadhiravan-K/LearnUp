@@ -1,8 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { isVideoCompleted } from '@/components/player/YouTubePlayer';
+import { isVideoCompleted, sanitizeVideoId } from '@/components/player/YouTubePlayer';
 import { DEFAULT_PLAYER_SHORTCUTS } from '@/lib/hooks/usePlayerShortcuts';
 
 describe('Custom YouTube Video Player Logic & Adaptations', () => {
+  it('sanitizes video IDs by stripping prefixes and extracting 11-char IDs', () => {
+    expect(sanitizeVideoId('dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+    expect(sanitizeVideoId('video-dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+    expect(sanitizeVideoId('pv-dQw4w9WgXcQ-0')).toBe('dQw4w9WgXcQ');
+    expect(sanitizeVideoId('  dQw4w9WgXcQ  ')).toBe('dQw4w9WgXcQ');
+    expect(sanitizeVideoId('')).toBe('');
+  });
+
   it('correctly calculates video completion threshold (90%)', () => {
     expect(isVideoCompleted(0, 100)).toBe(false);
     expect(isVideoCompleted(89, 100)).toBe(false);

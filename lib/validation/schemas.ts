@@ -11,9 +11,14 @@ export const importRequestSchema = z.object({
   selectedVideoIds: z.array(z.string()).optional().nullable()
 });
 
-export const previewCourseSchema = z.object({
-  url: z.string().trim().min(1, 'URL is required').max(2048, 'URL exceeds maximum length of 2048 characters')
-});
+export const previewCourseSchema = z
+  .object({
+    url: z.string().trim().max(2048).optional(),
+    urls: z.array(z.string().trim().min(1).max(2048)).max(100).optional()
+  })
+  .refine((data) => (data.url && data.url.length > 0) || (data.urls && data.urls.length > 0), {
+    message: 'URL is required'
+  });
 
 export const importCourseSchema = importRequestSchema;
 

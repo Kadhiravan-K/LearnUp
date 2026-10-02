@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { UndoProvider } from '@/lib/context/UndoContext';
+import { FocusTimerProvider } from '@/lib/context/FocusTimerContext';
 import styles from './AppShell.module.css';
 
 export interface AppShellProps {
@@ -54,28 +55,30 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <UndoProvider>
-      <div className={styles.container}>
-        {/* Mobile Drawer Backdrop */}
-        {isSidebarOpen && (
-          <div
-            className={`${styles.backdrop} ${styles.backdropActive}`}
-            onClick={closeSidebar}
-            aria-hidden="true"
-            data-testid="sidebar-backdrop"
-          />
-        )}
+      <FocusTimerProvider>
+        <div className={styles.container}>
+          {/* Mobile Drawer Backdrop */}
+          {isSidebarOpen && (
+            <div
+              className={`${styles.backdrop} ${styles.backdropActive}`}
+              onClick={closeSidebar}
+              aria-hidden="true"
+              data-testid="sidebar-backdrop"
+            />
+          )}
 
-        {/* Responsive Sidebar */}
-        <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+          {/* Responsive Sidebar */}
+          <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-        {/* Main Content Area */}
-        <div className={styles.mainWrapper}>
-          <Header onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-          <main className={styles.content} id="main-content">
-            {children}
-          </main>
+          {/* Main Content Area */}
+          <div className={styles.mainWrapper}>
+            <Header onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+            <main className={styles.content} id="main-content">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
+      </FocusTimerProvider>
     </UndoProvider>
   );
 }

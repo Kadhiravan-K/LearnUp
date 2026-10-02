@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseYouTubeUrl } from '../../lib/youtube/parser';
+import { parseYouTubeUrl, extractMultipleYouTubeUrls } from '../../lib/youtube/parser';
 
 describe('YouTube URL Parser & Classifier', () => {
   describe('Video URLs', () => {
@@ -136,6 +136,56 @@ describe('YouTube URL Parser & Classifier', () => {
       expect(() => parseYouTubeUrl('https://www.youtube.com/playlist?list=')).toThrowError(
         /Invalid or missing playlist ID/
       );
+    });
+  });
+
+  describe('extractMultipleYouTubeUrls', () => {
+    it('extracts single URL from plain string', () => {
+      const urls = extractMultipleYouTubeUrls('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+      expect(urls).toEqual(['https://www.youtube.com/watch?v=dQw4w9WgXcQ']);
+    });
+
+    it('extracts multiple URLs separated by newlines, commas, and spaces', () => {
+      const input = `
+        https://www.youtube.com/watch?v=vid11111111,
+        https://youtu.be/vid22222222
+        https://www.youtube.com/playlist?list=PL1234567890ABCDEF
+      `;
+      const urls = extractMultipleYouTubeUrls(input);
+      expect(urls).toHaveLength(3);
+      expect(urls[0]).toBe('https://www.youtube.com/watch?v=vid11111111');
+      expect(urls[1]).toBe('https://www.youtube.com/watch?v=vid22222222');
+      expect(urls[2]).toBe('https://www.youtube.com/playlist?list=PL1234567890ABCDEF');
+    });
+
+    it('deduplicates identical URLs', () => {
+      const input = `
+        https://www.youtube.com/watch?v=dQw4w9WgXcQ
+        https://www.youtube.com/watch?v=dQw4w9WgXcQ
+        https://youtu.be/dQw4w9WgXcQ
+      `;
+      const urls = extractMultipleYouTubeUrls(input);
+      // Both youtu.be and watch format for same ID parse to canonical video:dQw4w9WgXcQ
+      expect(urls).toHaveLength(1);
+    });
+
+    it('filters out empty lines and non-URL text', () => {
+      const input = `
+        Some random title
+        https://www.youtube.com/watch?v=vid11111111
+        not-a-valid-url
+        https://www.youtube.com/watch?v=vid22222222
+      `;
+      const urls = extractMultipleYouTubeUrls(input);
+      expect(urls).toEqual([
+        'https://www.youtube.com/watch?v=vid11111111',
+        'https://www.youtube.com/watch?v=vid22222222'
+      ]);
+    });
+
+    it('returns empty array for empty or whitespace-only input', () => {
+      expect(extractMultipleYouTubeUrls('')).toEqual([]);
+      expect(extractMultipleYouTubeUrls('   \n\n  ')).toEqual([]);
     });
   });
 });

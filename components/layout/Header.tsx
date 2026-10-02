@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
 import { useLearnUpTheme } from '@/lib/theme/ThemeProvider';
+import { useFocusTimer } from '@/lib/hooks/useFocusTimer';
 import styles from './Header.module.css';
 
 export interface BreadcrumbItem {
@@ -62,30 +63,29 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
   const supabase = createClient();
   const { isDark, toggleTheme } = useLearnUpTheme();
 
+  const {
+    formattedTime,
+    timerState,
+    startFocus,
+    pauseFocus,
+    selectMode,
+    mode
+  } = useFocusTimer();
+
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [focusTimeDisplay, setFocusTimeDisplay] = useState('25:00');
-  const [focusTimerStatus, setFocusTimerStatus] = useState<'ready' | 'running' | 'paused' | 'completed'>('ready');
 
-  useEffect(() => {
-    const syncFocusState = () => {
-      try {
-        const raw = localStorage.getItem('LearnUp_active_focus_state');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed.formattedTime) setFocusTimeDisplay(parsed.formattedTime);
-          if (parsed.timerState) setFocusTimerStatus(parsed.timerState);
-        }
-      } catch {}
-    };
-
-    syncFocusState();
-    window.addEventListener('LearnUp_focus_sync', syncFocusState);
-    window.addEventListener('storage', syncFocusState);
-    return () => {
-      window.removeEventListener('LearnUp_focus_sync', syncFocusState);
-      window.removeEventListener('storage', syncFocusState);
-    };
-  }, []);
+  const handleFocusPillClick = () => {
+    if (timerState === 'running') {
+      pauseFocus();
+    } else if (timerState === 'paused') {
+      startFocus();
+    } else {
+      if (mode !== 'sprint' && mode !== 'custom') {
+        selectMode('sprint');
+      }
+      startFocus();
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -165,13 +165,17 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
           <button
             type="button"
             className={styles.focusTimerPill}
-            onClick={() => router.push('/focus')}
-            aria-label={`Focus Timer (${focusTimeDisplay})`}
+            onClick={handleFocusPillClick}
+            aria-label={`Focus Timer (${formattedTime})`}
+            data-testid="header-focus-timer-button"
           >
-            <span className={styles.focusDot} style={focusTimerStatus === 'running' ? { animation: 'pulse 1s infinite' } : undefined} />
-            <span>{focusTimeDisplay}</span>
+            <span
+              className={styles.focusDot}
+              style={timerState === 'running' ? { animation: 'pulse 1s infinite' } : undefined}
+            />
+            <span>{formattedTime}</span>
             <span className={styles.startTag}>
-              {focusTimerStatus === 'running' ? '⏸ Running' : focusTimerStatus === 'paused' ? 'Paused' : '▶ Start'}
+              {timerState === 'running' ? '⏸ Running' : timerState === 'paused' ? 'Paused' : '▶ Start'}
             </span>
           </button>
 

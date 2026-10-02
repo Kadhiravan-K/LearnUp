@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CoursePreviewData } from '@/lib/types';
-import { isValidYouTubeUrl } from '@/lib/utils/url';
+import { isValidYouTubeUrl, extractMultipleYouTubeUrls } from '@/lib/utils/url';
 import { createClient } from '@/lib/supabase/browser';
 import { ActionableError } from '@/components/ui/ActionableError/ActionableError';
+import { YouTubeImportLoader } from '@/components/ui/LoadingAnimation/YouTubeImportLoader';
 import styles from './AddCourseModal.module.css';
 
 export interface AddCourseModalProps {
@@ -31,7 +32,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
   const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([]);
   const [courseName, setCourseName] = useState('');
   const [description, setDescription] = useState('');
-  const [skillDomain, setSkillDomain] = useState('General Studies');
+  const [skillDomain, setSkillDomain] = useState('General Learning');
   const [tags, setTags] = useState<string[]>([]);
   const [newTagInput, setNewTagInput] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
@@ -58,18 +59,23 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Derived detected URLs list
+  const detectedUrls = extractMultipleYouTubeUrls(url);
+
   // Fetch live preview from API with active session header
   const handleFetchPreview = async () => {
     setError(null);
     setErrorCode(null);
-    const trimmedUrl = url.trim();
-    if (!trimmedUrl) {
-      setError('Please provide a valid YouTube URL.');
+    const trimmedInput = url.trim();
+
+    if (!trimmedInput) {
+      setError('Please provide one or more valid YouTube URLs.');
       setErrorCode('VALIDATION_ERROR');
       return;
     }
 
-    if (!isValidYouTubeUrl(trimmedUrl)) {
+    const validUrls = extractMultipleYouTubeUrls(trimmedInput);
+    if (validUrls.length === 0 && !isValidYouTubeUrl(trimmedInput)) {
       setError('Please enter a valid YouTube video or playlist URL.');
       setErrorCode('VALIDATION_ERROR');
       return;
@@ -87,10 +93,14 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
         headers['Authorization'] = 'Bearer guest-session';
       }
 
+      const payload = validUrls.length > 1
+        ? { urls: validUrls }
+        : { url: validUrls[0] || trimmedInput };
+
       const res = await fetch('/api/learning-items/preview', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ url: trimmedUrl })
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
@@ -107,7 +117,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
         }
       } else {
         const errJson = await res.json().catch(() => ({}));
-        setError(errJson.error?.message || 'Could not fetch preview for this URL. Please check the link and try again.');
+        setError(errJson.error?.message || 'Could not fetch preview for the provided URL(s). Please check the link and try again.');
         setErrorCode(errJson.error?.code || 'FETCH_ERROR');
       }
     } catch {
@@ -125,6 +135,46 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
     } else {
       setSelectedVideoIds([...selectedVideoIds, videoId]);
     }
+  };
+
+  // Remove individual fetched video from preview
+  const handleRemoveVideo = (videoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!previewData) return;
+
+    const updatedVideos = previewData.videos.filter((v) => v.videoId !== videoId);
+    const updatedSelected = selectedVideoIds.filter((id) => id !== videoId);
+    setSelectedVideoIds(updatedSelected);
+
+    if (updatedVideos.length === 0) {
+      setPreviewData(null);
+      setIsConfirmed(false);
+      setCurrentStep(1);
+      return;
+    }
+
+    const totalSecs = updatedVideos.reduce((acc, v) => acc + (v.isAccessible ? v.durationSeconds : 0), 0);
+    const totalHours = Math.floor(totalSecs / 3600);
+    const totalMins = Math.floor((totalSecs % 3600) / 60);
+
+    setPreviewData({
+      ...previewData,
+      totalVideos: updatedVideos.length,
+      totalDurationSeconds: totalSecs,
+      totalDurationFormatted: `${totalHours > 0 ? `${totalHours}h ` : ''}${totalMins}m total duration`,
+      videos: updatedVideos
+    });
+  };
+
+  // Clear all fetched preview videos and reset state
+  const handleClearAll = () => {
+    setPreviewData(null);
+    setSelectedVideoIds([]);
+    setIsConfirmed(false);
+    setUrl('');
+    setCurrentStep(1);
+    setError(null);
+    setErrorCode(null);
   };
 
   const handleSelectAll = () => {
@@ -208,7 +258,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
 
   if (!isOpen) return null;
 
-  const totalVideosCount = previewData?.videos?.length || 25;
+  const totalVideosCount = previewData?.videos?.length || 0;
   const selectedCount = selectedVideoIds.length;
 
   return (
@@ -236,7 +286,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
         <div className={styles.stepperContainer}>
           <div className={`${styles.stepNode} ${currentStep >= 1 ? styles.stepActive : ''}`}>
             <span className={styles.stepNum}>①</span>
-            <span className={styles.stepText}>Paste URL</span>
+            <span className={styles.stepText}>Paste URL(s)</span>
           </div>
           <div className={`${styles.stepConnector} ${currentStep >= 2 ? styles.connectorActive : ''}`} />
 
@@ -280,10 +330,10 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                 <span className={styles.blueBullet}>●</span>
                 <span className={styles.sectionTitle}>1. CHOOSE CURRICULUM SOURCE</span>
               </div>
-              <span className={styles.monoBadge}>Auto-parsing Enabled</span>
+              <span className={styles.monoBadge}>Multi-URL Batch Enabled</span>
             </div>
             <p className={styles.sectionSubtitle}>
-              Select whether you are importing a standalone lecture or a multi-part playlist.
+              Paste a standalone lecture, a playlist, or multiple YouTube URLs separated by newlines or commas.
             </p>
 
             {/* Source Selection Cards */}
@@ -301,8 +351,8 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                     </svg>
                   </div>
                   <div className={styles.sourceDetails}>
-                    <span className={styles.sourceName}>Add YouTube Video</span>
-                    <span className={styles.sourceDesc}>Single lecture or deep-dive recording</span>
+                    <span className={styles.sourceName}>Add YouTube Video(s)</span>
+                    <span className={styles.sourceDesc}>Single lecture or batch video URLs</span>
                   </div>
                 </div>
               </button>
@@ -330,35 +380,60 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
               </button>
             </div>
 
-            {/* URL Input Bar */}
-            <div className={styles.urlInputRow}>
-              <div className={styles.urlInputBox}>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" strokeWidth={2} className={styles.linkIcon}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-                <input
-                  type="text"
-                  className={styles.urlInput}
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/playlist?list=..."
-                />
+            {/* URL Multi-Input Area */}
+            <div className={styles.urlInputContainer}>
+              <div className={styles.urlInputRow}>
+                <div className={styles.urlInputBox}>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" strokeWidth={2} className={styles.linkIcon}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  <textarea
+                    className={styles.urlTextarea}
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="Paste YouTube video or playlist URL(s)...&#10;e.g. https://www.youtube.com/watch?v=...&#10;or https://www.youtube.com/playlist?list=..."
+                    rows={url.includes('\n') ? 3 : 2}
+                    aria-label="YouTube URL Input"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={styles.fetchBtn}
+                  onClick={handleFetchPreview}
+                  disabled={isPreviewLoading || !url.trim()}
+                >
+                  {isPreviewLoading ? 'Fetching...' : detectedUrls.length > 1 ? `Fetch ${detectedUrls.length} Videos` : 'Fetch Preview'}
+                </button>
               </div>
-              <button
-                type="button"
-                className={styles.fetchBtn}
-                onClick={handleFetchPreview}
-                disabled={isPreviewLoading}
-              >
-                {isPreviewLoading ? 'Fetching...' : 'Fetch Preview'}
-              </button>
+
+              <div className={styles.urlMetaRow}>
+                <span>Paste single URL or multiple links separated by newlines/commas</span>
+                {detectedUrls.length > 1 && (
+                  <span className={styles.urlCountBadge}>
+                    ✓ {detectedUrls.length} YouTube URLs detected
+                  </span>
+                )}
+              </div>
             </div>
 
+            {/* Live Animated Custom Loader */}
+            {isPreviewLoading && (
+              <YouTubeImportLoader
+                message={
+                  detectedUrls.length > 1
+                    ? `Ingesting batch of ${detectedUrls.length} YouTube sources...`
+                    : 'Resolving YouTube syllabus & video records...'
+                }
+              />
+            )}
+
             {/* Confirmed Banner */}
-            {isConfirmed && (
+            {isConfirmed && previewData && (
               <div className={styles.confirmedBanner}>
                 <span className={styles.checkIcon}>✓</span>
-                <span>Valid YouTube playlist confirmed. 25 videos parsed and indexed.</span>
+                <span>
+                  Valid YouTube curriculum confirmed. {previewData.videos.length} video{previewData.videos.length === 1 ? '' : 's'} parsed and indexed.
+                </span>
               </div>
             )}
           </section>
@@ -369,13 +444,15 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionTitleArea}>
                   <span className={styles.blueBullet}>●</span>
-                  <span className={styles.sectionTitle}>2. PLAYLIST IMPORT PREVIEW</span>
+                  <span className={styles.sectionTitle}>2. CURRICULUM SYLLABUS PREVIEW</span>
                 </div>
                 <div className={styles.selectionControls}>
-                  <span className={styles.selectionCount}>{selectedCount} of {totalVideosCount} videos selected</span>
+                  <span className={styles.selectionCount}>{selectedCount} of {totalVideosCount} selected</span>
                   <button type="button" className={styles.controlLink} onClick={handleSelectAll}>Select all</button>
                   <span className={styles.pipe}>|</span>
                   <button type="button" className={styles.controlLink} onClick={handleDeselectAll}>Deselect all</button>
+                  <span className={styles.pipe}>|</span>
+                  <button type="button" className={styles.clearAllLink} onClick={handleClearAll}>Clear all</button>
                 </div>
               </div>
 
@@ -408,7 +485,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                     <span className={styles.colHash}>#</span>
                     <span className={styles.colTitle}>VIDEO TITLE &amp; SYLLABUS NODE</span>
                   </div>
-                  <span className={styles.colDuration}>DURATION</span>
+                  <span className={styles.colDuration}>DURATION / ACTION</span>
                 </div>
 
                 <div className={styles.tableBody}>
@@ -417,7 +494,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                     const formattedIdx = String(idx + 1).padStart(2, '0');
                     return (
                       <div
-                        key={vid.id}
+                        key={vid.id || `vid-${vid.videoId}-${idx}`}
                         className={`${styles.tableRow} ${isSelected ? styles.rowSelected : ''}`}
                         onClick={() => handleToggleVideo(vid.videoId)}
                       >
@@ -428,12 +505,24 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                             checked={isSelected}
                             onChange={() => handleToggleVideo(vid.videoId)}
                             onClick={(e) => e.stopPropagation()}
+                            aria-label={`Select ${vid.title}`}
                           />
                           <span className={styles.rowIdx}>{formattedIdx}</span>
                           <div className={styles.miniThumb} />
-                          <span className={styles.rowVidTitle}>{vid.title}</span>
+                          <span className={styles.rowVidTitle} title={vid.title}>{vid.title}</span>
                         </div>
-                        <span className={styles.rowDuration}>{vid.duration}</span>
+                        <div className={styles.rowRight}>
+                          <span className={styles.rowDuration}>{vid.duration}</span>
+                          <button
+                            type="button"
+                            className={styles.rowRemoveBtn}
+                            onClick={(e) => handleRemoveVideo(vid.videoId, e)}
+                            title="Remove video from preview"
+                            aria-label={`Remove ${vid.title}`}
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -492,6 +581,7 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                     <option value="Backend &amp; Distributed Systems">Backend &amp; Distributed Systems</option>
                     <option value="Data &amp; Machine Learning">Data &amp; Machine Learning</option>
                     <option value="Cloud Native &amp; DevOps">Cloud Native &amp; DevOps</option>
+                    <option value="General Learning">General Learning</option>
                   </select>
                 </div>
 
@@ -550,6 +640,9 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
                     {customThumbnail ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={customThumbnail} alt="Thumbnail preview" className={styles.thumbImg} />
+                    ) : previewData.thumbnailUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={previewData.thumbnailUrl} alt="Thumbnail preview" className={styles.thumbImg} />
                     ) : (
                       <div className={styles.thumbBoxEmpty} />
                     )}
@@ -589,13 +682,18 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
             <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isImporting}>
               Cancel
             </button>
+            {previewData && (
+              <button type="button" className={styles.clearAllLink} onClick={handleClearAll} disabled={isImporting}>
+                Clear Preview
+              </button>
+            )}
             <span className={styles.shortcutText}>Shortcut: Esc</span>
           </div>
 
           <div className={styles.footerRight}>
             <div className={styles.footerStats}>
               <span className={styles.statsBold}>{selectedCount} of {totalVideosCount} Lectures</span>
-              <span className={styles.statsLight}>Estimated ~18h 40m study plan</span>
+              <span className={styles.statsLight}>{previewData?.totalDurationFormatted || 'Ready to import'}</span>
             </div>
 
             <button

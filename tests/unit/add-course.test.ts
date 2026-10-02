@@ -22,6 +22,17 @@ describe('Add Course Modal & Curriculum Ingestion (SF-037)', () => {
       }).toThrow();
     });
 
+    it('validates multi-URL preview payloads', () => {
+      const payload = {
+        urls: [
+          'https://www.youtube.com/watch?v=vid11111111',
+          'https://www.youtube.com/watch?v=vid22222222'
+        ]
+      };
+      const parsed = validateInput(previewCourseSchema, payload);
+      expect(parsed.urls).toHaveLength(2);
+    });
+
     it('validates complete course import payload with custom metadata', () => {
       const payload = {
         url: 'https://www.youtube.com/playlist?list=PLrw6a1aacb36hK07P2v6hJ7u9cR',
@@ -67,6 +78,54 @@ describe('Add Course Modal & Curriculum Ingestion (SF-037)', () => {
       expect(preview.title).toBe('Distributed Systems Course');
       expect(preview.videos).toHaveLength(2);
       expect(preview.videos[0].duration).toBeDefined();
+    });
+
+    it('generates multi-URL batch previews combining multiple items', async () => {
+      const mockRepo = {} as any;
+      const mockYt = {
+        fetchVideoMetadata: async (id: string) => ({
+          id,
+          title: `Video ${id}`,
+          thumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+        }),
+        fetchPlaylistMetadata: async (id: string) => ({
+          id,
+          title: 'Playlist Title',
+          thumbnailUrl: 'https://i.ytimg.com/vi/pl/hqdefault.jpg',
+          items: [
+            { videoId: 'pl-vid1', title: 'PL Vid 1', thumbnailUrl: null, sourcePosition: 0, isAccessible: true },
+            { videoId: 'pl-vid2', title: 'PL Vid 2', thumbnailUrl: null, sourcePosition: 1, isAccessible: true }
+          ]
+        })
+      };
+
+      const service = new ImportService(mockRepo, mockYt);
+      const batchPreview = await service.previewMultipleUrls([
+        'https://www.youtube.com/watch?v=singleVid11',
+        'https://www.youtube.com/playlist?list=PL12345'
+      ]);
+
+      expect(batchPreview.videos).toHaveLength(3);
+      expect(batchPreview.videos[0].title).toBe('Video singleVid11');
+      expect(batchPreview.videos[1].title).toBe('PL Vid 1');
+      expect(batchPreview.videos[2].title).toBe('PL Vid 2');
+    });
+
+    it('allows client-side removing individual preview items and clearing syllabus', () => {
+      let previewVideos = [
+        { id: 'pv-vid1-0', videoId: 'vid1', title: 'Lesson 1', duration: '10:00', sourcePosition: 0 },
+        { id: 'pv-vid2-1', videoId: 'vid2', title: 'Lesson 2', duration: '15:00', sourcePosition: 1 },
+        { id: 'pv-vid3-2', videoId: 'vid3', title: 'Lesson 3', duration: '20:00', sourcePosition: 2 }
+      ];
+
+      // Remove item 2
+      previewVideos = previewVideos.filter((v) => v.id !== 'pv-vid2-1');
+      expect(previewVideos).toHaveLength(2);
+      expect(previewVideos.map((v) => v.videoId)).toEqual(['vid1', 'vid3']);
+
+      // Clear all items
+      previewVideos = [];
+      expect(previewVideos).toHaveLength(0);
     });
   });
 });

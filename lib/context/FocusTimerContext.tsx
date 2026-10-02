@@ -1,40 +1,59 @@
 'use client';
 
-import { useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { FocusMode, SoundscapeProfile, FocusStats, PomodoroCycleConfig } from '../types';
 import { soundscapeEngine } from '../audio/soundscapes';
-import {
-  FocusTimerContext,
-  FocusTimerContextType,
-  DEFAULT_POMODORO_CONFIG,
-  MODE_DURATIONS
-} from '../context/FocusTimerContext';
 
-export { DEFAULT_POMODORO_CONFIG, MODE_DURATIONS };
+export const DEFAULT_POMODORO_CONFIG: PomodoroCycleConfig = {
+  focusDurationMinutes: 25,
+  shortBreakMinutes: 5,
+  longBreakMinutes: 15,
+  intervalsBeforeLongBreak: 4,
+  autoStartBreaks: true,
+  autoStartSprints: false
+};
 
-/**
- * Hook to consume the shared Focus Timer state.
- * If called within a FocusTimerProvider (standard in AppShell), it returns the shared timer state.
- * If called outside of a provider (e.g. isolated test environments), it falls back to a local standalone timer.
- */
-export function useFocusTimer(initialMode?: FocusMode): FocusTimerContextType {
-  const context = useContext(FocusTimerContext);
+export const MODE_DURATIONS: Record<FocusMode, number> = {
+  sprint: 25 * 60,
+  deep_block: 50 * 60,
+  flow_state: 90 * 60,
+  short_break: 5 * 60,
+  long_break: 15 * 60,
+  custom: 25 * 60
+};
 
-  // Standalone fallback hook for tests running outside FocusTimerProvider
-  const standalone = useStandaloneFocusTimer(initialMode || 'sprint');
-
-  if (context) {
-    return context;
-  }
-
-  return standalone;
+export interface FocusTimerContextType {
+  mode: FocusMode;
+  selectMode: (newMode: FocusMode, customSecs?: number) => void;
+  totalSeconds: number;
+  secondsLeft: number;
+  timerState: 'ready' | 'running' | 'paused' | 'completed' | 'abandoned';
+  setTimerState: React.Dispatch<React.SetStateAction<'ready' | 'running' | 'paused' | 'completed' | 'abandoned'>>;
+  intervalNumber: number;
+  soundscape: SoundscapeProfile;
+  setSoundscape: (soundscape: SoundscapeProfile) => void;
+  soundscapeEnabled: boolean;
+  setSoundscapeEnabled: (enabled: boolean) => void;
+  startFocus: () => void;
+  pauseFocus: () => void;
+  resetClock: () => void;
+  endEarly: () => void;
+  startFocusSession: (durationMinutes?: number) => void;
+  formattedTime: string;
+  progressPercentage: number;
+  stats: FocusStats | null;
+  pomodoroConfig: PomodoroCycleConfig;
+  updatePomodoroConfig: (newConfig: Partial<PomodoroCycleConfig>) => void;
+  fetchStats: () => Promise<void>;
 }
 
-function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerContextType {
+export const FocusTimerContext = createContext<FocusTimerContextType | null>(null);
+
+export function FocusTimerProvider({ children }: { children: React.ReactNode }) {
   const [pomodoroConfig, setPomodoroConfig] = useState<PomodoroCycleConfig>(DEFAULT_POMODORO_CONFIG);
-  const [mode, setMode] = useState<FocusMode>(initialMode);
-  const [totalSeconds, setTotalSeconds] = useState<number>(MODE_DURATIONS[initialMode]);
-  const [secondsLeft, setSecondsLeft] = useState<number>(MODE_DURATIONS[initialMode]);
+  const [mode, setMode] = useState<FocusMode>('sprint');
+  const [totalSeconds, setTotalSeconds] = useState<number>(MODE_DURATIONS.sprint);
+  const [secondsLeft, setSecondsLeft] = useState<number>(MODE_DURATIONS.sprint);
   const [timerState, setTimerState] = useState<'ready' | 'running' | 'paused' | 'completed' | 'abandoned'>('ready');
   const [intervalNumber, setIntervalNumber] = useState<number>(1);
   const [soundscape, setSoundscape] = useState<SoundscapeProfile>('binaural_40hz');
@@ -43,25 +62,19 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load custom Pomodoro configuration from localStorage
+  // Load custom Pomodoro configuration from localStorage on client mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem('LearnUp_pomodoro_config');
       if (stored) {
         const parsed: PomodoroCycleConfig = JSON.parse(stored);
         setPomodoroConfig(parsed);
-        if (initialMode === 'sprint') {
-          const secs = parsed.focusDurationMinutes * 60;
-          setTotalSeconds(secs);
-          setSecondsLeft(secs);
-        } else if (initialMode === 'short_break') {
-          const secs = parsed.shortBreakMinutes * 60;
-          setTotalSeconds(secs);
-          setSecondsLeft(secs);
-        }
+        const secs = parsed.focusDurationMinutes * 60;
+        setTotalSeconds(secs);
+        setSecondsLeft(secs);
       }
     } catch {}
-  }, [initialMode]);
+  }, []);
 
   // Load telemetry stats
   const fetchStats = useCallback(async () => {
@@ -136,7 +149,7 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
     [totalSeconds, secondsLeft, mode, intervalNumber, soundscape, fetchStats]
   );
 
-  // Sync to global broadcast state
+  // Sync to global broadcast state / localStorage for external widgets
   useEffect(() => {
     try {
       const m = Math.floor(secondsLeft / 60);
@@ -194,7 +207,7 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
     }
   }, [logSession, mode, intervalNumber, pomodoroConfig]);
 
-  // Tick timer
+  // Single centralized timer tick
   useEffect(() => {
     if (timerState === 'running') {
       timerRef.current = setInterval(() => {
@@ -280,6 +293,35 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
     });
   }, [mode, timerState]);
 
+  // Keyboard Shortcuts listener (Space, R, Esc)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (timerState === 'running') {
+          pauseFocus();
+        } else if (timerState === 'ready' || timerState === 'paused') {
+          startFocus();
+        }
+      } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        resetClock();
+      } else if (e.code === 'Escape') {
+        e.preventDefault();
+        if (timerState === 'running' || timerState === 'paused') {
+          endEarly();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [timerState, startFocus, pauseFocus, resetClock, endEarly]);
+
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
@@ -289,7 +331,7 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
   const progressPercentage =
     totalSeconds > 0 ? Math.round(((totalSeconds - secondsLeft) / totalSeconds) * 100) : 0;
 
-  return {
+  const value: FocusTimerContextType = {
     mode,
     selectMode,
     totalSeconds,
@@ -313,4 +355,18 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
     updatePomodoroConfig,
     fetchStats
   };
+
+  return (
+    <FocusTimerContext.Provider value={value}>
+      {children}
+    </FocusTimerContext.Provider>
+  );
+}
+
+export function useFocusTimerContext() {
+  const context = useContext(FocusTimerContext);
+  if (!context) {
+    throw new Error('useFocusTimerContext must be used within a FocusTimerProvider');
+  }
+  return context;
 }

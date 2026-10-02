@@ -142,3 +142,30 @@ export function parseYouTubeUrl(rawUrl: string): ParsedYouTubeUrl {
     400
   );
 }
+
+/**
+ * Extracts, validates, and deduplicates multiple YouTube URLs from raw text
+ * (separated by newlines, commas, semicolons, or whitespace).
+ */
+export function extractMultipleYouTubeUrls(input: string): string[] {
+  if (!input || typeof input !== 'string') return [];
+  const tokens = input.split(/[\r\n,;\s]+/);
+  const seen = new Set<string>();
+  const results: string[] = [];
+
+  for (const token of tokens) {
+    const trimmed = token.trim();
+    if (!trimmed) continue;
+    try {
+      const parsed = parseYouTubeUrl(trimmed);
+      if (!seen.has(parsed.canonicalUrl)) {
+        seen.add(parsed.canonicalUrl);
+        results.push(parsed.canonicalUrl);
+      }
+    } catch {
+      // Skip invalid non-URL tokens
+    }
+  }
+
+  return results;
+}

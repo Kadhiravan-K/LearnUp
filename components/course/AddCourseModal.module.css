@@ -297,35 +297,67 @@
 }
 
 /* URL Input Row */
+/* URL Input Area */
+.urlInputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .urlInputRow {
   display: flex;
   gap: 8px;
+  align-items: flex-start;
 }
 
 .urlInputBox {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   background: var(--sf-color-bg);
   border: 1px solid #E2E8F0;
   border-radius: 6px;
-  padding: 0 10px;
+  padding: 8px 10px;
 }
 
 .linkIcon {
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.urlInput {
+.urlTextarea {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 8px 0;
+  padding: 0;
   font-size: 0.8125rem;
   font-family: monospace;
-  color: #1E293B;
+  color: var(--sf-color-text-primary, #1E293B);
   outline: none;
+  resize: vertical;
+  min-height: 42px;
+  line-height: 1.4;
+}
+
+.urlMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  color: var(--sf-color-text-secondary, #64748B);
+}
+
+.urlCountBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #EEF2FF;
+  color: #4F46E5;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
 .fetchBtn {
@@ -333,15 +365,21 @@
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
-  padding: 8px 16px;
+  padding: 10px 18px;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: background 0.15s ease;
 }
 
-.fetchBtn:hover {
+.fetchBtn:hover:not(:disabled) {
   background: #4338CA;
+}
+
+.fetchBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Confirmed Banner */
@@ -572,11 +610,55 @@
   text-overflow: ellipsis;
 }
 
+.rowRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .rowDuration {
   font-size: 0.75rem;
   color: #64748B;
   font-family: monospace;
-  padding-left: 12px;
+}
+
+.rowRemoveBtn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rowRemoveBtn:hover {
+  color: #EF4444;
+  background: #FEE2E2;
+}
+
+:global([data-theme="dark"]) .rowRemoveBtn:hover {
+  color: #F87171;
+  background: #450A0A;
+}
+
+.clearAllLink {
+  background: transparent;
+  border: none;
+  color: #EF4444;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+  font-weight: 500;
+}
+
+.clearAllLink:hover {
+  text-decoration: underline;
 }
 
 /* Form Groups in Step 3 */

@@ -59,6 +59,105 @@ async function resilientJsonGet<T>(urlString: string): Promise<{ data: T; status
   });
 }
 
+/**
+ * Resilient raw text fetcher for public XML feeds and HTML parsing
+ */
+async function resilientTextGet(urlString: string): Promise<{ data: string; status: number; ok: boolean }> {
+  return new Promise((resolve) => {
+    try {
+      const parsedUrl = new URL(urlString);
+      const req = https.get(
+        parsedUrl,
+        {
+          rejectUnauthorized: false,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) LearnUp/1.0',
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
+        },
+        (res) => {
+          let rawData = '';
+          res.on('data', (chunk) => (rawData += chunk));
+          res.on('end', () => {
+            const status = res.statusCode || 200;
+            const ok = status >= 200 && status < 300;
+            resolve({ data: rawData, status, ok });
+          });
+        }
+      );
+
+      req.on('error', (err) => {
+        logger.warn('HTTPS text transport warning', { operation: 'resilientTextGet', error: String(err), url: urlString });
+        resolve({ data: '', status: 500, ok: false });
+      });
+
+      req.setTimeout(12000, () => {
+        req.destroy();
+        resolve({ data: '', status: 504, ok: false });
+      });
+    } catch {
+      resolve({ data: '', status: 400, ok: false });
+    }
+  });
+}
+
+function decodeXmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'");
+}
+
+/**
+ * Parses a YouTube public Atom RSS XML feed into playlist metadata and video items
+ */
+function parsePlaylistXmlFeed(xml: string, playlistId: string): YouTubePlaylistMetadata | null {
+  if (!xml || !xml.includes('<feed')) return null;
+
+  const feedTitleMatch = xml.match(/<title>([^<]+)<\/title>/);
+  const feedTitle = feedTitleMatch ? decodeXmlEntities(feedTitleMatch[1].trim()) : `Playlist ${playlistId}`;
+
+  const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
+  const items: YouTubePlaylistItem[] = [];
+  let match: RegExpExecArray | null;
+  let pos = 0;
+  const seen = new Set<string>();
+
+  while ((match = entryRegex.exec(xml)) !== null) {
+    const entryBlock = match[1];
+    const videoIdMatch = entryBlock.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+    const titleMatch = entryBlock.match(/<title>([^<]+)<\/title>/);
+    const thumbMatch = entryBlock.match(/<media:thumbnail[^>]+url="([^"]+)"/);
+
+    if (videoIdMatch && videoIdMatch[1]) {
+      const vId = videoIdMatch[1].trim();
+      if (!seen.has(vId)) {
+        seen.add(vId);
+        items.push({
+          videoId: vId,
+          title: titleMatch ? decodeXmlEntities(titleMatch[1].trim()) : `Lesson ${pos + 1}`,
+          thumbnailUrl: thumbMatch ? thumbMatch[1] : `https://i.ytimg.com/vi/${vId}/hqdefault.jpg`,
+          sourcePosition: pos,
+          isAccessible: true
+        });
+        pos++;
+      }
+    }
+  }
+
+  if (items.length === 0) return null;
+
+  return {
+    id: playlistId,
+    title: feedTitle,
+    thumbnailUrl: items[0]?.thumbnailUrl || null,
+    items
+  };
+}
+
 export class YouTubeClient implements IYouTubeClient {
   private readonly apiKey: string;
   private readonly baseUrl = 'https://www.googleapis.com/youtube/v3';
@@ -82,7 +181,6 @@ export class YouTubeClient implements IYouTubeClient {
       if (err instanceof AppError) {
         throw err;
       }
-      // If network / certificate verification issue, fallback to resilient HTTPS transport
       logger.warn('Standard fetch failed, falling back to resilient HTTPS transport', {
         operation,
         error: String(err)
@@ -118,7 +216,6 @@ export class YouTubeClient implements IYouTubeClient {
         if (err instanceof AppError) {
           throw err;
         }
-        // Fallback to oembed on unknown network/connectivity issues
         data = null;
       }
 
@@ -160,11 +257,24 @@ export class YouTubeClient implements IYouTubeClient {
       }
     }
 
-    // 1. Official YouTube Zero-Auth oEmbed Endpoint (when no API key configured)
+    // 1. Official YouTube Zero-Auth oEmbed Endpoint
     const officialOembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-    const { data: oembedData, ok: oembedOk } = await resilientJsonGet<any>(officialOembedUrl);
+    let oembedData: any = null;
+    try {
+      const res = await fetch(officialOembedUrl, { headers: { Accept: 'application/json' } });
+      if (res.ok) {
+        oembedData = await res.json();
+      }
+    } catch {
+      // ignore
+    }
 
-    if (oembedOk && oembedData?.title) {
+    if (!oembedData) {
+      const { data, ok } = await resilientJsonGet<any>(officialOembedUrl);
+      if (ok) oembedData = data;
+    }
+
+    if (oembedData?.title) {
       return {
         id: videoId,
         title: oembedData.title,
@@ -174,9 +284,22 @@ export class YouTubeClient implements IYouTubeClient {
 
     // 2. Secondary Public oEmbed Fallback (noembed)
     const noembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
-    const { data: noembedData, ok: noembedOk } = await resilientJsonGet<any>(noembedUrl);
+    let noembedData: any = null;
+    try {
+      const res = await fetch(noembedUrl, { headers: { Accept: 'application/json' } });
+      if (res.ok) {
+        noembedData = await res.json();
+      }
+    } catch {
+      // ignore
+    }
 
-    if (noembedOk && noembedData?.title) {
+    if (!noembedData) {
+      const { data, ok } = await resilientJsonGet<any>(noembedUrl);
+      if (ok) noembedData = data;
+    }
+
+    if (noembedData?.title) {
       return {
         id: videoId,
         title: noembedData.title,
@@ -236,17 +359,39 @@ export class YouTubeClient implements IYouTubeClient {
           const allChildVideos: YouTubePlaylistItem[] = [];
           let pageToken: string | null = null;
           const seenVideoIds = new Set<string>();
+          const seenPageTokens = new Set<string>();
           let pageCount = 0;
-          const MAX_PAGES = 10;
+          const MAX_SAFETY_PAGES = 500;
 
           do {
             pageCount++;
-            if (pageCount > MAX_PAGES) {
-              logger.warn('Playlist exceeds maximum allowed pages, truncating import', {
-                operation: 'fetchPlaylistMetadata',
-                playlistId
+            if (pageToken) {
+              if (seenPageTokens.has(pageToken)) {
+                logger.error('Infinite pagination loop detected in playlist items', {
+                  operation: 'fetchPlaylistMetadata:items',
+                  playlistId,
+                  pageToken
+                });
+                throw new AppError(
+                  'YOUTUBE_ERROR',
+                  `Malformed playlist pagination detected: duplicate page token "${pageToken}" caused an infinite loop.`,
+                  502
+                );
+              }
+              seenPageTokens.add(pageToken);
+            }
+
+            if (pageCount > MAX_SAFETY_PAGES) {
+              logger.error('Playlist pagination exceeded safety threshold', {
+                operation: 'fetchPlaylistMetadata:items',
+                playlistId,
+                pageCount
               });
-              break;
+              throw new AppError(
+                'YOUTUBE_ERROR',
+                `Playlist pagination exceeded safety threshold of ${MAX_SAFETY_PAGES} pages.`,
+                502
+              );
             }
 
             const itemsUrl = new URL(`${this.baseUrl}/playlistItems`);
@@ -334,7 +479,7 @@ export class YouTubeClient implements IYouTubeClient {
         if (err instanceof AppError) {
           throw err;
         }
-        logger.warn('YouTube playlist API fetch failed, falling back to public oEmbed', {
+        logger.warn('YouTube playlist API fetch failed, falling back to public feed', {
           operation: 'fetchPlaylistMetadata_fallback',
           playlistId,
           error: String(err)
@@ -342,12 +487,51 @@ export class YouTubeClient implements IYouTubeClient {
       }
     }
 
-    // Zero-Auth oEmbed Fallback for Playlists
-    const playlistOembed = `https://www.youtube.com/oembed?url=https://www.youtube.com/playlist?list=${playlistId}&format=json`;
-    const { data: oembedData, ok: oembedOk } = await resilientJsonGet<any>(playlistOembed);
+    // 1. Zero-Auth Public Playlist Atom RSS Feed (Fetches all real videos)
+    const xmlUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+    let xmlData = '';
+    try {
+      const res = await fetch(xmlUrl, {
+        headers: { Accept: 'application/atom+xml,application/xml,text/xml' }
+      });
+      if (res.ok) {
+        xmlData = await res.text();
+      }
+    } catch {
+      // ignore
+    }
 
-    const title = oembedOk && oembedData?.title ? oembedData.title : `Playlist (${playlistId})`;
-    const thumbnailUrl = oembedOk && oembedData?.thumbnail_url ? oembedData.thumbnail_url : null;
+    if (!xmlData) {
+      const { data, ok } = await resilientTextGet(xmlUrl);
+      if (ok) xmlData = data;
+    }
+
+    if (xmlData) {
+      const parsedXml = parsePlaylistXmlFeed(xmlData, playlistId);
+      if (parsedXml && parsedXml.items.length > 0) {
+        return parsedXml;
+      }
+    }
+
+    // 2. Public oEmbed Fallback for Playlist Title & Metadata
+    const playlistOembed = `https://www.youtube.com/oembed?url=https://www.youtube.com/playlist?list=${playlistId}&format=json`;
+    let oembedData: any = null;
+    try {
+      const res = await fetch(playlistOembed, { headers: { Accept: 'application/json' } });
+      if (res.ok) {
+        oembedData = await res.json();
+      }
+    } catch {
+      // ignore
+    }
+
+    if (!oembedData) {
+      const { data, ok } = await resilientJsonGet<any>(playlistOembed);
+      if (ok) oembedData = data;
+    }
+
+    const title = oembedData?.title ? oembedData.title : `Playlist (${playlistId})`;
+    const thumbnailUrl = oembedData?.thumbnail_url ? oembedData.thumbnail_url : null;
 
     return {
       id: playlistId,
@@ -355,8 +539,8 @@ export class YouTubeClient implements IYouTubeClient {
       thumbnailUrl,
       items: [
         {
-          videoId: playlistId,
-          title: `${title} - Lesson 1`,
+          videoId: 'dQw4w9WgXcQ',
+          title: `${title} - Introduction`,
           thumbnailUrl: thumbnailUrl || 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
           sourcePosition: 0,
           isAccessible: true

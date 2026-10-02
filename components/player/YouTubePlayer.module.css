@@ -544,3 +544,68 @@
 .toggleSwitch input:checked + .toggleSlider:before {
   transform: translateX(16px);
 }
+
+/* Error State Overlay */
+.errorOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(11, 15, 25, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 20;
+  padding: 24px;
+}
+
+.errorCard {
+  max-width: 440px;
+  background: var(--sf-color-bg-elevated, #111827);
+  border: 1px solid var(--sf-color-border, #1e293b);
+  border-radius: var(--sf-radius-lg, 12px);
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+.errorIcon {
+  font-size: 32px;
+}
+
+.errorTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sf-color-text-primary, #ffffff);
+  margin: 0;
+}
+
+.errorText {
+  font-size: 13px;
+  color: var(--sf-color-text-secondary, #94a3b8);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.errorLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 8px 16px;
+  background: var(--sf-color-primary, #6366f1);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--sf-radius-md, 8px);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.errorLink:hover {
+  opacity: 0.9;
+}
