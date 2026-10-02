@@ -19,7 +19,7 @@ export function createClient() {
 
 export function formatAuthError(error: any): string {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return 'Supabase is not configured for this environment.';
+    return 'Supabase configuration is missing. Configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the deployment environment.';
   }
 
   const msg = error?.message || String(error);
@@ -27,7 +27,7 @@ export function formatAuthError(error: any): string {
   if (msg === 'Failed to fetch') {
     const isLocal = process.env.NEXT_PUBLIC_SUPABASE_URL.includes('127.0.0.1') || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('localhost');
     if (isLocal) {
-      return 'Local Supabase is not running. Start Docker Desktop and run npm run db:start.';
+      return 'Local Supabase is not running. Start Docker Desktop, then run: npm run db:start';
     }
     return 'Network error connecting to authentication service.';
   }

@@ -19,7 +19,7 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
   try {
     supabase = createClient();
   } catch (e: any) {
-    initError = e.message;
+    initError = 'Supabase configuration is missing. Configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the deployment environment.';
   }
 
   const [email, setEmail] = useState(initialEmail);
