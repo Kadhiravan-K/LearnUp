@@ -1,6 +1,6 @@
 .container {
   width: 100%;
-  background: var(--sf-color-bg-secondary, #f1f5f9);
+  background: var(--sf-color-bg);
   border: 1px solid var(--sf-color-border, #e2e8f0);
   border-radius: var(--sf-radius-lg, 12px);
   padding: 6px;

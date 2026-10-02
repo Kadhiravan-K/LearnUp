@@ -51,7 +51,7 @@
 
 /* Course Card */
 .courseCard {
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   border: 1px solid var(--sf-color-border, #e2e8f0);
   border-radius: 8px;
   padding: 12px;
@@ -156,7 +156,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   border: none;
   cursor: pointer;
 }

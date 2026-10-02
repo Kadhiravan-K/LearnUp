@@ -77,7 +77,7 @@
   gap: 6px;
   font-size: 0.75rem;
   color: var(--sf-color-text-secondary, #475569);
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid var(--sf-color-border, #e2e8f0);
@@ -113,7 +113,7 @@
 
 .ringBackground {
   fill: none;
-  stroke: var(--sf-color-bg-secondary, #e2e8f0);
+  stroke: var(--sf-color-bg);
 }
 
 .ringProgress {
@@ -184,7 +184,7 @@
 }
 
 .actionBtn:hover {
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   border-color: #6366f1;
   color: #6366f1;
 }

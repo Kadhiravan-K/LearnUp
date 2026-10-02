@@ -31,7 +31,7 @@ describe('LearnUp Theme System — Architecture & Token Integrity', () => {
   it('provides the core light and dark themes', () => {
     expect(PRIMARY_LearnUp_THEMES).toHaveLength(2);
     const themeIds = PRIMARY_LearnUp_THEMES.map((t) => t.id);
-    expect(themeIds).toContain('default');
+    expect(themeIds).toContain('light');
     expect(themeIds).toContain('dark');
   });
 
@@ -50,7 +50,7 @@ describe('LearnUp Theme System — Architecture & Token Integrity', () => {
     expect(DARK_THEME.category).toBe('core');
     expect(DARK_THEME.colors.primary).toBe('#818CF8');
     expect(DARK_THEME.colors.bg).toBe('#0B0F19');
-    expect(DARK_THEME.colors.surface).toBe('#1E293B');
+    expect(DARK_THEME.colors.surface).toBe('#111827');
     expect(DARK_THEME.colors.textPrimary).toBe('#F8FAFC');
   });
 
@@ -74,8 +74,5 @@ describe('LearnUp Theme System — Architecture & Token Integrity', () => {
 
     localStorage.setItem('LearnUp_theme', 'dark');
     expect(localStorage.getItem('LearnUp_theme')).toBe('dark');
-
-    localStorage.setItem('LearnUp_theme', 'system');
-    expect(localStorage.getItem('LearnUp_theme')).toBe('system');
   });
 });

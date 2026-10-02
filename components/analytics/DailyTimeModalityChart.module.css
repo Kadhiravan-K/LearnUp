@@ -100,7 +100,7 @@
   top: -36px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #0F172A;
+  background-color: var(--sf-color-surface);
   color: #ffffff;
   font-size: 10px;
   font-weight: var(--sf-font-medium);

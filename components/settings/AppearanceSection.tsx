@@ -90,27 +90,6 @@ export function AppearanceSection({
             </div>
           </button>
 
-          {/* System Auto */}
-          <button
-            type="button"
-            className={`${styles.themeCard} ${themeMode === 'system' ? styles.themeCardActive : ''}`}
-            onClick={() => handleSelectTheme('system')}
-            aria-pressed={themeMode === 'system'}
-          >
-            <div className={styles.themeCardTop}>
-              <div className={styles.themeTitleRow}>
-                <span>🖥</span>
-                <span className={styles.themeName}>System Auto</span>
-              </div>
-              <span className={themeMode === 'system' ? styles.checkActive : styles.radioInactive}>
-                {themeMode === 'system' ? '✓' : ''}
-              </span>
-            </div>
-            <div className={styles.themePreviewSplit}>
-              <div className={styles.previewSplitLight} />
-              <div className={styles.previewSplitDark} />
-            </div>
-          </button>
         </div>
       </div>
 

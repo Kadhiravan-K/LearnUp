@@ -3,13 +3,9 @@
  * Centralized contracts for light and dark theme tokens, metadata, and provider context.
  */
 
-export type CoreThemeId = 'default' | 'light' | 'dark' | 'system';
+export type CoreThemeId = 'light' | 'dark';
 
-export type ExtendedThemeId =
-  | 'default'
-  | 'light'
-  | 'dark'
-  | 'system';
+export type ExtendedThemeId = 'light' | 'dark';
 
 export interface ThemeColors {
   primary: string;

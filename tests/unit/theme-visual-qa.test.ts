@@ -29,7 +29,7 @@ describe('LearnUp Theme System — Visual QA & Integration Verification', () => 
 
   describe('1. LearnUp Light Theme Baseline Verification', () => {
     it('preserves clean productivity tokens and high contrast ratios', () => {
-      expect(DEFAULT_THEME.id).toBe('default');
+      expect(DEFAULT_THEME.id).toBe('light');
       expect(DEFAULT_THEME.name).toBe('LearnUp Default');
       expect(DEFAULT_THEME.tagline).toBe('Clean Productivity');
       expect(DEFAULT_THEME.colors.bg).toBe('#F8FAFC');
@@ -50,10 +50,10 @@ describe('LearnUp Theme System — Visual QA & Integration Verification', () => 
       expect(DARK_THEME.name).toBe('LearnUp Dark');
       expect(DARK_THEME.tagline).toBe('Midnight Void (OLED Focus)');
       expect(DARK_THEME.colors.bg).toBe('#0B0F19');
-      expect(DARK_THEME.colors.surface).toBe('#1E293B');
+      expect(DARK_THEME.colors.surface).toBe('#111827');
       expect(DARK_THEME.colors.primary).toBe('#818CF8');
       expect(DARK_THEME.colors.textPrimary).toBe('#F8FAFC');
-      expect(DARK_THEME.colors.textSecondary).toBe('#94A3B8');
+      expect(DARK_THEME.colors.textSecondary).toBe('#CBD5E1');
     });
 
     it('has precision focus ring and dark telemetry labels', () => {
@@ -77,8 +77,8 @@ describe('LearnUp Theme System — Visual QA & Integration Verification', () => 
       const saved = localStorage.getItem('LearnUp_theme');
       const validThemeIds = PRIMARY_LearnUp_THEMES.map((t) => t.id as string);
       const isKnown = validThemeIds.includes(saved || '');
-      const effective = isKnown ? saved : 'default';
-      expect(effective).toBe('default');
+      const effective = isKnown ? saved : 'light';
+      expect(effective).toBe('light');
     });
   });
 

@@ -25,7 +25,7 @@
   padding: 0.625rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--sf-color-border, #e2e8f0);
-  background: var(--sf-color-bg-primary, #ffffff);
+  background: var(--sf-color-bg-elevated);
   color: var(--sf-color-text-primary, #0f172a);
   font-size: 0.875rem;
   outline: none;
@@ -77,7 +77,7 @@
 }
 
 .addVideoForm {
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   padding: 0.75rem;
   border-radius: 8px;
   border: 1px dashed var(--sf-color-border, #cbd5e1);
@@ -106,14 +106,14 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.625rem;
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   border: 1px solid var(--sf-color-border, #e2e8f0);
   border-radius: 8px;
   transition: background-color 0.15s ease;
 }
 
 .videoRow:hover {
-  background: var(--sf-color-bg-hover, #f1f5f9);
+  background: var(--sf-color-surface-hover);
 }
 
 .positionBadge {
@@ -130,7 +130,7 @@
   height: 28px;
   border-radius: 4px;
   overflow: hidden;
-  background: #0f172a;
+  background: var(--sf-color-surface);
   flex-shrink: 0;
 }
 
@@ -178,7 +178,7 @@
 }
 
 .iconBtn {
-  background: var(--sf-color-bg-primary, #ffffff);
+  background: var(--sf-color-bg-elevated);
   border: 1px solid var(--sf-color-border, #cbd5e1);
   color: var(--sf-color-text-secondary, #475569);
   width: 26px;

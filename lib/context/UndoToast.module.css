@@ -37,7 +37,7 @@
 }
 
 [data-theme="light"] .toastCard {
-  background-color: #0F172A;
+  background-color: var(--sf-color-surface);
   color: #F8FAFC;
   border-color: rgba(255, 255, 255, 0.1);
 }

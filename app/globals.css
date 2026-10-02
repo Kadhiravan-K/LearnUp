@@ -21,6 +21,7 @@
   --sf-color-border: #E2E8F0;
   --sf-color-border-hover: #CBD5E1;
   --sf-color-border-focus: #6366F1;
+  --sf-color-divider: #CBD5E1;
 
   --sf-color-text-primary: #0F172A;
   --sf-color-text-secondary: #475569;
@@ -136,6 +137,7 @@
   --sf-color-border: #E2E8F0;
   --sf-color-border-hover: #CBD5E1;
   --sf-color-border-focus: #6366F1;
+  --sf-color-divider: #CBD5E1;
   --sf-color-text-primary: #0F172A;
   --sf-color-text-secondary: #475569;
   --sf-color-text-tertiary: #64748B;
@@ -162,7 +164,7 @@
 
   /* ── Backgrounds & Surfaces ── */
   --sf-color-bg: #0B0F19;
-  --sf-color-bg-elevated: #111827;
+  --sf-color-bg-elevated: #151C2B;
   
   --sf-color-surface: #111827;
   --sf-color-surface-hover: #1E293B;
@@ -171,11 +173,12 @@
   --sf-color-border: #1E293B;
   --sf-color-border-hover: #334155;
   --sf-color-border-focus: #818CF8;
+  --sf-color-divider: #334155;
 
   --sf-color-text-primary: #F8FAFC;
-  --sf-color-text-secondary: #94A3B8;
-  --sf-color-text-tertiary: #64748B;
-  --sf-color-text-muted: #475569;
+  --sf-color-text-secondary: #CBD5E1;
+  --sf-color-text-tertiary: #94A3B8;
+  --sf-color-text-muted: #94A3B8;
   --sf-color-text-inverse: #0F172A;
   --sf-color-text-on-primary: #FFFFFF;
 
@@ -198,7 +201,7 @@
   /* ── Cards & Inputs ── */
   --sf-color-card-bg: #111827;
   --sf-color-card-border: #1E293B;
-  --sf-color-input-bg: #1E293B;
+  --sf-color-input-bg: #0F172A;
   --sf-color-input-border: #334155;
 
   /* ── Shadows ── */

@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { learningItemsApi } from '@/lib/api/learning-items';
 import type { LearningItem, LibraryProgress } from '@/lib/types';
 import { ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export type LibraryItemWithProgress = LearningItem & { progress?: LibraryProgress };
 
 export function useLibrary() {
+  const { isLoading: isAuthLoading } = useAuth();
   const [items, setItems] = useState<LibraryItemWithProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,8 +52,10 @@ export function useLibrary() {
   }, []);
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    if (!isAuthLoading) {
+      fetchItems();
+    }
+  }, [isAuthLoading, fetchItems]);
 
-  return { items, isLoading, error, refresh: fetchItems };
+  return { items, isLoading: isLoading || isAuthLoading, error, refresh: fetchItems };
 }

@@ -901,7 +901,7 @@
 
 /* Study Session Focus HUD */
 .studyModalContent {
-  background: #0f172a;
+  background: var(--sf-color-surface);
   color: #ffffff;
   border-radius: 20px;
   width: 100%;

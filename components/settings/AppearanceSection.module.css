@@ -156,7 +156,7 @@
 }
 
 .themePreviewDark {
-  background: #0F172A;
+  background: var(--sf-color-surface);
   border: 1px solid #1E293B;
   border-radius: 6px;
   height: 48px;
@@ -195,7 +195,7 @@
 
 .previewSplitDark {
   flex: 1;
-  background: #0F172A;
+  background: var(--sf-color-surface);
 }
 
 /* Accent Spectrum */

@@ -145,11 +145,7 @@ export interface Bookmark {
   created_at: string;
 }
 
-export type ThemeMode =
-  | 'default'
-  | 'light'
-  | 'dark'
-  | 'system';
+export type ThemeMode = 'light' | 'dark';
 
 
 export type AccentColor = 'indigo' | 'violet' | 'cobalt' | 'orange' | 'cyan' | 'emerald' | 'rose' | 'amber';
@@ -437,7 +433,27 @@ export interface RoadmapTrack {
   nodes: RoadmapNode[];
 }
 
+export interface Workspace {
+  id: string;
+  user_id: string;
+  name: string;
+  icon: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateWorkspaceInput {
+  name: string;
+  icon?: string;
+}
+
+export interface UpdateWorkspaceInput {
+  name?: string;
+  icon?: string;
+}
+
 export * from './calendar';
+
 
 
 

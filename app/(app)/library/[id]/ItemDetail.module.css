@@ -49,7 +49,7 @@
 }
 
 .lectureBadge {
-  background: var(--sf-color-bg-secondary, #f1f5f9);
+  background: var(--sf-color-bg);
   border: 1px solid var(--sf-color-border, #e2e8f0);
   color: var(--sf-color-text-primary, #0f172a);
   padding: 2px 8px;

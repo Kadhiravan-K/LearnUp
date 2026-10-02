@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
 import { BrowseTemplatesModal } from '@/components/templates/BrowseTemplatesModal';
+import { useWorkspaces } from '@/lib/hooks/useWorkspaces';
+import { Workspace } from '@/lib/types';
 import styles from './Sidebar.module.css';
 
 export interface SidebarProps {
@@ -20,7 +22,8 @@ export interface NavItem {
   isActive: (pathname: string) => boolean;
 }
 
-// Approved navigation items for LearnUp
+const AVAILABLE_ICONS = ['📚', '💻', '🎯', '🧪', '🎨', '🚀', '⚡', '📖', '🔬', '🧠'];
+
 export const NAV_ITEMS: NavItem[] = [
   {
     label: 'Dashboard',
@@ -164,16 +167,55 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const supabase = createClient();
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  // Workspace dropdown state
+  // Desktop Collapsible state (hydrated safely after mount to prevent SSR mismatches)
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('learnup_sidebar_collapsed');
+      if (saved !== null) {
+        setIsCollapsed(saved === 'true');
+      }
+    } catch {
+      // Safe fallback
+    }
+  }, []);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('learnup_sidebar_collapsed', String(next));
+      } catch {
+        // Safe fallback
+      }
+      return next;
+    });
+  };
+
+  // Real persistent workspace state
+  const {
+    workspaces,
+    activeWorkspace,
+    selectWorkspace,
+    createWorkspace,
+    updateWorkspace,
+    deleteWorkspace
+  } = useWorkspaces();
+
+  // Workspace UI states
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
-  const [workspaces, setWorkspaces] = useState<string[]>([
-    'Personal Study Vault',
-    'General Studies',
-    'Self-Paced Learning'
-  ]);
-  const [activeWorkspace, setActiveWorkspace] = useState('Personal Study Vault');
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const [newWorkspaceIcon, setNewWorkspaceIcon] = useState('📚');
+
+  const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
+  const [editWorkspaceName, setEditWorkspaceName] = useState('');
+  const [editWorkspaceIcon, setEditWorkspaceIcon] = useState('📚');
+
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
 
@@ -201,113 +243,235 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     router.push('/login');
   };
 
-  const handleSelectWorkspace = (ws: string) => {
-    setActiveWorkspace(ws);
+  const handleSelectWorkspace = (id: string) => {
+    selectWorkspace(id);
     setIsWorkspaceMenuOpen(false);
   };
 
-  const handleCreateWorkspace = (e: React.FormEvent) => {
+  const handleCreateWorkspaceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = newWorkspaceName.trim();
-    if (trimmed && !workspaces.includes(trimmed)) {
-      setWorkspaces((prev) => [...prev, trimmed]);
-      setActiveWorkspace(trimmed);
+    if (!newWorkspaceName.trim()) return;
+    try {
+      await createWorkspace({ name: newWorkspaceName.trim(), icon: newWorkspaceIcon });
       setNewWorkspaceName('');
+      setNewWorkspaceIcon('📚');
       setIsCreatingWorkspace(false);
       setIsWorkspaceMenuOpen(false);
+    } catch (err: any) {
+      alert(err.message || 'Failed to create workspace');
+    }
+  };
+
+  const handleOpenEditModal = (ws: Workspace, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingWorkspace(ws);
+    setEditWorkspaceName(ws.name);
+    setEditWorkspaceIcon(ws.icon || '📚');
+    setIsWorkspaceMenuOpen(false);
+  };
+
+  const handleEditWorkspaceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingWorkspace || !editWorkspaceName.trim()) return;
+    try {
+      await updateWorkspace(editingWorkspace.id, {
+        name: editWorkspaceName.trim(),
+        icon: editWorkspaceIcon
+      });
+      setEditingWorkspace(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update workspace');
+    }
+  };
+
+  const handleOpenDeleteModal = (ws: Workspace, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setWorkspaceToDelete(ws);
+    setDeleteError(null);
+    setIsWorkspaceMenuOpen(false);
+  };
+
+  const handleDeleteWorkspaceSubmit = async () => {
+    if (!workspaceToDelete) return;
+    if (workspaces.length <= 1) {
+      setDeleteError('Cannot delete your only workspace. At least one workspace is required.');
+      return;
+    }
+    try {
+      await deleteWorkspace(workspaceToDelete.id);
+      setWorkspaceToDelete(null);
+      setDeleteError(null);
+    } catch (err: any) {
+      setDeleteError(err.message || 'Failed to delete workspace');
     }
   };
 
   const userName = userEmail ? userEmail.split('@')[0] : 'Learner';
   const userInitial = userName.charAt(0).toUpperCase();
 
+  const activeName = activeWorkspace ? activeWorkspace.name : 'Personal Study Vault';
+  const activeIcon = activeWorkspace ? activeWorkspace.icon : '📚';
+
   return (
     <>
       <aside
         id="app-sidebar"
-        className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}
+        className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''} ${isCollapsed ? styles.sidebarCollapsed : ''}`}
         aria-label="Application Sidebar"
       >
         <div className={styles.topSection}>
-          <div className={styles.header}>
-            <Link href="/dashboard" className={styles.brand} onClick={onClose}>
-              <div className={styles.brandLogo}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span>LearnUp</span>
+          <div className={`${styles.header} ${isCollapsed ? styles.headerCollapsed : ''}`}>
+            {!isCollapsed ? (
+              <Link href="/dashboard" className={styles.brand} onClick={onClose}>
+                <div className={styles.brandLogo}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+                <span>LearnUp</span>
+                <button
+                  type="button"
+                  className={styles.proBadgeBtn}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsUpgradeModalOpen(true);
+                  }}
+                  title="View Pro Subscription"
+                >
+                  Pro ↕
+                </button>
+              </Link>
+            ) : (
+              <Link href="/dashboard" className={styles.brandCollapsed} onClick={onClose} title="LearnUp Pro Workspace">
+                <div className={styles.brandLogo}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+              </Link>
+            )}
+
+            <div className={styles.headerActions}>
               <button
                 type="button"
-                className={styles.proBadgeBtn}
-                onClick={() => setIsUpgradeModalOpen(true)}
-                title="View Pro Subscription"
+                className={styles.collapseToggleBtn}
+                onClick={toggleCollapse}
+                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-expanded={!isCollapsed}
+                title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
-                Pro ↕
+                <svg
+                  width="18"
+                  height="18"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  className={isCollapsed ? styles.rotate180 : ''}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
               </button>
-            </Link>
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="Close navigation"
-            >
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close navigation"
+              >
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          {/* Functional Workspace Selector */}
+          {/* Persistent Workspace Selector & Popover */}
           <div className={styles.workspaceWrapper}>
             <button
               type="button"
-              className={styles.workspaceSelector}
+              className={`${styles.workspaceSelector} ${isCollapsed ? styles.workspaceSelectorCollapsed : ''}`}
               onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
               aria-expanded={isWorkspaceMenuOpen}
               aria-haspopup="true"
-              aria-label="Select study workspace"
+              aria-label={`Select study workspace: ${activeName}`}
+              title={isCollapsed ? `Workspace: ${activeName}` : undefined}
             >
               <div className={styles.workspaceText}>
-                <span className={styles.workspaceDot} />
-                <span className={styles.activeWorkspaceLabel}>{activeWorkspace}</span>
+                <span className={styles.workspaceIcon}>{activeIcon}</span>
+                {!isCollapsed && <span className={styles.activeWorkspaceLabel}>{activeName}</span>}
               </div>
-              <svg
-                width="14"
-                height="14"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className={`${styles.dropdownChevron} ${isWorkspaceMenuOpen ? styles.dropdownChevronOpen : ''}`}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              {!isCollapsed && (
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  className={`${styles.dropdownChevron} ${isWorkspaceMenuOpen ? styles.dropdownChevronOpen : ''}`}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
             </button>
 
             {isWorkspaceMenuOpen && (
-              <div className={styles.workspaceMenu} role="menu">
+              <div className={`${styles.workspaceMenu} ${isCollapsed ? styles.workspaceMenuCollapsed : ''}`} role="menu">
                 <div className={styles.workspaceMenuHeader}>Workspaces</div>
                 {workspaces.map((ws) => (
-                  <button
-                    key={ws}
-                    type="button"
+                  <div
+                    key={ws.id}
                     role="menuitem"
-                    className={`${styles.workspaceMenuItem} ${ws === activeWorkspace ? styles.workspaceMenuItemActive : ''}`}
-                    onClick={() => handleSelectWorkspace(ws)}
+                    tabIndex={0}
+                    className={`${styles.workspaceMenuItem} ${ws.id === activeWorkspace?.id ? styles.workspaceMenuItemActive : ''}`}
+                    onClick={() => handleSelectWorkspace(ws.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleSelectWorkspace(ws.id);
+                      }
+                    }}
                   >
-                    <span className={styles.workspaceItemName}>{ws}</span>
-                    {ws === activeWorkspace && (
-                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
+                    <div className={styles.workspaceItemLeft}>
+                      <span className={styles.workspaceIcon}>{ws.icon}</span>
+                      <span className={styles.workspaceItemName}>{ws.name}</span>
+                    </div>
+
+                    <div className={styles.workspaceItemRight}>
+                      {ws.id === activeWorkspace?.id && (
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.wsActionBtn}
+                        onClick={(e) => handleOpenEditModal(ws, e)}
+                        title="Edit Workspace"
+                        aria-label={`Edit ${ws.name}`}
+                      >
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.wsActionBtn} ${styles.wsActionBtnDelete}`}
+                        onClick={(e) => handleOpenDeleteModal(ws, e)}
+                        title="Delete Workspace"
+                        aria-label={`Delete ${ws.name}`}
+                      >
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 ))}
 
                 <div className={styles.workspaceMenuDivider} />
 
                 {isCreatingWorkspace ? (
-                  <form onSubmit={handleCreateWorkspace} className={styles.createWorkspaceForm}>
+                  <form onSubmit={handleCreateWorkspaceSubmit} className={styles.createWorkspaceForm}>
                     <input
                       type="text"
                       placeholder="Workspace name..."
@@ -316,9 +480,21 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       className={styles.newWorkspaceInput}
                       autoFocus
                     />
+                    <div className={styles.iconPickerGrid}>
+                      {AVAILABLE_ICONS.map((ic) => (
+                        <button
+                          key={ic}
+                          type="button"
+                          className={`${styles.iconOption} ${newWorkspaceIcon === ic ? styles.iconOptionActive : ''}`}
+                          onClick={() => setNewWorkspaceIcon(ic)}
+                        >
+                          {ic}
+                        </button>
+                      ))}
+                    </div>
                     <div className={styles.createWorkspaceActions}>
                       <button type="submit" className={styles.saveWorkspaceBtn} disabled={!newWorkspaceName.trim()}>
-                        Add
+                        Create
                       </button>
                       <button
                         type="button"
@@ -367,44 +543,56 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               {NAV_ITEMS.map((item) => {
                 const active = item.isActive(pathname);
                 const Icon = item.icon;
+                const tooltipText = item.badge ? `${item.label} (${item.badge})` : item.label;
                 return (
                   <li key={item.label} className={styles.navItem}>
                     <Link
                       href={item.href}
-                      className={`${styles.navLink} ${active ? styles.navLinkActive : ''}`}
+                      className={`${styles.navLink} ${active ? styles.navLinkActive : ''} ${isCollapsed ? styles.navLinkCollapsed : ''}`}
                       aria-current={active ? 'page' : undefined}
+                      aria-label={tooltipText}
+                      title={isCollapsed ? tooltipText : undefined}
                       onClick={onClose}
                     >
                       <div className={styles.navLinkLeft}>
                         <Icon className={styles.navIcon} />
-                        <span>{item.label}</span>
+                        {!isCollapsed && <span>{item.label}</span>}
                       </div>
-                      {item.badge && <span className={styles.badge}>{item.badge}</span>}
+                      {!isCollapsed && item.badge && <span className={styles.badge}>{item.badge}</span>}
                     </Link>
                   </li>
                 );
               })}
 
-              <li style={{ padding: '8px 12px 4px 12px', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sf-text-muted)' }}>
-                Learning Hubs
-              </li>
+              {!isCollapsed ? (
+                <li className={styles.sectionHeader}>
+                  Learning Hubs
+                </li>
+              ) : (
+                <li className={styles.sectionHeaderCollapsed} aria-hidden="true">
+                  <div className={styles.sectionHeaderDivider} />
+                </li>
+              )}
 
               {ADDITIONAL_NAV_ITEMS.map((item) => {
                 const active = item.isActive(pathname);
                 const Icon = item.icon;
+                const tooltipText = item.badge ? `${item.label} (${item.badge})` : item.label;
                 return (
                   <li key={item.label} className={styles.navItem}>
                     <Link
                       href={item.href}
-                      className={`${styles.navLink} ${active ? styles.navLinkActive : ''}`}
+                      className={`${styles.navLink} ${active ? styles.navLinkActive : ''} ${isCollapsed ? styles.navLinkCollapsed : ''}`}
                       aria-current={active ? 'page' : undefined}
+                      aria-label={tooltipText}
+                      title={isCollapsed ? tooltipText : undefined}
                       onClick={onClose}
                     >
                       <div className={styles.navLinkLeft}>
                         <Icon className={styles.navIcon} />
-                        <span>{item.label}</span>
+                        {!isCollapsed && <span>{item.label}</span>}
                       </div>
-                      {item.badge && <span className={styles.badge}>{item.badge}</span>}
+                      {!isCollapsed && item.badge && <span className={styles.badge}>{item.badge}</span>}
                     </Link>
                   </li>
                 );
@@ -414,44 +602,134 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         <div className={styles.bottomSection}>
-          {/* Browse Templates Community Blueprint Button */}
           <button
             type="button"
-            className={styles.browseTemplatesBtn}
+            className={`${styles.browseTemplatesBtn} ${isCollapsed ? styles.browseTemplatesBtnCollapsed : ''}`}
             onClick={() => setIsTemplatesModalOpen(true)}
             aria-label="Browse Community Blueprints & Templates"
+            title={isCollapsed ? "Browse Templates (Explore)" : undefined}
           >
             <div className={styles.browseTemplatesLeft}>
               <span>🧭</span>
-              <span>Browse Templates</span>
+              {!isCollapsed && <span>Browse Templates</span>}
             </div>
-            <span className={styles.browseTemplatesBadge}>Explore</span>
+            {!isCollapsed && <span className={styles.browseTemplatesBadge}>Explore</span>}
           </button>
 
-          <div className={styles.userCard}>
-            <div className={styles.userLeft}>
+          <div className={`${styles.userCard} ${isCollapsed ? styles.userCardCollapsed : ''}`}>
+            <div className={styles.userLeft} title={isCollapsed ? `${userName} (${userEmail || ''})` : undefined}>
               <div className={styles.userAvatar}>
                 {userInitial}
               </div>
-              <div className={styles.userInfo}>
-                <span className={styles.userName}>{userName}</span>
-                <span className={styles.userEmail}>{userEmail || 'learner@LearnUp.local'}</span>
-              </div>
+              {!isCollapsed && (
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>{userName}</span>
+                  <span className={styles.userEmail}>{userEmail || 'learner@LearnUp.local'}</span>
+                </div>
+              )}
             </div>
-            <button
-              type="button"
-              className={styles.signOutBtn}
-              onClick={handleSignOut}
-              aria-label="Sign out"
-              title="Sign out"
-            >
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+            {!isCollapsed && (
+              <button
+                type="button"
+                className={styles.signOutBtn}
+                onClick={handleSignOut}
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </aside>
+
+      {/* Edit Workspace Modal */}
+      {editingWorkspace && (
+        <div className={styles.modalBackdrop} onClick={() => setEditingWorkspace(null)}>
+          <div className={styles.workspaceModal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.workspaceModalTitle}>Edit Workspace</h3>
+            <form onSubmit={handleEditWorkspaceSubmit} className={styles.createWorkspaceForm}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--sf-color-text-secondary)' }}>
+                Workspace Name
+              </label>
+              <input
+                type="text"
+                placeholder="Workspace name..."
+                value={editWorkspaceName}
+                onChange={(e) => setEditWorkspaceName(e.target.value)}
+                className={styles.newWorkspaceInput}
+                autoFocus
+              />
+              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--sf-color-text-secondary)', marginTop: '4px' }}>
+                Icon
+              </label>
+              <div className={styles.iconPickerGrid}>
+                {AVAILABLE_ICONS.map((ic) => (
+                  <button
+                    key={ic}
+                    type="button"
+                    className={`${styles.iconOption} ${editWorkspaceIcon === ic ? styles.iconOptionActive : ''}`}
+                    onClick={() => setEditWorkspaceIcon(ic)}
+                  >
+                    {ic}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.createWorkspaceActions} style={{ marginTop: '12px' }}>
+                <button type="submit" className={styles.saveWorkspaceBtn} disabled={!editWorkspaceName.trim()}>
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelWorkspaceBtn}
+                  onClick={() => setEditingWorkspace(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Workspace Confirmation Modal */}
+      {workspaceToDelete && (
+        <div className={styles.modalBackdrop} onClick={() => setWorkspaceToDelete(null)}>
+          <div className={styles.workspaceModal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.workspaceModalTitle}>Delete Workspace</h3>
+            <p style={{ fontSize: '13px', color: 'var(--sf-color-text-secondary)', margin: 0 }}>
+              Are you sure you want to delete <strong>{workspaceToDelete.name}</strong>?
+            </p>
+
+            {deleteError && (
+              <div className={styles.errorBanner}>
+                {deleteError}
+              </div>
+            )}
+
+            <div className={styles.createWorkspaceActions} style={{ marginTop: '8px' }}>
+              <button
+                type="button"
+                className={styles.saveWorkspaceBtn}
+                style={{ backgroundColor: 'var(--sf-color-error)' }}
+                onClick={handleDeleteWorkspaceSubmit}
+                disabled={workspaces.length <= 1}
+              >
+                Delete Workspace
+              </button>
+              <button
+                type="button"
+                className={styles.cancelWorkspaceBtn}
+                onClick={() => setWorkspaceToDelete(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Community Templates Browser Modal */}
       <BrowseTemplatesModal

@@ -188,7 +188,7 @@
 }
 
 [data-theme='dark'] .modalContent {
-  background: #0f172a;
+  background: var(--sf-color-surface);
   border-color: #1e293b;
   color: #f8fafc;
 }
@@ -199,7 +199,7 @@
   justify-content: space-between;
   padding: 18px 24px;
   border-bottom: 1px solid var(--sf-color-border, #e2e8f0);
-  background: var(--sf-color-surface-elevated, #f8fafc);
+  background: var(--sf-color-bg-elevated);
 }
 
 [data-theme='dark'] .modalHeader {
@@ -267,7 +267,7 @@
 }
 
 .sectionCard {
-  background: var(--sf-color-surface-elevated, #f8fafc);
+  background: var(--sf-color-bg-elevated);
   border: 1px solid var(--sf-color-border, #e2e8f0);
   border-radius: 10px;
   padding: 14px 16px;
@@ -323,7 +323,7 @@
 }
 
 .stepCard {
-  background: #ffffff;
+  background: var(--sf-color-bg-elevated);
   border: 1px solid var(--sf-color-border, #e2e8f0);
   border-radius: 10px;
   padding: 14px 16px;
@@ -331,8 +331,8 @@
 }
 
 [data-theme='dark'] .stepCard {
-  background: #111827;
-  border-color: #1e293b;
+  background: var(--sf-color-bg-elevated);
+  border-color: var(--sf-color-border);
 }
 
 .stepHeader {
@@ -374,7 +374,7 @@
 }
 
 .snippetWrap {
-  background: #0f172a;
+  background: var(--sf-color-surface);
   border-radius: 8px;
   padding: 10px 12px;
   display: flex;
@@ -454,12 +454,12 @@
   gap: 12px;
   padding: 14px 24px;
   border-top: 1px solid var(--sf-color-border, #e2e8f0);
-  background: var(--sf-color-surface-elevated, #f8fafc);
+  background: var(--sf-color-bg-elevated);
 }
 
 [data-theme='dark'] .modalFooter {
-  background: #111827;
-  border-color: #1e293b;
+  background: var(--sf-color-bg-elevated);
+  border-color: var(--sf-color-border);
 }
 
 .footerDismissBtn {

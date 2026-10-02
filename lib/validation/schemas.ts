@@ -24,7 +24,7 @@ export const updateUserSettingsSchema = z.object({
   display_name: z.string().trim().min(1).max(100).optional().nullable(),
   avatar_url: z.string().url().max(1024).optional().nullable(),
   student_id: z.string().trim().max(30).optional(),
-  theme_mode: z.enum(['light', 'dark', 'system']).optional(),
+  theme_mode: z.enum(['light', 'dark']).optional(),
   accent_color: z.enum(['indigo', 'violet', 'cobalt', 'orange']).optional(),
   default_sprint_duration: z.number().int().min(1).max(180).optional(),
   short_break_duration: z.number().int().min(1).max(60).optional(),
@@ -79,6 +79,16 @@ export const recordFocusSessionSchema = z.object({
   interval_number: z.number().int().min(1).default(1),
   soundscape: z.enum(['binaural_40hz', 'rain', 'pink_noise', 'lofi', 'silent']).default('binaural_40hz'),
   completed: z.boolean().default(true)
+});
+
+export const createWorkspaceSchema = z.object({
+  name: z.string().trim().min(1, 'Workspace name is required').max(50, 'Workspace name must be 50 characters or less'),
+  icon: z.string().trim().min(1, 'Workspace icon is required').max(20, 'Icon identifier is too long').optional().default('📚')
+});
+
+export const updateWorkspaceSchema = z.object({
+  name: z.string().trim().min(1, 'Workspace name is required').max(50, 'Workspace name must be 50 characters or less').optional(),
+  icon: z.string().trim().min(1, 'Workspace icon is required').max(20, 'Icon identifier is too long').optional()
 });
 
 export function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): T {

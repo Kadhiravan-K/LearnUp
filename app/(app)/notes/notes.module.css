@@ -245,7 +245,7 @@
 }
 
 .codeBlock {
-  background: #0f172a;
+  background: var(--sf-color-surface);
   color: #f8fafc;
   padding: 14px 16px;
   border-radius: 8px;

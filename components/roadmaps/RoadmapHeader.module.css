@@ -98,7 +98,7 @@
 }
 
 .secondaryBtn:hover {
-  background: var(--sf-color-bg-secondary, #f8fafc);
+  background: var(--sf-color-bg);
   border-color: #cbd5e1;
 }
 

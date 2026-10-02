@@ -11,6 +11,7 @@
   flex-direction: column;
   min-width: 0; /* Prevents flex children from overflowing */
   overflow-x: hidden;
+  background-color: var(--sf-color-bg);
 }
 
 .content {
@@ -19,6 +20,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--sf-space-6) var(--sf-space-4);
+  background-color: var(--sf-color-bg);
 }
 
 .backdrop {

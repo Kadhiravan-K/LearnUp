@@ -29,7 +29,7 @@ export function ThemeSwitcher({ onThemeSelect, className = '' }: ThemeSwitcherPr
     <div className={`${styles.container} ${className}`} role="radiogroup" aria-label="LearnUp Visual Themes">
       <div className={styles.themeGrid}>
         {availableThemes.map((t: ThemeDefinition) => {
-          const isActive = theme === t.id || (t.id === 'light' && (theme === 'light' || theme === 'default'));
+          const isActive = theme === t.id;
 
           return (
             <button
