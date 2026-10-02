@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -103,7 +103,7 @@
   font-size: 0.8125rem;
   text-align: center;
   outline: none;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
 }
 
 /* Steppers Grid */
@@ -159,7 +159,7 @@
   height: 28px;
   border-radius: 4px;
   border: 1px solid #D1D5DB;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -187,7 +187,7 @@
 
 .select:focus {
   border-color: var(--sf-color-primary);
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
 }
 
 /* Toggles */
@@ -246,7 +246,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   transition: transform 0.2s ease;
 }
 

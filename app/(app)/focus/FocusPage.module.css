@@ -9,7 +9,7 @@
 
 /* State Inspector Bar */
 .stateInspectorBar {
-  background: #F8FAFC;
+  background: var(--sf-color-bg);
   border: 1px solid #E2E8F0;
   border-radius: var(--sf-radius-md, 8px);
   padding: 8px 12px;
@@ -45,7 +45,7 @@
 }
 
 .stateBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #CBD5E1;
   border-radius: 4px;
   padding: 3px 8px;
@@ -57,7 +57,7 @@
 }
 
 .stateBtn:hover {
-  background: #F1F5F9;
+  background: var(--sf-color-surface-hover);
 }
 
 .stateBtnActive {
@@ -74,7 +74,7 @@
 }
 
 .modeBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #CBD5E1;
   border-radius: 4px;
   padding: 4px 10px;
@@ -86,7 +86,7 @@
 }
 
 .modeBtn:hover {
-  background: #F1F5F9;
+  background: var(--sf-color-surface-hover);
 }
 
 .modeBtnActive {
@@ -96,7 +96,7 @@
 }
 
 .customSettingsBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #CBD5E1;
   border-radius: 4px;
   padding: 4px 8px;
@@ -108,7 +108,7 @@
 }
 
 .customSettingsBtn:hover {
-  background: #F1F5F9;
+  background: var(--sf-color-surface-hover);
   color: #1E293B;
 }
 
@@ -148,7 +148,7 @@
 .shortcutKey {
   font-size: 0.6875rem;
   font-family: monospace;
-  background: #F1F5F9;
+  background: var(--sf-color-surface-hover);
   border: 1px solid #CBD5E1;
   padding: 1px 5px;
   border-radius: 3px;
@@ -157,7 +157,7 @@
 
 /* Focus Sanctuary Hero Section */
 .heroCard {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E2E8F0;
   border-radius: var(--sf-radius-lg, 12px);
   padding: 40px 24px 32px;
@@ -274,7 +274,7 @@
 }
 
 .secondaryControlBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   color: #334155;
   border: 1px solid #CBD5E1;
   border-radius: 9999px;
@@ -289,7 +289,7 @@
 }
 
 .secondaryControlBtn:hover {
-  background: #F8FAFC;
+  background: var(--sf-color-bg);
   border-color: #94A3B8;
 }
 
@@ -298,7 +298,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #F8FAFC;
+  background: var(--sf-color-bg);
   border: 1px solid #E2E8F0;
   border-radius: 9999px;
   padding: 6px 16px;
@@ -316,7 +316,7 @@
 }
 
 .soundscapeSelect {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #CBD5E1;
   border-radius: 6px;
   padding: 4px 10px;
@@ -348,7 +348,7 @@
 }
 
 .telemetryCard {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E2E8F0;
   border-radius: var(--sf-radius-lg, 12px);
   padding: 20px;
@@ -391,7 +391,7 @@
 }
 
 .badgeMuted {
-  background: #F1F5F9;
+  background: var(--sf-color-surface-hover);
   color: #475569;
 }
 
@@ -529,7 +529,7 @@
 
 /* Keyboard Shortcuts HUD Footer */
 .hudFooter {
-  background: #F8FAFC;
+  background: var(--sf-color-bg);
   border: 1px solid #E2E8F0;
   border-radius: var(--sf-radius-md, 8px);
   padding: 10px 16px;
@@ -556,7 +556,7 @@
 }
 
 .hudKey {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #CBD5E1;
   border-radius: 4px;
   padding: 2px 6px;

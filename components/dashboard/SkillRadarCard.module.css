@@ -36,9 +36,9 @@
 }
 
 .scoreBadge {
-  background-color: #EEF2FF;
-  color: #4F46E5;
-  border: var(--sf-border-width) solid #C7D2FE;
+  background-color: var(--sf-color-primary-light);
+  color: var(--sf-color-primary);
+  border: var(--sf-border-width) solid var(--sf-color-primary-border);
   padding: 4px 8px;
   border-radius: var(--sf-radius-md);
   font-size: 11px;

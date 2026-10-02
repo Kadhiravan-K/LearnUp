@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -93,7 +93,7 @@
 
 .exportBtn {
   flex: 1;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #D1D5DB;
   border-radius: var(--sf-radius-sm);
   padding: 8px 12px;
@@ -109,7 +109,7 @@
 }
 
 .exportBtnAlt {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #D1D5DB;
   border-radius: var(--sf-radius-sm);
   padding: 8px 10px;
@@ -190,7 +190,7 @@
 }
 
 .clearCacheBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-sm);
   padding: 6px 12px;
@@ -206,7 +206,7 @@
 }
 
 .resetHistoryBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #FCA5A5;
   border-radius: var(--sf-radius-sm);
   padding: 6px 12px;

@@ -137,29 +137,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #FEF3C7;
-  border: var(--sf-border-width) solid #FDE68A;
+  background-color: var(--sf-color-warning-bg);
+  border: var(--sf-border-width) solid var(--sf-color-warning-border);
   padding: 4px 10px;
   border-radius: var(--sf-radius-full);
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-semibold);
-  color: #D97706;
+  color: var(--sf-color-warning-text);
   cursor: pointer;
   transition: background-color var(--sf-duration-fast);
 }
 
 .focusTimerPill:hover {
-  background-color: #FDE68A;
-}
-
-:global([data-theme="dark"]) .focusTimerPill {
-  background-color: #451A03;
-  border-color: #78350F;
-  color: #FDE68A;
-}
-
-:global([data-theme="dark"]) .focusTimerPill:hover {
-  background-color: #78350F;
+  background-color: var(--sf-color-warning-border);
 }
 
 .focusDot {

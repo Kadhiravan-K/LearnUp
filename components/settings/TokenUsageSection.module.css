@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -87,7 +87,7 @@
 
 /* Budget Card */
 .budgetCard {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-md);
   padding: 16px;
@@ -223,7 +223,7 @@
 .mcpEndpoint {
   font-size: 0.75rem;
   font-family: monospace;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E9D5FF;
   padding: 4px 8px;
   border-radius: 4px;

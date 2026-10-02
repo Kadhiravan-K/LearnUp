@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -70,7 +70,7 @@
 }
 
 .themeCard {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1.5px solid #E5E7EB;
   border-radius: var(--sf-radius-md);
   padding: 12px;
@@ -131,7 +131,7 @@
 
 /* Previews */
 .themePreviewLight {
-  background: #F8FAFC;
+  background: var(--sf-color-bg);
   border: 1px solid #E2E8F0;
   border-radius: 6px;
   height: 48px;
@@ -190,7 +190,7 @@
 
 .previewSplitLight {
   flex: 1;
-  background: #F8FAFC;
+  background: var(--sf-color-bg);
 }
 
 .previewSplitDark {

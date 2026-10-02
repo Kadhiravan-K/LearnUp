@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -96,7 +96,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   transition: transform 0.2s ease;
 }
 

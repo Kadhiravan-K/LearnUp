@@ -38,9 +38,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #EEF2FF;
-  border: 1px solid #C7D2FE;
-  color: var(--sf-color-primary, #4F46E5);
+  background-color: var(--sf-color-primary-light);
+  border: 1px solid var(--sf-color-primary-border);
+  color: var(--sf-color-primary);
   font-size: 11px;
   font-weight: 700;
   padding: 3px 10px;
@@ -52,12 +52,12 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #10B981;
+  background-color: var(--sf-color-success);
 }
 
 .subheading {
   font-size: var(--sf-text-sm, 0.875rem);
-  color: var(--sf-color-text-secondary, #64748B);
+  color: var(--sf-color-text-secondary);
   margin: 0;
 }
 
@@ -72,20 +72,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #4F46E5;
-  color: #FFFFFF;
-  border: 1px solid #4338CA;
+  background-color: var(--sf-color-primary);
+  color: var(--sf-color-text-on-primary, #FFFFFF);
+  border: 1px solid var(--sf-color-primary-hover);
   padding: 8px 16px;
   border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
+  box-shadow: var(--sf-shadow-sm);
   transition: all 0.15s ease;
 }
 
 .primaryActionBtn:hover {
-  background-color: #4338CA;
+  background-color: var(--sf-color-primary-hover);
   transform: translateY(-1px);
 }
 

@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -116,7 +116,7 @@
 
 .select:focus, .input:focus {
   border-color: var(--sf-color-primary);
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
 }
 
 /* Key Card */
@@ -173,7 +173,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-sm);
   padding: 8px 12px;
@@ -252,7 +252,7 @@
 }
 
 .testBtn, .replaceBtn {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #D1D5DB;
   border-radius: var(--sf-radius-sm);
   padding: 6px 10px;

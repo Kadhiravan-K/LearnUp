@@ -32,10 +32,10 @@
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
   background-color: var(--sf-color-warning-bg);
-  color: #D97706;
+  color: var(--sf-color-warning-text);
   padding: 2px 8px;
   border-radius: var(--sf-radius-full);
-  border: var(--sf-border-width) solid #FDE68A;
+  border: var(--sf-border-width) solid var(--sf-color-warning-border);
 }
 
 .daysRow {
@@ -65,15 +65,15 @@
 }
 
 .dayCompleted {
-  background-color: #DCFCE7;
-  color: #16A34A;
-  border: var(--sf-border-width) solid #86EFAC;
+  background-color: var(--sf-color-success-bg);
+  color: var(--sf-color-success-text);
+  border: var(--sf-border-width) solid var(--sf-color-success-border);
 }
 
 .dayActive {
-  background-color: #FEF3C7;
-  color: #D97706;
-  border: var(--sf-border-width) solid #FCD34D;
+  background-color: var(--sf-color-warning-bg);
+  color: var(--sf-color-warning-text);
+  border: var(--sf-border-width) solid var(--sf-color-warning-border);
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 

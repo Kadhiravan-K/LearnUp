@@ -1,5 +1,5 @@
 .section {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border: 1px solid #E5E7EB;
   border-radius: var(--sf-radius-lg);
   padding: 24px;
@@ -197,7 +197,7 @@
 
 .input:focus {
   border-color: var(--sf-color-primary);
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
 }
 
 .validCheck {

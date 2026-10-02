@@ -38,11 +38,11 @@
 .blockBadge {
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
-  background-color: #FEF3C7;
-  color: #D97706;
+  background-color: var(--sf-color-warning-bg);
+  color: var(--sf-color-warning-text);
   padding: 2px 8px;
   border-radius: var(--sf-radius-full);
-  border: var(--sf-border-width) solid #FDE68A;
+  border: var(--sf-border-width) solid var(--sf-color-warning-border);
 }
 
 .timerContainer {
@@ -76,7 +76,7 @@
 
 .dialProgress {
   fill: none;
-  stroke: #F59E0B;
+  stroke: var(--sf-color-warning);
   stroke-width: 8;
   stroke-linecap: round;
   stroke-dasharray: 440;
@@ -103,7 +103,7 @@
 .timerMode {
   font-size: 10px;
   font-weight: var(--sf-font-bold);
-  color: #D97706;
+  color: var(--sf-color-warning-text);
   letter-spacing: 0.08em;
   margin-top: 4px;
 }

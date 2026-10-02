@@ -35,7 +35,7 @@
 }
 
 [data-theme="light"] .modalContainer {
-  background: #FFFFFF;
+  background: var(--sf-color-surface);
   border-color: #E2E8F0;
 }
 
