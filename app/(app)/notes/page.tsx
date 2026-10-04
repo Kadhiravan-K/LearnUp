@@ -23,61 +23,9 @@ interface BookmarkRecord {
   label: string;
 }
 
-const INITIAL_NOTES: NoteRecord[] = [
-  {
-    id: 'note-1',
-    course: 'Embedded Systems & C Internals',
-    lecture: 'Lecture 7: Low-Level Memory & Hardware Interfaces',
-    timestamp: '23:41',
-    title: 'Pointer Arithmetic & Array Stride Alignment',
-    content: 'Pointer increments stride strictly by sizeof(type). When indexing memory-mapped I/O buffers for UART transmission, pointer casting (uint32_t*)base + offset requires 4-byte architectural alignment or triggers a processor hard fault on ARM Cortex-M.',
-    type: 'code',
-    snippet: `// UART Driver Register Stride Example
-volatile uint32_t *UART_DR = (uint32_t*)(UART0_BASE + 0x000);
-while (*UART_FR & (1 << 5)); // Wait until TXFF flag is cleared
-*UART_DR = data_byte;        // Hardware serial pipe dispatch`,
-    tags: ['#embedded-c', '#uart-registers', '#arm-cortex'],
-    date: 'Oct 24, 2024'
-  },
-  {
-    id: 'note-2',
-    course: 'Distributed Systems & Consensus',
-    lecture: 'Lecture 4: Primary-Backup & Split-Brain',
-    timestamp: '18:42',
-    title: 'AppendEntries RPC & Leader Commit Calculation',
-    content: 'Leader commit calculation rule: An entry is committed once successfully acknowledged by a majority (N/2 + 1) of nodes. Must originate from leader current term to avoid split-brain log overwriting.',
-    type: 'code',
-    snippet: `// Raft AppendEntries quorum calculation
-if leaderCommit > rf.matchIndex[peer] {
-    rf.commitIndex = min(leaderCommit, lastNewEntryIndex)
-    rf.applyCond.Broadcast() // Notify state machine worker
-}`,
-    tags: ['#raft', '#quorum', '#split-brain'],
-    date: 'Yesterday, 08:30 AM'
-  },
-  {
-    id: 'note-3',
-    course: 'Database Internals: LSM Trees & WAL',
-    lecture: 'Lecture 5: SSTable Compaction & Bloom Filters',
-    timestamp: '31:10',
-    title: 'Write Amplification in Size-Tiered vs Leveled Compaction',
-    content: 'Leveled compaction bounds read amplification to at most 1 SSTable per level using Bloom filters (calibrated to 10 bits/key for ~1% false positive probability). This significantly reduces random disk seeks at the expense of continuous write amplification during down-level merge passes.',
-    type: 'lemma',
-    snippet: 'Lemma 5.2: Bits per key m/n = -(ln p) / (ln 2)^2 ≈ 1.44 * log2(1/p)',
-    tags: ['#lsm-tree', '#storage-engines', '#compaction'],
-    date: '3 days ago'
-  }
-];
+const INITIAL_NOTES: NoteRecord[] = [];
 
-const INITIAL_BOOKMARKS: BookmarkRecord[] = [
-  { id: 'bm-1', course: 'Embedded Systems', timestamp: '23:41', label: 'Pointer arithmetic & UART TX ring' },
-  { id: 'bm-2', course: 'Embedded Systems', timestamp: '31:10', label: 'Memory allocation & heap fragment' },
-  { id: 'bm-3', course: 'Embedded Systems', timestamp: '42:05', label: 'Struct packing #pragma pack(1)' },
-  { id: 'bm-4', course: 'Distributed Systems', timestamp: '08:15', label: 'Split-Brain Prevention & Asymmetry' },
-  { id: 'bm-5', course: 'Distributed Systems', timestamp: '18:42', label: 'Raft AppendEntries RPC & Term Index' },
-  { id: 'bm-6', course: 'Distributed Systems', timestamp: '32:10', label: 'Log Compaction & Snapshotting Flow' },
-  { id: 'bm-7', course: 'Distributed Systems', timestamp: '49:22', label: 'Multi-Node Election Quorum Voting' }
-];
+const INITIAL_BOOKMARKS: BookmarkRecord[] = [];
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<NoteRecord[]>(INITIAL_NOTES);
@@ -230,7 +178,14 @@ export default function NotesPage() {
       <div className={styles.mainGrid}>
         {/* Left Column: Notes List */}
         <div className={styles.notesList}>
-          {filteredNotes.map((note) => (
+          {filteredNotes.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 20px", background: "var(--sf-bg-surface)", borderRadius: "12px", border: "1px solid var(--sf-border-subtle)" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "12px" }}>📝</div>
+              <h3 style={{ margin: "0 0 6px 0", color: "var(--sf-text-primary)" }}>No notes found</h3>
+              <p style={{ margin: 0, color: "var(--sf-text-secondary)", fontSize: "0.875rem" }}>You have not created any notes yet.</p>
+            </div>
+          ) : (
+            filteredNotes.map((note) => (
             <article key={note.id} className={styles.noteCard}>
               <div className={styles.noteHeader}>
                 <div className={styles.courseTag}>
@@ -292,7 +247,8 @@ export default function NotesPage() {
                 </div>
               </div>
             </article>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Right Column: Bookmarks Ledger & Quick Note */}

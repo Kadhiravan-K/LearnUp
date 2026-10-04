@@ -6,21 +6,9 @@ describe('Learning Roadmaps & Progression (SF-Roadmaps)', () => {
   const mockClient = {} as any;
   const testUserId = 'test_user_roadmaps_1';
 
-  it('provides initial baseline tracks matching design specification', async () => {
+  it('provides zero tracks initially', async () => {
     const tracks = await repository.listTracks(mockClient, testUserId);
-    expect(tracks.length).toBeGreaterThanOrEqual(3);
-
-    const embeddedTrack = tracks.find((t) => t.id === 'track_embedded_systems');
-    expect(embeddedTrack).toBeDefined();
-    expect(embeddedTrack?.title).toBe('Embedded Systems Engineer');
-    expect(embeddedTrack?.mastery_percentage).toBe(67);
-    expect(embeddedTrack?.nodes).toHaveLength(9);
-
-    const activeNode = embeddedTrack?.nodes.find((n) => n.id === 'node_05');
-    expect(activeNode).toBeDefined();
-    expect(activeNode?.title).toBe('Real-Time Operating Systems (RTOS)');
-    expect(activeNode?.status).toBe('active');
-    expect(activeNode?.attached_course?.title).toBe('FreeRTOS Architecture & Real-Time Kernel');
+    expect(tracks.length).toBe(0);
   });
 
   it('allows creating a custom roadmap track', async () => {

@@ -6,9 +6,9 @@ import type { RoadmapTrack, RoadmapNode } from '@/lib/types';
 import { INITIAL_ROADMAP_TRACKS } from '@/lib/db/roadmaps-repository';
 
 export function useRoadmaps() {
-  const [tracks, setTracks] = useState<RoadmapTrack[]>(INITIAL_ROADMAP_TRACKS);
-  const [activeTrackId, setActiveTrackId] = useState<string>('track_embedded_systems');
-  const [selectedNodeId, setSelectedNodeId] = useState<string>('node_05');
+  const [tracks, setTracks] = useState<RoadmapTrack[]>([]);
+  const [activeTrackId, setActiveTrackId] = useState<string>('');
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,14 +39,14 @@ export function useRoadmaps() {
       const res = await fetch('/api/roadmaps', { headers });
       if (res.ok) {
         const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.data && Array.isArray(json.data)) {
           setTracks(json.data);
           return;
         }
       }
-      setTracks(INITIAL_ROADMAP_TRACKS);
+      setTracks([]);
     } catch {
-      setTracks(INITIAL_ROADMAP_TRACKS);
+      setTracks([]);
     } finally {
       setIsLoading(false);
     }

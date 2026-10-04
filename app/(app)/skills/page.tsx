@@ -23,163 +23,9 @@ interface SkillNode {
   feed: Array<{ text: string; time: string; type: string }>;
 }
 
-const INITIAL_SKILLS: SkillNode[] = [
-  {
-    id: 'embedded-systems',
-    name: 'Embedded Systems',
-    category: 'core',
-    badgeLabel: 'Core Node',
-    mastery: 78,
-    description: 'ARM Cortex-M bare-metal, memory mapped I/O, RTOS multithreading & low-level firmware.',
-    coursesCount: 6,
-    completedCoursesCount: 4,
-    loggedHours: 48.5,
-    tags: ['#embedded', '#c-lang', '#bare-metal', '#hardware'],
-    level: 4,
-    verifiedLemmas: 18,
-    repetitionCards: 42,
-    repetitionDue: 3,
-    nextMilestone: 'RTOS Kernel Architect (85%)',
-    relatedCourses: [
-      { title: 'MIT 6.004 Embedded Systems & C Internals', progress: 68, status: 'In Progress', hours: '22h' },
-      { title: 'Bare-Metal ARM Cortex-M Firmware', progress: 100, status: 'Completed' },
-      { title: 'FreeRTOS Architecture & Kernels', progress: 100, status: 'Completed' },
-      { title: 'High-Speed I/O: SPI, I2C & UART Register Drive', progress: 100, status: 'Completed' }
-    ],
-    feed: [
-      { text: 'Completed Lecture 7 (Pointer Arithmetic)', time: 'Yesterday • MIT 6.004 • +50m logged', type: 'lecture' },
-      { text: 'Passed FreeRTOS Mutex Priority Inversion Quiz', time: '3 days ago • Score: 100% (12/12)', type: 'quiz' },
-      { text: 'Logged deep focus session on UART ring buffers', time: 'Last week • 2h 15m focus session', type: 'focus' }
-    ]
-  },
-  {
-    id: 'iot-edge',
-    name: 'IoT & Edge Computing',
-    category: 'emerging',
-    badgeLabel: 'Emerging',
-    mastery: 54,
-    description: 'ESP32 mesh networks, telemetry dispatch via MQTT, low-power telemetry sleep cycles.',
-    coursesCount: 4,
-    completedCoursesCount: 2,
-    loggedHours: 26.0,
-    tags: ['#iot', '#esp32', '#mqtt', '#networking'],
-    level: 3,
-    verifiedLemmas: 12,
-    repetitionCards: 28,
-    repetitionDue: 5,
-    nextMilestone: 'LoRaWAN Edge Gateway (65%)',
-    relatedCourses: [
-      { title: 'ESP32 MicroPython & FreeRTOS Telemetry', progress: 50, status: 'In Progress', hours: '12h' },
-      { title: 'MQTT Broker Architecture on Embedded Linux', progress: 100, status: 'Completed' }
-    ],
-    feed: [
-      { text: 'Deployed MQTT broker testbench on NodeMCU', time: '2 days ago • +1h 30m', type: 'project' }
-    ]
-  },
-  {
-    id: 'systems-programming',
-    name: 'Systems Programming (C / Rust)',
-    category: 'core',
-    badgeLabel: 'Core Node',
-    mastery: 82,
-    description: 'Ownership semantics, zero-cost abstractions, memory alignment, OS syscalls.',
-    coursesCount: 5,
-    completedCoursesCount: 3,
-    loggedHours: 38.0,
-    tags: ['#advanced', '#systems', '#memory-safety'],
-    level: 5,
-    verifiedLemmas: 24,
-    repetitionCards: 55,
-    repetitionDue: 0,
-    nextMilestone: 'Zero-Copy IO Ring Dispatcher (90%)',
-    relatedCourses: [
-      { title: 'Rust Systems & Concurrency Patterns', progress: 85, status: 'In Progress', hours: '18h' },
-      { title: 'Advanced Linux System Call Architecture', progress: 100, status: 'Completed' }
-    ],
-    feed: [
-      { text: 'Verified atomic memory ordering lemmas in Rust', time: '4 days ago', type: 'lemma' }
-    ]
-  },
-  {
-    id: 'electronics-circuit',
-    name: 'Electronics & Circuit Design',
-    category: 'review',
-    badgeLabel: 'Needs Review',
-    mastery: 41,
-    description: 'Analog signal conditioning, op-amp filters, KiCad 2-layer PCB trace layout.',
-    coursesCount: 3,
-    completedCoursesCount: 1,
-    loggedHours: 14.5,
-    tags: ['#hardware', '#schematics', '#pcb'],
-    level: 2,
-    verifiedLemmas: 8,
-    repetitionCards: 19,
-    repetitionDue: 6,
-    nextMilestone: 'Active Filter Topologies (50%)',
-    relatedCourses: [
-      { title: 'Op-Amp Filter Theory & Implementation', progress: 30, status: 'In Progress' }
-    ],
-    feed: [
-      { text: '6 Spaced Repetition Cards Overdue', time: 'Action recommended', type: 'alert' }
-    ]
-  },
-  {
-    id: 'python-automation',
-    name: 'Python & Automation',
-    category: 'mastered',
-    badgeLabel: 'Mastered Node',
-    mastery: 92,
-    description: 'Data pipelines, hardware test harness scripting, asyncio worker queues.',
-    coursesCount: 7,
-    completedCoursesCount: 6,
-    loggedHours: 32.0,
-    tags: ['#python', '#automation', '#scripting'],
-    level: 5,
-    verifiedLemmas: 30,
-    repetitionCards: 60,
-    repetitionDue: 1,
-    nextMilestone: 'High-Throughput PyO3 Native Extensions (95%)',
-    relatedCourses: [
-      { title: 'AsyncIO Internal Event Loop & Protocol Engines', progress: 100, status: 'Completed' }
-    ],
-    feed: [
-      { text: 'Mastery verified across test automation harness', time: 'Last week', type: 'verified' }
-    ]
-  },
-  {
-    id: 'data-analysis-dsp',
-    name: 'Data Analysis & DSP',
-    category: 'focus',
-    badgeLabel: 'Needs Focus',
-    mastery: 35,
-    description: 'Fast Fourier Transforms (FFT), FIR/IIR filtering on sensor stream buffers.',
-    coursesCount: 3,
-    completedCoursesCount: 1,
-    loggedHours: 11.5,
-    tags: ['#dsp', '#math', '#data-analysis'],
-    level: 2,
-    verifiedLemmas: 6,
-    repetitionCards: 15,
-    repetitionDue: 4,
-    nextMilestone: 'Cooley-Tukey Radix-2 FFT Optimization (45%)',
-    relatedCourses: [
-      { title: 'Discrete-Time Signal Processing Foundation', progress: 25, status: 'In Progress' }
-    ],
-    feed: [
-      { text: 'Assigned focus track for upcoming module', time: '1 day ago', type: 'focus' }
-    ]
-  }
-];
+const INITIAL_SKILLS: SkillNode[] = [];
 
-const INITIAL_TAGS = [
-  { name: '#beginner', count: 12, color: '#10b981' },
-  { name: '#advanced', count: 18, color: '#3b82f6' },
-  { name: '#embedded', count: 14, color: '#6366f1' },
-  { name: '#python', count: 9, color: '#f59e0b' },
-  { name: '#iot', count: 7, color: '#10b981' },
-  { name: '#interview', count: 5, color: '#8b5cf6' },
-  { name: '#project', count: 11, color: '#ec4899' }
-];
+const INITIAL_TAGS: any[] = [];
 
 export default function SkillsPage() {
   const [skills, setSkills] = useState<SkillNode[]>(INITIAL_SKILLS);
@@ -422,7 +268,14 @@ export default function SkillsPage() {
           </div>
 
           <div className={styles.cardsList}>
-            {filteredSkills.map((skill) => {
+            {filteredSkills.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", background: "var(--sf-bg-surface)", borderRadius: "12px", border: "1px solid var(--sf-border-subtle)" }}>
+                <div style={{ fontSize: "2.5rem", marginBottom: "12px" }}>🎯</div>
+                <h3 style={{ margin: "0 0 6px 0", color: "var(--sf-text-primary)" }}>No skills found</h3>
+                <p style={{ margin: 0, color: "var(--sf-text-secondary)", fontSize: "0.875rem" }}>You have not added any skills yet.</p>
+              </div>
+            ) : (
+              filteredSkills.map((skill) => {
               const isSelected = skill.id === selectedSkillId;
               let badgeClass = styles.badgeCore;
               if (skill.category === 'emerging') badgeClass = styles.badgeEmerging;
@@ -483,12 +336,14 @@ export default function SkillsPage() {
                   </div>
                 </div>
               );
-            })}
+            })
+          )}
           </div>
         </div>
 
         {/* Right Column: Node Inspector */}
-        <aside className={styles.inspectorPane} aria-label="Skill Node Inspector">
+        {selectedSkill ? (
+          <aside className={styles.inspectorPane} aria-label="Skill Node Inspector">
           <div className={styles.inspectorHeader}>
             <div className={styles.inspectorTitleRow}>
               <div className={styles.skillIconBox}>⚙️</div>
@@ -591,7 +446,14 @@ export default function SkillsPage() {
               ))}
             </div>
           </div>
-        </aside>
+          </aside>
+        ) : (
+          <aside className={styles.inspectorPane}>
+            <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--sf-text-muted)" }}>
+              Select or create a skill node to view telemetry.
+            </div>
+          </aside>
+        )}
       </div>
 
       {/* Bottom Section: Taxonomy & Labels Manager */}

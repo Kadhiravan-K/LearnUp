@@ -21,93 +21,7 @@ interface RewardCredential {
   prerequisite?: string;
 }
 
-const INITIAL_REWARDS: RewardCredential[] = [
-  {
-    id: 'c99-architect',
-    title: 'C99 Systems Architect',
-    course: 'MIT 6.004: EMBEDDED SYSTEMS & C INTERNALS',
-    status: 'unlocked',
-    xp: 500,
-    icon: '💻',
-    description: 'Mastery of memory alignment, low-level pointer arithmetic, inline assembly, and bare-metal register mapping.',
-    completionRate: 100,
-    modulesCompleted: 8,
-    totalModules: 8,
-    credentialId: '#SF-C99-8821',
-    unlockedDate: 'Oct 14, 2024 • 16:42 UTC',
-    sha256Hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-  },
-  {
-    id: 'consensus-master',
-    title: 'Consensus Master',
-    course: 'DISTRIBUTED SYSTEMS & RAFT CONSENSUS',
-    status: 'unlocked',
-    xp: 450,
-    icon: '🛡️',
-    description: 'Engineered partitioned state machine replication, leader election edge-cases, log compaction, and snapshotting.',
-    completionRate: 100,
-    modulesCompleted: 6,
-    totalModules: 6,
-    credentialId: '#SF-RAFT-4402',
-    unlockedDate: 'Sep 28, 2024 • 11:15 UTC',
-    sha256Hash: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'
-  },
-  {
-    id: 'rtos-hacker',
-    title: 'RTOS Kernel Hacker',
-    course: 'FREERTOS ARCHITECTURE & REAL-TIME KERNELS',
-    status: 'unlocked',
-    xp: 600,
-    icon: '⚡',
-    description: 'Context-switching heuristics, priority inversion mitigation with mutex semaphores, and preemptive task scheduling.',
-    completionRate: 100,
-    modulesCompleted: 12,
-    totalModules: 12,
-    credentialId: '#SF-RTOS-1904',
-    unlockedDate: 'Aug 19, 2024 • 19:30 UTC',
-    sha256Hash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'
-  },
-  {
-    id: 'bare-metal-arm',
-    title: 'Bare-Metal ARM Pioneer',
-    course: 'ARM CORTEX-M BARE-METAL DEEP DIVE',
-    status: 'in-progress',
-    xp: 550,
-    icon: '⚙️',
-    description: 'Linker scripts from scratch, vector tables, interrupt prioritization, and UART DMA ring buffers.',
-    completionRate: 85,
-    modulesCompleted: 11,
-    totalModules: 13,
-    estimatedCompletion: 'Nov 05, 2024',
-    prerequisite: 'Locked until 100% module mastery'
-  },
-  {
-    id: 'k8s-specialist',
-    title: 'Cloud Native & K8s Specialist',
-    course: 'ADVANCED KUBERNETES ARCHITECTURE & OPERATORS',
-    status: 'locked',
-    xp: 700,
-    icon: '🔒',
-    description: 'Custom Resource Definitions (CRDs), reconciler loops, eBPF telemetry hooks, and high-availability control planes.',
-    completionRate: 15,
-    modulesCompleted: 2,
-    totalModules: 14,
-    prerequisite: 'Pass Adaptive Diagnostic ≥ 90%'
-  },
-  {
-    id: 'llvm-compiler',
-    title: 'Compiler Engineer & LLVM',
-    course: 'COMPILERS & LLVM IR ARCHITECTURE',
-    status: 'locked',
-    xp: 800,
-    icon: '🔒',
-    description: 'Static single assignment (SSA), dead-code elimination passes, register allocation, and target machine code generation.',
-    completionRate: 0,
-    modulesCompleted: 0,
-    totalModules: 10,
-    prerequisite: 'Complete Systems Track Phase 3'
-  }
-];
+const INITIAL_REWARDS: RewardCredential[] = [];
 
 export default function RewardsPage() {
   const [rewards] = useState<RewardCredential[]>(INITIAL_REWARDS);
@@ -443,3 +357,4 @@ export default function RewardsPage() {
     </div>
   );
 }
+

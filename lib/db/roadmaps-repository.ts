@@ -303,14 +303,7 @@ export class RoadmapsRepository {
       return userTracks;
     }
 
-    // Clone baseline seed tracks for the user
-    const cloned = INITIAL_ROADMAP_TRACKS.map((t) => ({
-      ...t,
-      user_id: userId,
-      nodes: t.nodes.map((n) => ({ ...n }))
-    }));
-    this.customTracks.set(userId, cloned);
-    return cloned;
+    return [];
   }
 
   async getTrackById(client: SupabaseClient, userId: string, trackId: string): Promise<RoadmapTrack | null> {
