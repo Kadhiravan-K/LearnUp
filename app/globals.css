@@ -150,7 +150,7 @@
    Light Theme Explicit Override (matches :root)
    ========================================================================== */
 
-[data-theme="light"] {
+[data-theme="light"], html[data-theme="light"] {
   --sf-color-bg: #F8FAFC;
   --sf-color-bg-elevated: #FFFFFF;
   --sf-color-surface: #FFFFFF;
@@ -198,7 +198,7 @@
    Dark Theme Overrides
    ========================================================================== */
 
-[data-theme="dark"] {
+[data-theme="dark"], html[data-theme="dark"] {
   /* ── Brand ── */
   --sf-color-primary: #818CF8;
   --sf-color-primary-hover: #6366F1;
