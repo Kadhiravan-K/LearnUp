@@ -136,6 +136,25 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     expect(lightAgainStyles.varTextPrimary.toLowerCase()).toBe('#0f172a');
     expect(lightAgainStyles.varPrimary.toLowerCase()).toBe('#6366f1');
 
+    await page.goto('/settings?tab=customization', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: 'Apply Workspace Theme' }).waitFor();
+    await page.getByRole('button', { name: 'Apply Workspace Theme' }).click();
+    await page.getByRole('button', { name: 'Switch to Dark Theme' }).click();
+    await page.waitForTimeout(500);
+
+    const darkAfterWorkspaceTheme = await page.evaluate(() => {
+      const docStyle = getComputedStyle(document.documentElement);
+      return {
+        theme: document.documentElement.dataset.theme,
+        primary: docStyle.getPropertyValue('--sf-color-primary').trim(),
+        inlinePrimary: document.documentElement.style.getPropertyValue('--sf-color-primary'),
+      };
+    });
+
+    expect(darkAfterWorkspaceTheme.theme).toBe('dark');
+    expect(darkAfterWorkspaceTheme.primary.toLowerCase()).toBe('#818cf8');
+    expect(darkAfterWorkspaceTheme.inlinePrimary).toBe('');
+
     await context.close();
   });
 });

@@ -1,360 +1,216 @@
 'use client';
 
-import React, { useState } from 'react';
-import styles from './rewards.module.css';
+import React, { useState, useEffect } from 'react';
 
-interface RewardCredential {
+interface Reward {
   id: string;
   title: string;
-  course: string;
-  status: 'unlocked' | 'in-progress' | 'locked';
-  xp: number;
-  icon: string;
   description: string;
-  completionRate: number;
-  modulesCompleted: number;
-  totalModules: number;
-  credentialId?: string;
-  unlockedDate?: string;
-  sha256Hash?: string;
-  estimatedCompletion?: string;
-  prerequisite?: string;
+  status: 'unlocked' | 'in_progress' | 'locked';
+  xp_earned: number;
+  xp_required?: number;
+  completion_percentage: number;
+  unlocked_at?: string;
+  icon?: string;
 }
 
-const INITIAL_REWARDS: RewardCredential[] = [];
-
 export default function RewardsPage() {
-  const [rewards] = useState<RewardCredential[]>(INITIAL_REWARDS);
-  const [filterTab, setFilterTab] = useState<'all' | 'unlocked' | 'in-progress' | 'locked'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCert, setSelectedCert] = useState<RewardCredential | null>(null);
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'unlocked' | 'in_progress' | 'locked'>('all');
 
-  const filteredRewards = rewards.filter((item) => {
-    const matchesQuery =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.course.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
+  useEffect(() => {
+    loadRewards();
+  }, []);
 
-    if (!matchesQuery) return false;
+  const loadRewards = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // TODO: Connect to /api/rewards
+      // const response = await fetch('/api/rewards');
+      // if (!response.ok) throw new Error('Failed to load rewards');
+      // const data = await response.json();
+      // setRewards(data.rewards || []);
+      setRewards([]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load rewards');
+      console.error('Error loading rewards:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    if (filterTab === 'unlocked') return item.status === 'unlocked';
-    if (filterTab === 'in-progress') return item.status === 'in-progress';
-    if (filterTab === 'locked') return item.status === 'locked';
-    return true;
+  const filteredRewards = rewards.filter((reward) => {
+    if (filterStatus === 'all') return true;
+    return reward.status === filterStatus;
   });
 
-  const unlockedCount = rewards.filter((r) => r.status === 'unlocked').length;
-  const inProgressCount = rewards.filter((r) => r.status === 'in-progress').length;
-  const lockedCount = rewards.filter((r) => r.status === 'locked').length;
+  const getStatusColor = (status: Reward['status']) => {
+    switch (status) {
+      case 'unlocked':
+        return { bg: '#dbeafe', text: '#0369a1', label: 'Unlocked' };
+      case 'in_progress':
+        return { bg: '#fef3c7', text: '#92400e', label: 'In Progress' };
+      case 'locked':
+        return { bg: '#f3f4f6', text: '#6b7280', label: 'Locked' };
+    }
+  };
 
   return (
-    <div className={styles.container}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
       {/* Header */}
-      <header className={styles.header}>
-        <div>
-          <div className={styles.protocolTag}>
-            <span className={styles.protocolDot} />
-            <span>CREDENTIAL REGISTRY • PROTOCOL V4.2</span>
-          </div>
-          <h1 className={styles.title}>Course Rewards & Badges</h1>
-          <p className={styles.subtitle}>
-            Verifiable credentials, mastery badges, and course completion rewards linked to your curriculum milestones.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
-          <button
-            type="button"
-            className={styles.btnSecondary}
-            onClick={() => setSelectedCert(rewards[0])}
-            title="Inspect credential certificate"
-          >
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            Inspect Credential
-          </button>
-          <button
-            type="button"
-            className={styles.btnPrimary}
-            onClick={() => {
-              if (navigator.clipboard) {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Verifiable transcript link copied to clipboard!');
-              }
-            }}
-          >
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-            Share Transcript
-          </button>
-        </div>
-      </header>
-
-      {/* Stats Row */}
-      <section className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statLabel}>Total Rewards</span>
-            <span className={styles.statIcon}>🎖️</span>
-          </div>
-          <div className={styles.statMainVal}>12 <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--sf-text-secondary)' }}>Badges Issued</span></div>
-          <div className={styles.statSubtext}>
-            <span style={{ color: '#10b981', fontWeight: 600 }}>6 Unlocked</span>
-            <span>•</span>
-            <span>4 Active</span>
-            <span>•</span>
-            <span>2 Locked</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statLabel}>Verified Certificates</span>
-            <span className={styles.statIcon}>📜</span>
-          </div>
-          <div className={styles.statMainVal}>4 <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--sf-text-secondary)' }}>SHA-256 Signed</span></div>
-          <div className={styles.statSubtext}>
-            <span style={{ color: '#10b981' }}>Latest: #SF-C99-8821</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statLabel}>Cognitive XP</span>
-            <span className={styles.statIcon}>⚡</span>
-          </div>
-          <div className={styles.statMainVal}>4,850 <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--sf-text-secondary)' }}>PTS</span></div>
-          <div className={styles.statSubtext}>
-            <span>Level 14 Systems Architect</span>
-            <span style={{ color: '#10b981', fontWeight: 600 }}>+350 this week</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statLabel}>Next Milestone</span>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f59e0b' }}>92%</span>
-          </div>
-          <div style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--sf-text-primary)' }}>Bare-Metal Pioneer</div>
-          <div className={styles.statSubtext}>2 modules remaining</div>
-          <div className={styles.progressBar}>
-            <div className={styles.progressBarFill} style={{ width: '92%' }} />
-          </div>
-        </div>
-      </section>
-
-      {/* Filter and Search Bar */}
-      <div className={styles.controlsBar}>
-        <div className={styles.filterTabs}>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${filterTab === 'all' ? styles.filterTabActive : ''}`}
-            onClick={() => setFilterTab('all')}
-          >
-            All Rewards <span className={styles.filterTabBadge}>{rewards.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${filterTab === 'unlocked' ? styles.filterTabActive : ''}`}
-            onClick={() => setFilterTab('unlocked')}
-          >
-            Unlocked <span className={styles.filterTabBadge}>{unlockedCount}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${filterTab === 'in-progress' ? styles.filterTabActive : ''}`}
-            onClick={() => setFilterTab('in-progress')}
-          >
-            In Progress <span className={styles.filterTabBadge}>{inProgressCount}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.filterTab} ${filterTab === 'locked' ? styles.filterTabActive : ''}`}
-            onClick={() => setFilterTab('locked')}
-          >
-            Locked <span className={styles.filterTabBadge}>{lockedCount}</span>
-          </button>
-        </div>
-
-        <div className={styles.searchWrapper}>
-          <svg className={styles.searchIcon} width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search rewards, courses, or certificates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>Achievements & Rewards</h1>
+        <p style={{ color: '#666', fontSize: '14px' }}>
+          Earn achievements by completing learning milestones and challenges.
+        </p>
       </div>
 
-      {/* Rewards Cards Grid */}
-      {filteredRewards.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--sf-bg-surface)', borderRadius: '12px', border: '1px solid var(--sf-border-subtle)' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🎖️</div>
-          <h3 style={{ margin: '0 0 6px 0', color: 'var(--sf-text-primary)' }}>No rewards found in this category</h3>
-          <p style={{ margin: '0 0 16px 0', color: 'var(--sf-text-secondary)', fontSize: '0.875rem' }}>
-            Complete courses and pass adaptive diagnostic assessments to unlock verified badges and cryptographically signed certificates.
-          </p>
-          <button type="button" className={styles.btnPrimary} onClick={() => { setFilterTab('all'); setSearchQuery(''); }}>
-            Reset Filters
-          </button>
+      {/* Error Alert */}
+      {error && (
+        <div
+          style={{
+            padding: '12px 16px',
+            marginBottom: '16px',
+            backgroundColor: '#fee2e2',
+            border: '1px solid #fecaca',
+            borderRadius: '6px',
+            color: '#991b1b'
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* Filter Tabs */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        {(['all', 'unlocked', 'in_progress', 'locked'] as const).map((status) => {
+          const count = status === 'all' ? rewards.length : rewards.filter((r) => r.status === status).length;
+          return (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: filterStatus === status ? '#3b82f6' : 'white',
+                color: filterStatus === status ? 'white' : '#374151',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Rewards Grid */}
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '48px', color: '#999' }}>
+          <p>Loading achievements...</p>
+        </div>
+      ) : filteredRewards.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px', backgroundColor: '#f9fafb', borderRadius: '8px', color: '#999' }}>
+          <p style={{ fontSize: '16px', marginBottom: '8px' }}>No rewards to display</p>
+          <p style={{ fontSize: '14px' }}>Complete learning activities to unlock achievements.</p>
         </div>
       ) : (
-        <div className={styles.cardsGrid}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {filteredRewards.map((reward) => {
-            const isUnlocked = reward.status === 'unlocked';
-            const isInProgress = reward.status === 'in-progress';
-
+            const statusColor = getStatusColor(reward.status);
             return (
-              <div key={reward.id} className={styles.rewardCard}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.rewardIconBox}>{reward.icon}</div>
-                  <span
-                    className={`${styles.statusBadge} ${
-                      isUnlocked ? styles.statusUnlocked : isInProgress ? styles.statusInProgress : styles.statusLocked
-                    }`}
+              <div
+                key={reward.id}
+                style={{
+                  padding: '20px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  backgroundColor: 'white',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+              >
+                {/* Icon & Status Badge */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '32px' }}>{reward.icon || '🏆'}</div>
+                  <div
+                    style={{
+                      padding: '4px 8px',
+                      backgroundColor: statusColor.bg,
+                      color: statusColor.text,
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '500'
+                    }}
                   >
-                    {isUnlocked ? `🛡️ Reward Unlocked • ${reward.xp} XP` : isInProgress ? `⏳ In Progress (${reward.completionRate}%)` : `🔒 Complete to unlock`}
-                  </span>
-                </div>
-
-                <div>
-                  <div className={styles.courseCategory}>{reward.course}</div>
-                  <h3 className={styles.rewardTitle}>{reward.title}</h3>
-                  <p className={styles.rewardDesc}>{reward.description}</p>
-                </div>
-
-                <div className={styles.progressSection}>
-                  <div className={styles.progressLabelRow}>
-                    <span>Curriculum Completion</span>
-                    <strong>{reward.completionRate}% ({reward.modulesCompleted}/{reward.totalModules} Modules)</strong>
+                    {statusColor.label}
                   </div>
-                  <div className={styles.progressBar}>
+                </div>
+
+                {/* Content */}
+                <h3 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0', color: '#1f2937' }}>
+                  {reward.title}
+                </h3>
+                <p style={{ fontSize: '13px', color: '#666', margin: '0 0 12px 0' }}>{reward.description}</p>
+
+                {/* Progress Bar */}
+                {reward.status !== 'unlocked' && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Progress</span>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: '#1f2937' }}>
+                        {reward.completion_percentage}%
+                      </span>
+                    </div>
                     <div
-                      className={styles.progressBarFill}
                       style={{
-                        width: `${reward.completionRate}%`,
-                        background: isUnlocked ? '#10b981' : isInProgress ? '#f59e0b' : '#94a3b8'
+                        height: '6px',
+                        backgroundColor: '#e5e7eb',
+                        borderRadius: '3px',
+                        overflow: 'hidden'
                       }}
-                    />
-                  </div>
-                </div>
-
-                {isUnlocked ? (
-                  <div className={styles.metaGrid}>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Credential ID</span>
-                      <span className={styles.metaVal}>{reward.credentialId}</span>
-                    </div>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Unlocked</span>
-                      <span className={styles.metaVal}>{reward.unlockedDate?.split('•')[0]}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className={styles.metaGrid}>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Prerequisite</span>
-                      <span className={styles.metaVal}>{reward.prerequisite || 'Course in progress'}</span>
-                    </div>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Reward Reward</span>
-                      <span className={styles.metaVal} style={{ color: '#6366f1' }}>+{reward.xp} XP</span>
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          backgroundColor: '#3b82f6',
+                          width: `${reward.completion_percentage}%`,
+                          transition: 'width 0.3s ease'
+                        }}
+                      />
                     </div>
                   </div>
                 )}
 
-                <div className={styles.cardActionRow}>
-                  {isUnlocked ? (
-                    <>
-                      <button
-                        type="button"
-                        className={`${styles.cardActionBtn} ${styles.cardActionBtnPrimary}`}
-                        onClick={() => setSelectedCert(reward)}
-                      >
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        View Certificate
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.cardActionBtn}
-                        onClick={() => alert(`Certificate ${reward.credentialId} exported.`)}
-                        title="Share / Export"
-                      >
-                        Export
-                      </button>
-                    </>
-                  ) : isInProgress ? (
-                    <button
-                      type="button"
-                      className={`${styles.cardActionBtn} ${styles.cardActionBtnPrimary}`}
-                      onClick={() => alert(`Resuming ${reward.title}...`)}
-                    >
-                      Continue Course →
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className={styles.cardActionBtn}
-                      onClick={() => alert(`Starting prerequisite module for ${reward.title}...`)}
-                    >
-                      Start Prerequisites ▶
-                    </button>
+                {/* XP Info */}
+                <div style={{ fontSize: '12px', color: '#666' }}>
+                  <p style={{ margin: 0 }}>💰 {reward.xp_earned} XP earned</p>
+                  {reward.xp_required && (
+                    <p style={{ margin: '4px 0 0 0' }}>
+                      {reward.status === 'locked' ? `Requires ${reward.xp_required} XP` : 'Unlocked!'}
+                    </p>
                   )}
                 </div>
+
+                {reward.unlocked_at && (
+                  <p style={{ fontSize: '11px', color: '#999', margin: '8px 0 0 0' }}>
+                    Unlocked: {new Date(reward.unlocked_at).toLocaleDateString()}
+                  </p>
+                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Certificate Modal */}
-      {selectedCert && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedCert(null)}>
-          <div className={styles.certModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.certBorder}>
-              <div style={{ fontSize: '2rem' }}>🎓</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6366f1' }}>
-                LearnUp Verifiable Credential Registry
-              </div>
-              <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--sf-text-primary)' }}>{selectedCert.title}</h2>
-              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--sf-text-secondary)' }}>{selectedCert.course}</p>
-              
-              <div style={{ background: 'var(--sf-bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--sf-border-subtle)', margin: '8px 0', fontSize: '0.75rem', textAlign: 'left' }}>
-                <div style={{ marginBottom: '4px' }}><strong>Credential ID:</strong> {selectedCert.credentialId}</div>
-                <div style={{ marginBottom: '4px' }}><strong>Issued On:</strong> {selectedCert.unlockedDate}</div>
-                <div style={{ wordBreak: 'break-all', fontFamily: 'monospace', color: 'var(--sf-text-muted)' }}>
-                  <strong>SHA-256:</strong> {selectedCert.sha256Hash}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button type="button" className={styles.btnSecondary} onClick={() => setSelectedCert(null)}>
-                Close
-              </button>
-              <button
-                type="button"
-                className={styles.btnPrimary}
-                onClick={() => {
-                  window.print();
-                }}
-              >
-                Print / Save PDF
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div style={{ marginTop: '32px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '8px', fontSize: '12px', color: '#0369a1' }}>
+        <p>🔗 API integration required for production. Connect to /api/rewards endpoint.</p>
+      </div>
     </div>
   );
 }
-

@@ -16,6 +16,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     setResolvedTheme(effective);
     if (typeof document !== 'undefined') {
+      document.documentElement.style.removeProperty('--sf-color-primary');
       document.documentElement.setAttribute('data-theme', effective);
     }
   }, []);
@@ -98,4 +99,3 @@ export function useLearnUpTheme(): ThemeContextValue {
   }
   return context;
 }
-
