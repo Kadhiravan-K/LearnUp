@@ -3,7 +3,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import type { RoadmapTrack, RoadmapNode } from '@/lib/types';
-import { INITIAL_ROADMAP_TRACKS } from '@/lib/db/roadmaps-repository';
+
+function getResponseError(payload: unknown, fallback: string): Error {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'error' in payload &&
+    payload.error &&
+    typeof payload.error === 'object' &&
+    'message' in payload.error &&
+    typeof payload.error.message === 'string'
+  ) {
+    return new Error(payload.error.message);
+  }
+  return new Error(fallback);
+}
 
 export function useRoadmaps() {
   const [tracks, setTracks] = useState<RoadmapTrack[]>([]);
@@ -14,19 +28,16 @@ export function useRoadmaps() {
 
   const getHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
+    const supabase = createClient();
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
-      } else if (
+    } else if (
         typeof window !== 'undefined' &&
         (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
-      ) {
+    ) {
         headers['Authorization'] = 'Bearer guest-session';
-      }
-    } catch {
-      // ignore
     }
     return headers;
   }, []);
@@ -37,16 +48,12 @@ export function useRoadmaps() {
     try {
       const headers = await getHeaders();
       const res = await fetch('/api/roadmaps', { headers });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data)) {
-          setTracks(json.data);
-          return;
-        }
-      }
-      setTracks([]);
-    } catch {
-      setTracks([]);
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw getResponseError(json, 'Failed to load roadmaps.');
+      if (!Array.isArray(json?.data)) throw new Error('The roadmap response was invalid.');
+      setTracks(json.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load roadmaps.');
     } finally {
       setIsLoading(false);
     }
@@ -67,17 +74,18 @@ export function useRoadmaps() {
         headers,
         body: JSON.stringify({ title, description, category })
       });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data) {
-          setTracks((prev) => [...prev, json.data]);
-          setActiveTrackId(json.data.id);
-          setSelectedNodeId(json.data.nodes[0]?.id || '');
-          return json.data;
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to create roadmap track');
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw getResponseError(json, 'Failed to create roadmap.');
+      if (!json?.data) throw new Error('The created roadmap response was invalid.');
+      setTracks((prev) => [...prev, json.data]);
+      setActiveTrackId(json.data.id);
+      setSelectedNodeId(json.data.nodes[0]?.id || '');
+      setError(null);
+      return json.data as RoadmapTrack;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create roadmap.';
+      setError(message);
+      throw new Error(message);
     }
   };
 
@@ -89,14 +97,15 @@ export function useRoadmaps() {
         headers,
         body: JSON.stringify({ title, description, tags })
       });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data) {
-          setTracks((prev) => prev.map((t) => (t.id === trackId ? json.data : t)));
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to append node');
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw getResponseError(json, 'Failed to add roadmap milestone.');
+      if (!json?.data) throw new Error('The updated roadmap response was invalid.');
+      setTracks((prev) => prev.map((track) => (track.id === trackId ? json.data : track)));
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to add roadmap milestone.';
+      setError(message);
+      throw new Error(message);
     }
   };
 
@@ -114,14 +123,21 @@ export function useRoadmaps() {
       );
 
       const headers = await getHeaders();
-      await fetch(`/api/roadmaps/${trackId}/nodes/${nodeId}`, {
+      const response = await fetch(`/api/roadmaps/${trackId}/nodes/${nodeId}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify(updates)
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to update node');
-      fetchTracks();
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.data) {
+        throw new Error(result?.error?.message || 'Failed to update roadmap milestone.');
+      }
+      setTracks((prev) => prev.map((track) => track.id === trackId ? result.data : track));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update roadmap milestone.';
+      setError(message);
+      await fetchTracks();
+      throw new Error(message);
     }
   };
 

@@ -32,6 +32,14 @@ function toDatetimeLocalString(d: Date): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+async function readApiData<T>(response: Response, fallbackMessage: string): Promise<T> {
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(body?.error?.message || fallbackMessage);
+  }
+  return body?.data as T;
+}
+
 export default function CalendarPage() {
   // Navigation & View Mode State
   const [viewMode, setViewMode] = useState<CalendarViewMode>('week');
@@ -53,6 +61,7 @@ export default function CalendarPage() {
   const [categories, setCategories] = useState<CalendarCategory[]>([]);
   const [learningItems, setLearningItems] = useState<Array<{ id: string; title: string }>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Active Filter Set (Visible Calendars & Categories)
   const [visibleCalendarIds, setVisibleCalendarIds] = useState<Set<string>>(new Set());
@@ -103,6 +112,7 @@ export default function CalendarPage() {
   const [googleSyncState, setGoogleSyncState] = useState<{
     is_configured: boolean;
     is_connected: boolean;
+    is_available: boolean;
     last_synced_at: string | null;
     message?: string;
   } | null>(null);
@@ -189,43 +199,29 @@ export default function CalendarPage() {
   // Fetch Calendars, Categories, Learning Items, Events, and Google Sync Status
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
-      // 1. Fetch Calendars
-      const calRes = await fetch('/api/calendar/calendars');
-      if (calRes.ok) {
-        const { data } = await calRes.json();
-        setCalendars(data || []);
-        setVisibleCalendarIds(new Set((data || []).map((c: Calendar) => c.id)));
-      }
-
-      // 2. Fetch Categories
-      const catRes = await fetch('/api/calendar/categories');
-      if (catRes.ok) {
-        const { data } = await catRes.json();
-        setCategories(data || []);
-        setVisibleCategoryIds(new Set((data || []).map((c: CalendarCategory) => c.id)));
-      }
-
-      // 3. Fetch Library Learning Items
-      const libRes = await fetch('/api/library');
-      if (libRes.ok) {
-        const { data } = await libRes.json();
-        setLearningItems(
-          (data || []).map((item: any) => ({
-            id: item.id,
-            title: item.title
-          }))
-        );
-      }
-
-      // 4. Fetch Events in date window
+      const [calRes, catRes, libRes] = await Promise.all([
+        fetch('/api/calendar/calendars'),
+        fetch('/api/calendar/categories'),
+        fetch('/api/learning-items')
+      ]);
       const queryStart = new Date(currentDate.getTime() - 45 * 86400000).toISOString();
       const queryEnd = new Date(currentDate.getTime() + 45 * 86400000).toISOString();
       const evRes = await fetch(`/api/calendar/events?start=${encodeURIComponent(queryStart)}&end=${encodeURIComponent(queryEnd)}`);
-      if (evRes.ok) {
-        const { data } = await evRes.json();
-        setEvents(data || []);
-      }
+
+      const [calendarData, categoryData, libraryData, eventData] = await Promise.all([
+        readApiData<Calendar[]>(calRes, 'Unable to load calendars.'),
+        readApiData<CalendarCategory[]>(catRes, 'Unable to load event categories.'),
+        readApiData<Array<{ id: string; title: string }>>(libRes, 'Unable to load your library courses.'),
+        readApiData<CalendarEvent[]>(evRes, 'Unable to load calendar events.')
+      ]);
+      setCalendars(calendarData || []);
+      setVisibleCalendarIds(new Set((calendarData || []).map((calendar) => calendar.id)));
+      setCategories(categoryData || []);
+      setVisibleCategoryIds(new Set((categoryData || []).map((category) => category.id)));
+      setLearningItems(libraryData || []);
+      setEvents(eventData || []);
 
       // 5. Fetch Google Calendar Sync Status
       try {
@@ -234,11 +230,12 @@ export default function CalendarPage() {
           const syncJson = await syncRes.json();
           setGoogleSyncState(syncJson.data || null);
         }
-      } catch {
-        // ignore
+      } catch (syncError) {
+        console.error('Failed to load Google Calendar connection status', syncError);
       }
     } catch (err) {
       console.error('Failed to load calendar data', err);
+      setLoadError(err instanceof Error ? err.message : 'Failed to load calendar data. Try again.');
     } finally {
       setIsLoading(false);
     }
@@ -665,7 +662,7 @@ export default function CalendarPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               action: 'edit_occurrence',
-              date: occurrenceDate,
+              occurrence_date: occurrenceDate,
               start_at: startDate.toISOString(),
               end_at: endDate.toISOString(),
               title: titleTrimmed,
@@ -814,15 +811,14 @@ export default function CalendarPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newCalendarName.trim(), color: newCalendarColor })
       });
-      if (res.ok) {
-        const { data } = await res.json();
-        setCalendars((prev) => [...prev, data]);
-        setVisibleCalendarIds((prev) => new Set([...prev, data.id]));
-        setNewCalendarName('');
-        setIsCalendarModalOpen(false);
-      }
+      const data = await readApiData<Calendar>(res, 'Failed to create calendar.');
+      setCalendars((prev) => [...prev, data]);
+      setVisibleCalendarIds((prev) => new Set([...prev, data.id]));
+      setNewCalendarName('');
+      setIsCalendarModalOpen(false);
     } catch (err) {
       console.error('Failed to create calendar', err);
+      setLoadError(err instanceof Error ? err.message : 'Failed to create calendar.');
     }
   };
 
@@ -836,15 +832,14 @@ export default function CalendarPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newCategoryName.trim(), color: newCategoryColor })
       });
-      if (res.ok) {
-        const { data } = await res.json();
-        setCategories((prev) => [...prev, data]);
-        setVisibleCategoryIds((prev) => new Set([...prev, data.id]));
-        setNewCategoryName('');
-        setIsCategoryModalOpen(false);
-      }
+      const data = await readApiData<CalendarCategory>(res, 'Failed to create event category.');
+      setCategories((prev) => [...prev, data]);
+      setVisibleCategoryIds((prev) => new Set([...prev, data.id]));
+      setNewCategoryName('');
+      setIsCategoryModalOpen(false);
     } catch (err) {
       console.error('Failed to create category', err);
+      setLoadError(err instanceof Error ? err.message : 'Failed to create event category.');
     }
   };
 
@@ -968,6 +963,15 @@ export default function CalendarPage() {
           </button>
         </div>
       </header>
+
+      {loadError && (
+        <div className={styles.dataError} role="alert">
+          <span>{loadError}</span>
+          <button type="button" className={styles.todayBtn} onClick={fetchData}>
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Main Workspace Layout */}
       <div className={styles.workspaceLayout}>
@@ -1124,9 +1128,9 @@ export default function CalendarPage() {
               </span>
             </div>
             <div className={styles.googleSyncStatus}>
-              {!googleSyncState?.is_configured ? (
+              {!googleSyncState?.is_available ? (
                 <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-muted)' }}>
-                  Sync ready. Configure <code>GOOGLE_CLIENT_ID</code> in <code>.env.local</code> to activate live OAuth.
+                  {googleSyncState?.message || 'Google Calendar sync is not available yet. Your LearnUp calendar remains available.'}
                 </span>
               ) : googleSyncState.is_connected ? (
                 <span style={{ fontSize: '0.75rem', color: 'var(--sf-text-secondary)' }}>
@@ -1141,10 +1145,12 @@ export default function CalendarPage() {
             <button
               type="button"
               className={styles.syncBtn}
-              disabled={isSyncingGoogle || !googleSyncState?.is_configured}
+              disabled={isSyncingGoogle || !googleSyncState?.is_available}
               onClick={handleSyncGoogle}
             >
-              {isSyncingGoogle ? 'Syncing...' : googleSyncState?.is_connected ? '🔄 Sync Now' : '🔗 Connect Google Calendar'}
+              {isSyncingGoogle ? 'Syncing...' : googleSyncState?.is_available
+                ? googleSyncState.is_connected ? '🔄 Sync Now' : '🔗 Connect Google Calendar'
+                : 'Google sync unavailable'}
             </button>
           </div>
         </aside>

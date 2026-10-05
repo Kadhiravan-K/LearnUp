@@ -1,3 +1,4 @@
+import { createServerClient } from '@supabase/ssr';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../errors';
 import { AuthenticatedUser } from '../types';
@@ -56,6 +57,56 @@ export async function requireAuth(req: Request): Promise<AuthContext> {
       },
       accessToken: 'guest-session',
       supabase: anonClient
+    };
+  }
+
+  if (!token && cookieHeader) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new AppError('INTERNAL_ERROR', 'Authentication service is not configured.', 500);
+    }
+
+    const cookies = cookieHeader.split(';').flatMap((part) => {
+      const separator = part.indexOf('=');
+      if (separator < 1) return [];
+      const name = part.slice(0, separator).trim();
+      const rawValue = part.slice(separator + 1).trim();
+      if (!name) return [];
+
+      try {
+        return [{ name, value: decodeURIComponent(rawValue) }];
+      } catch {
+        return [{ name, value: rawValue }];
+      }
+    });
+    if (!cookies.some(({ name }) => /^sb-.+-auth-token(?:\.\d+)?$/.test(name))) {
+      throw new AppError('UNAUTHORIZED', 'Authentication required.', 401);
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll: () => cookies,
+        setAll: () => undefined
+      }
+    });
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      throw new AppError('UNAUTHORIZED', 'Invalid or expired session.', 401);
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new AppError('UNAUTHORIZED', 'Invalid or expired session.', 401);
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email
+      },
+      accessToken: session.access_token,
+      supabase
     };
   }
 

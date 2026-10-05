@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic';
 const repository = new RoadmapsRepository();
 
 const appendNodeSchema = z.object({
-  title: z.string().min(1, 'Node title is required'),
-  description: z.string().optional().default(''),
-  tags: z.array(z.string()).optional().default([])
+  title: z.string().trim().min(1, 'Node title is required').max(200),
+  description: z.string().max(5000).optional().default(''),
+  tags: z.array(z.string().trim().min(1).max(80)).max(30).optional().default([])
 });
 
 interface RouteParams {

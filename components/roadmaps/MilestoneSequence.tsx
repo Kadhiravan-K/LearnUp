@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { RoadmapTrack, RoadmapNode } from '@/lib/types';
+import { formatPercentage } from '@/lib/utils/formatPercentage';
 import styles from './MilestoneSequence.module.css';
 
 export interface MilestoneSequenceProps {
@@ -149,11 +150,11 @@ export function MilestoneSequence({
                     <div className={styles.attachedInfo}>
                       <span className={styles.attachedTitle}>{node.attached_course.title}</span>
                       <span className={styles.attachedMeta}>
-                        Attached Course • {node.attached_course.runtime_formatted || `${node.attached_course.progress_percentage}% Watched`}
+                        Attached Course • {node.attached_course.runtime_formatted || `${formatPercentage(node.attached_course.progress_percentage)}% Watched`}
                       </span>
                     </div>
                     <span className={styles.watchedBadge}>
-                      {node.attached_course.progress_percentage === 100 ? '100% Watched' : `${node.attached_course.progress_percentage}% Watched`}
+                      {node.attached_course.progress_percentage === 100 ? '100% Watched' : `${formatPercentage(node.attached_course.progress_percentage)}% Watched`}
                     </span>
                   </div>
                 )}

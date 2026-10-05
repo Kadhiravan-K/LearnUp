@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { LearningItem, LibraryProgress } from '@/lib/types';
 import { Card } from '@/components/ui/Card/Card';
+import { formatPercentage } from '@/lib/utils/formatPercentage';
 import styles from './LibraryCard.module.css';
 
 export interface LibraryCardProps {
@@ -19,13 +20,14 @@ export function LibraryCard({ item, onEdit, onDelete }: LibraryCardProps) {
 
   const href = `/library/${item.id}`;
   const pct = item.progress?.progress_percentage || 0;
+  const formattedPct = formatPercentage(pct);
   const isCompleted = item.progress?.is_completed || false;
   const isInProgress = pct > 0 && !isCompleted;
 
   const statusLabel = isCompleted
     ? 'Completed'
     : isInProgress
-    ? `${pct}% Completed`
+    ? `${formattedPct}% Completed`
     : 'Not started';
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export function LibraryCard({ item, onEdit, onDelete }: LibraryCardProps) {
 
             {isInProgress && !isCompleted && (
               <span className={`${styles.statusBadge} ${styles.statusInProgress}`}>
-                ● In Progress · {pct}%
+                ● In Progress · {formattedPct}%
               </span>
             )}
 
@@ -158,7 +160,7 @@ export function LibraryCard({ item, onEdit, onDelete }: LibraryCardProps) {
 
             {/* Progress stats row */}
             <div className={styles.statsRow}>
-              <span className={styles.statsText}>{pct}% completed</span>
+              <span className={styles.statsText}>{formattedPct}% completed</span>
               {durationStr && (
                 <span className={styles.statsText}>{durationStr} total</span>
               )}

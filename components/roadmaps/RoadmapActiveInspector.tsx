@@ -3,34 +3,21 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import type { RoadmapTrack, RoadmapNode } from '@/lib/types';
+import { formatPercentage } from '@/lib/utils/formatPercentage';
 import styles from './RoadmapActiveInspector.module.css';
 
 export interface RoadmapActiveInspectorProps {
   track: RoadmapTrack;
   node: RoadmapNode;
-  onLinkCourseSubmit?: (courseTitle: string, isPrerequisite: boolean) => void;
+  onAttachCourseClick: () => void;
 }
 
 export function RoadmapActiveInspector({
   track,
   node,
-  onLinkCourseSubmit
+  onAttachCourseClick
 }: RoadmapActiveInspectorProps) {
   const [isAttachOpen, setIsAttachOpen] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isMandatoryPrereq, setIsMandatoryPrereq] = useState(true);
-  const [successToast, setSuccessToast] = useState(false);
-
-  const handleConfirmLink = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    if (onLinkCourseSubmit) {
-      onLinkCourseSubmit(searchQuery.trim(), isMandatoryPrereq);
-    }
-    setSuccessToast(true);
-    setTimeout(() => setSuccessToast(false), 2500);
-    setSearchQuery('');
-  };
 
   const course = node.attached_course;
 
@@ -70,12 +57,12 @@ export function RoadmapActiveInspector({
 
           <div className={styles.courseProgressRow}>
             <span className={styles.progressLabel}>
-              Progress <strong>{course.completed_lectures || 0}/{course.total_lectures || 12} Lectures ({course.progress_percentage}%)</strong>
+              Progress <strong>{formatPercentage(course.progress_percentage)}%</strong>
             </span>
           </div>
 
           <div className={styles.courseCardFooter}>
-            <Link href="/library" className={styles.viewCurriculumLink}>
+            <Link href={`/library/${course.id}`} className={styles.viewCurriculumLink}>
               View Full Curriculum ›
             </Link>
             {course.runtime_formatted && (
@@ -100,55 +87,17 @@ export function RoadmapActiveInspector({
         </button>
 
         {isAttachOpen && (
-          <form onSubmit={handleConfirmLink} className={styles.attachForm}>
-            {successToast && (
-              <div className={styles.successToast}>✓ Attached course link confirmed!</div>
-            )}
-
-            <div className={styles.field}>
-              <label className={styles.fieldLabel}>Search Library / Catalogs</label>
-              <div className={styles.searchBox}>
-                <span className={styles.searchIcon}>🔍</span>
-                <input
-                  type="text"
-                  className={styles.input}
-                  placeholder="e.g. ESP32 IoT Production Systems"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.fieldLabel}>Link Target Node</label>
-              <select className={styles.select} value={node.id} disabled>
-                <option value={node.id}>
-                  {node.node_number}. {node.title}
-                </option>
-              </select>
-            </div>
-
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={isMandatoryPrereq}
-                onChange={(e) => setIsMandatoryPrereq(e.target.checked)}
-              />
-              <span className={styles.checkboxText}>
-                <strong>Prerequisite requirement</strong>
-              </span>
-              <span className={styles.mandatoryBadge}>Mandatory</span>
-            </label>
-
+          <div className={styles.attachForm}>
+            <p className={styles.fieldLabel}>Choose an existing course or playlist from your private library.</p>
             <button
-              type="submit"
+              type="button"
               className={styles.confirmBtn}
-              disabled={!searchQuery.trim()}
+              onClick={onAttachCourseClick}
             >
               <span>🔗</span>
-              <span>Confirm Link Attachment</span>
+              <span>{course ? 'Change Linked Course' : 'Select from Library'}</span>
             </button>
-          </form>
+          </div>
         )}
       </div>
     </div>

@@ -271,22 +271,19 @@ describe('Production Calendar API Integration Tests (SF-057 & SF-057A)', () => {
       const json = await res.json();
       expect(json.data).toHaveProperty('is_configured');
       expect(json.data).toHaveProperty('is_connected');
+      expect(json.data.is_available).toBe(false);
+      expect(json.data).not.toHaveProperty('sync_token');
     });
 
-    it('POST /api/calendar/sync/google returns 200 or clean message without exposing secrets', async () => {
+    it('POST /api/calendar/sync/google does not claim to sync events before OAuth is implemented', async () => {
       const req = new NextRequest('http://localhost:3000/api/calendar/sync/google', {
         method: 'POST',
         body: JSON.stringify({ action: 'sync' })
       });
       const res = await postGoogleSync(req);
       const json = await res.json();
-      expect([200, 400]).toContain(res.status);
-      if (res.status === 200) {
-        expect(json.data).toBeDefined();
-      } else {
-        expect(json.error).toBeDefined();
-      }
+      expect(res.status).toBe(501);
+      expect(json.error.message).toContain('No events were synced');
     });
   });
 });
-

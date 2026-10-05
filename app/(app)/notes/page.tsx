@@ -128,7 +128,7 @@ export default function NotesPage() {
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>Notes & Bookmarks</h1>
-        <p style={{ color: '#666', fontSize: '14px' }}>
+        <p style={{ color: 'var(--sf-color-text-secondary)', fontSize: '14px' }}>
           Create and manage notes for your learning content. Bookmarks mark important timestamps.
         </p>
       </div>
@@ -139,10 +139,10 @@ export default function NotesPage() {
           style={{
             padding: '12px 16px',
             marginBottom: '16px',
-            backgroundColor: '#fee2e2',
-            border: '1px solid #fecaca',
+            backgroundColor: 'var(--sf-color-error-bg)',
+            border: '1px solid var(--sf-color-error-border)',
             borderRadius: '6px',
-            color: '#991b1b'
+            color: 'var(--sf-color-error-text)'
           }}
         >
           {error}
@@ -150,7 +150,7 @@ export default function NotesPage() {
       )}
 
       {/* Tab Navigation */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid var(--sf-color-border)' }}>
         <button
           onClick={() => setActiveTab('notes')}
           style={{
@@ -158,8 +158,8 @@ export default function NotesPage() {
             fontSize: '14px',
             fontWeight: '500',
             border: 'none',
-            borderBottom: activeTab === 'notes' ? '2px solid #3b82f6' : 'none',
-            color: activeTab === 'notes' ? '#3b82f6' : '#666',
+            borderBottom: activeTab === 'notes' ? '2px solid var(--sf-color-primary)' : 'none',
+            color: activeTab === 'notes' ? 'var(--sf-color-primary)' : 'var(--sf-color-text-secondary)',
             cursor: 'pointer',
             backgroundColor: 'transparent'
           }}
@@ -173,8 +173,8 @@ export default function NotesPage() {
             fontSize: '14px',
             fontWeight: '500',
             border: 'none',
-            borderBottom: activeTab === 'bookmarks' ? '2px solid #3b82f6' : 'none',
-            color: activeTab === 'bookmarks' ? '#3b82f6' : '#666',
+            borderBottom: activeTab === 'bookmarks' ? '2px solid var(--sf-color-primary)' : 'none',
+            color: activeTab === 'bookmarks' ? 'var(--sf-color-primary)' : 'var(--sf-color-text-secondary)',
             cursor: 'pointer',
             backgroundColor: 'transparent'
           }}
@@ -200,7 +200,7 @@ export default function NotesPage() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--sf-color-input-border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                     fontFamily: 'inherit'
@@ -217,7 +217,7 @@ export default function NotesPage() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--sf-color-input-border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                     fontFamily: 'inherit',
@@ -230,8 +230,8 @@ export default function NotesPage() {
                 disabled={isSubmitting || !newTitle.trim() || !newContent.trim()}
                 style={{
                   padding: '10px 16px',
-                  backgroundColor: isSubmitting || !newTitle.trim() ? '#d1d5db' : '#3b82f6',
-                  color: 'white',
+                  backgroundColor: isSubmitting || !newTitle.trim() ? 'var(--sf-color-input-border)' : 'var(--sf-color-primary)',
+                  color: 'var(--sf-color-text-on-primary)',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '14px',
@@ -248,9 +248,9 @@ export default function NotesPage() {
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Your Notes</h2>
             {isLoading ? (
-              <p style={{ color: '#999' }}>Loading notes...</p>
+              <p style={{ color: 'var(--sf-color-text-tertiary)' }}>Loading notes...</p>
             ) : notes.length === 0 ? (
-              <p style={{ color: '#999', textAlign: 'center', padding: '24px' }}>No notes yet. Create one above.</p>
+              <p style={{ color: 'var(--sf-color-text-tertiary)', textAlign: 'center', padding: '24px' }}>No notes yet. Create one above.</p>
             ) : (
               <div style={{ display: 'grid', gap: '12px' }}>
                 {notes.map((note) => (
@@ -258,9 +258,9 @@ export default function NotesPage() {
                     key={note.id}
                     style={{
                       padding: '16px',
-                      border: '1px solid #e5e7eb',
+                      border: '1px solid var(--sf-color-border)',
                       borderRadius: '8px',
-                      backgroundColor: '#f9fafb'
+                      backgroundColor: 'var(--sf-color-bg-secondary)'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
@@ -269,8 +269,8 @@ export default function NotesPage() {
                         onClick={() => handleDeleteNote(note.id)}
                         style={{
                           padding: '4px 8px',
-                          backgroundColor: '#fee2e2',
-                          color: '#991b1b',
+                          backgroundColor: 'var(--sf-color-error-bg)',
+                          color: 'var(--sf-color-error-text)',
                           border: 'none',
                           borderRadius: '4px',
                           cursor: 'pointer',
@@ -280,8 +280,8 @@ export default function NotesPage() {
                         Delete
                       </button>
                     </div>
-                    <p style={{ margin: '0 0 8px 0', color: '#444', fontSize: '14px' }}>{note.content}</p>
-                    <p style={{ margin: 0, color: '#999', fontSize: '12px' }}>
+                    <p style={{ margin: '0 0 8px 0', color: 'var(--sf-color-text-secondary)', fontSize: '14px' }}>{note.content}</p>
+                    <p style={{ margin: 0, color: 'var(--sf-color-text-tertiary)', fontSize: '12px' }}>
                       {new Date(note.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -297,9 +297,9 @@ export default function NotesPage() {
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Your Bookmarks</h2>
           {isLoading ? (
-            <p style={{ color: '#999' }}>Loading bookmarks...</p>
+            <p style={{ color: 'var(--sf-color-text-tertiary)' }}>Loading bookmarks...</p>
           ) : bookmarks.length === 0 ? (
-            <p style={{ color: '#999', textAlign: 'center', padding: '24px' }}>
+            <p style={{ color: 'var(--sf-color-text-tertiary)', textAlign: 'center', padding: '24px' }}>
               No bookmarks yet. Create them while watching videos.
             </p>
           ) : (
@@ -309,18 +309,18 @@ export default function NotesPage() {
                   key={bookmark.id}
                   style={{
                     padding: '16px',
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid var(--sf-color-border)',
                     borderRadius: '8px',
-                    backgroundColor: '#f9fafb'
+                    backgroundColor: 'var(--sf-color-bg-secondary)'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                     <div>
                       <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '500' }}>{bookmark.label}</p>
-                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#999' }}>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'var(--sf-color-text-tertiary)' }}>
                         Video: {bookmark.youtube_video_id}
                       </p>
-                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#999' }}>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'var(--sf-color-text-tertiary)' }}>
                         Time: {Math.floor(bookmark.position_seconds / 60)}:{String(bookmark.position_seconds % 60).padStart(2, '0')}
                       </p>
                     </div>
@@ -328,8 +328,8 @@ export default function NotesPage() {
                       onClick={() => handleDeleteBookmark(bookmark.id)}
                       style={{
                         padding: '4px 8px',
-                        backgroundColor: '#fee2e2',
-                        color: '#991b1b',
+                        backgroundColor: 'var(--sf-color-error-bg)',
+                        color: 'var(--sf-color-error-text)',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: 'pointer',
@@ -346,7 +346,7 @@ export default function NotesPage() {
         </div>
       )}
 
-      <div style={{ marginTop: '32px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '8px', fontSize: '12px', color: '#0369a1' }}>
+      <div style={{ marginTop: '32px', padding: '16px', backgroundColor: 'var(--sf-color-primary-light)', borderRadius: '8px', fontSize: '12px', color: 'var(--sf-color-primary)' }}>
         <p>🔗 API integration required for production. Connect to /api/notes and /api/bookmarks endpoints.</p>
       </div>
     </div>

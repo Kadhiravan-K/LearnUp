@@ -50,11 +50,11 @@ export default function RewardsPage() {
   const getStatusColor = (status: Reward['status']) => {
     switch (status) {
       case 'unlocked':
-        return { bg: '#dbeafe', text: '#0369a1', label: 'Unlocked' };
+        return { bg: 'var(--sf-color-primary-light)', text: 'var(--sf-color-primary)', label: 'Unlocked' };
       case 'in_progress':
-        return { bg: '#fef3c7', text: '#92400e', label: 'In Progress' };
+        return { bg: 'var(--sf-color-warning-bg)', text: 'var(--sf-color-warning-text)', label: 'In Progress' };
       case 'locked':
-        return { bg: '#f3f4f6', text: '#6b7280', label: 'Locked' };
+        return { bg: 'var(--sf-color-surface-hover)', text: 'var(--sf-color-text-tertiary)', label: 'Locked' };
     }
   };
 
@@ -63,7 +63,7 @@ export default function RewardsPage() {
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>Achievements & Rewards</h1>
-        <p style={{ color: '#666', fontSize: '14px' }}>
+        <p style={{ color: 'var(--sf-color-text-secondary)', fontSize: '14px' }}>
           Earn achievements by completing learning milestones and challenges.
         </p>
       </div>
@@ -74,10 +74,10 @@ export default function RewardsPage() {
           style={{
             padding: '12px 16px',
             marginBottom: '16px',
-            backgroundColor: '#fee2e2',
-            border: '1px solid #fecaca',
+            backgroundColor: 'var(--sf-color-error-bg)',
+            border: '1px solid var(--sf-color-error-border)',
             borderRadius: '6px',
-            color: '#991b1b'
+            color: 'var(--sf-color-error-text)'
           }}
         >
           {error}
@@ -94,10 +94,10 @@ export default function RewardsPage() {
               onClick={() => setFilterStatus(status)}
               style={{
                 padding: '8px 16px',
-                border: '1px solid #d1d5db',
+                border: '1px solid var(--sf-color-input-border)',
                 borderRadius: '6px',
-                backgroundColor: filterStatus === status ? '#3b82f6' : 'white',
-                color: filterStatus === status ? 'white' : '#374151',
+                backgroundColor: filterStatus === status ? 'var(--sf-color-primary)' : 'var(--sf-color-surface)',
+                color: filterStatus === status ? 'var(--sf-color-text-on-primary)' : 'var(--sf-color-text-primary)',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: '500',
@@ -112,11 +112,11 @@ export default function RewardsPage() {
 
       {/* Rewards Grid */}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: '#999' }}>
+        <div style={{ textAlign: 'center', padding: '48px', color: 'var(--sf-color-text-tertiary)' }}>
           <p>Loading achievements...</p>
         </div>
       ) : filteredRewards.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px', backgroundColor: '#f9fafb', borderRadius: '8px', color: '#999' }}>
+        <div style={{ textAlign: 'center', padding: '48px', backgroundColor: 'var(--sf-color-bg-secondary)', borderRadius: '8px', color: 'var(--sf-color-text-tertiary)' }}>
           <p style={{ fontSize: '16px', marginBottom: '8px' }}>No rewards to display</p>
           <p style={{ fontSize: '14px' }}>Complete learning activities to unlock achievements.</p>
         </div>
@@ -129,10 +129,10 @@ export default function RewardsPage() {
                 key={reward.id}
                 style={{
                   padding: '20px',
-                  border: '1px solid #e5e7eb',
+                  border: '1px solid var(--sf-color-border)',
                   borderRadius: '8px',
-                  backgroundColor: 'white',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  backgroundColor: 'var(--sf-color-surface)',
+                  boxShadow: 'var(--sf-shadow-xs)'
                 }}
               >
                 {/* Icon & Status Badge */}
@@ -153,24 +153,24 @@ export default function RewardsPage() {
                 </div>
 
                 {/* Content */}
-                <h3 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0', color: '#1f2937' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0', color: 'var(--sf-color-text-primary)' }}>
                   {reward.title}
                 </h3>
-                <p style={{ fontSize: '13px', color: '#666', margin: '0 0 12px 0' }}>{reward.description}</p>
+                <p style={{ fontSize: '13px', color: 'var(--sf-color-text-secondary)', margin: '0 0 12px 0' }}>{reward.description}</p>
 
                 {/* Progress Bar */}
                 {reward.status !== 'unlocked' && (
                   <div style={{ marginBottom: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '12px', color: '#666' }}>Progress</span>
-                      <span style={{ fontSize: '12px', fontWeight: '600', color: '#1f2937' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--sf-color-text-secondary)' }}>Progress</span>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--sf-color-text-primary)' }}>
                         {reward.completion_percentage}%
                       </span>
                     </div>
                     <div
                       style={{
                         height: '6px',
-                        backgroundColor: '#e5e7eb',
+                        backgroundColor: 'var(--sf-color-border)',
                         borderRadius: '3px',
                         overflow: 'hidden'
                       }}
@@ -178,7 +178,7 @@ export default function RewardsPage() {
                       <div
                         style={{
                           height: '100%',
-                          backgroundColor: '#3b82f6',
+                          backgroundColor: 'var(--sf-color-primary)',
                           width: `${reward.completion_percentage}%`,
                           transition: 'width 0.3s ease'
                         }}
@@ -188,7 +188,7 @@ export default function RewardsPage() {
                 )}
 
                 {/* XP Info */}
-                <div style={{ fontSize: '12px', color: '#666' }}>
+                <div style={{ fontSize: '12px', color: 'var(--sf-color-text-secondary)' }}>
                   <p style={{ margin: 0 }}>💰 {reward.xp_earned} XP earned</p>
                   {reward.xp_required && (
                     <p style={{ margin: '4px 0 0 0' }}>
@@ -198,7 +198,7 @@ export default function RewardsPage() {
                 </div>
 
                 {reward.unlocked_at && (
-                  <p style={{ fontSize: '11px', color: '#999', margin: '8px 0 0 0' }}>
+                  <p style={{ fontSize: '11px', color: 'var(--sf-color-text-tertiary)', margin: '8px 0 0 0' }}>
                     Unlocked: {new Date(reward.unlocked_at).toLocaleDateString()}
                   </p>
                 )}
@@ -208,7 +208,7 @@ export default function RewardsPage() {
         </div>
       )}
 
-      <div style={{ marginTop: '32px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '8px', fontSize: '12px', color: '#0369a1' }}>
+      <div style={{ marginTop: '32px', padding: '16px', backgroundColor: 'var(--sf-color-primary-light)', borderRadius: '8px', fontSize: '12px', color: 'var(--sf-color-primary)' }}>
         <p>🔗 API integration required for production. Connect to /api/rewards endpoint.</p>
       </div>
     </div>

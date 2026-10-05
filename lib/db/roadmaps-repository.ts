@@ -3,397 +3,197 @@ import { AppError } from '../errors';
 import { logger } from '../logging';
 import { RoadmapTrack, RoadmapNode } from '../types';
 
-export const INITIAL_ROADMAP_TRACKS: RoadmapTrack[] = [
-  {
-    id: 'track_embedded_systems',
-    user_id: 'default',
-    title: 'Embedded Systems Engineer',
-    description: 'Complete hardware-to-software firmware trajectory spanning bare-metal C programming, ARM Cortex internals, RTOS microkernels, and automotive bus systems.',
-    category: 'Embedded & Systems Architecture',
-    status_badge: 'IN PRODUCTION',
-    author: 'Created by You',
-    last_updated: 'Last updated 2 hours ago',
-    total_nodes_count: 9,
-    completed_nodes_count: 4,
-    active_nodes_count: 2,
-    mastery_percentage: 67,
-    pipeline_state: '6 of 9 Active',
-    linked_courses_count: 4,
-    total_hours_logged: 68,
-    estimated_completion_date: 'Apr 24, 2026',
-    pacing_status: '14% ahead of baseline trajectory',
-    nodes: [
-      {
-        id: 'node_01',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '01',
-        title: 'C Programming & Memory Fundamentals',
-        description: 'Pointers, stack vs heap allocations, structs, bitwise operators, endianness, and deterministic memory safety.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 14,
-        tags: ['c-lang', 'memory-management', 'pointers'],
-        attached_course: {
-          id: 'course_c_fundamentals',
-          title: 'Modern C for Systems Engineers',
-          provider: 'Embedded Expert IO',
-          total_lectures: 16,
-          completed_lectures: 16,
-          progress_percentage: 100,
-          runtime_formatted: '100% Watched'
-        }
-      },
-      {
-        id: 'node_02',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '02',
-        title: 'Embedded C & Hardware Abstraction',
-        description: 'Volatile keyword invariants, register bit-masking, memory-mapped I/O (MMIO), inline assembly, and memory barrier primitives.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 18,
-        tags: ['embedded', 'hardware-registers', 'mmio'],
-        attached_course: {
-          id: 'course_mit_6004',
-          title: 'MIT 6.004: C Internals & Computation Structures',
-          provider: 'MIT OpenCourseWare',
-          total_lectures: 24,
-          completed_lectures: 24,
-          progress_percentage: 100,
-          runtime_formatted: 'All Modules Completed'
-        }
-      },
-      {
-        id: 'node_03',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '03',
-        title: 'Microcontrollers & CPU Architecture',
-        description: 'ARM Cortex-M pipeline architecture, NVIC vector table relocations, clock tree distribution (PLL), and system low-power sleep modes.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 12,
-        tags: ['arm-cortex', 'nvic', 'interrupts'],
-        attached_course: {
-          id: 'course_arm_baremetal',
-          title: 'ARM Cortex-M Bare-Metal Deep Dive',
-          provider: 'FastBit Academy',
-          total_lectures: 20,
-          completed_lectures: 20,
-          progress_percentage: 100,
-          runtime_formatted: 'Verified Capstone Passed'
-        }
-      },
-      {
-        id: 'node_04',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '04',
-        title: 'Serial Protocols: UART / SPI / I2C',
-        description: 'Baud rate generators, circular ring buffers, DMA transfers without CPU overhead, and multi-master I2C bus arbitration.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 9,
-        tags: ['protocols', 'uart', 'spi', 'i2c'],
-        attached_course: {
-          id: 'course_bus_masterclass',
-          title: 'High-Speed Bus Protocols Masterclass',
-          provider: 'Hardware Academy',
-          total_lectures: 14,
-          completed_lectures: 14,
-          progress_percentage: 100,
-          runtime_formatted: 'Laboratory Bench Scopes Verified'
-        }
-      },
-      {
-        id: 'node_05',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '05',
-        title: 'Real-Time Operating Systems (RTOS)',
-        description: 'Preemptive vs cooperative scheduling, task priorities, binary and counting semaphores, mutex deadlock avoidance, and priority inversion.',
-        status: 'active',
-        progress_percentage: 65,
-        hours_logged: 15,
-        tags: ['rtos', 'freertos', 'concurrency', 'scheduling'],
-        attached_course: {
-          id: 'course_freertos',
-          title: 'FreeRTOS Architecture & Real-Time Kernel',
-          provider: 'Embedded Expert IO',
-          total_lectures: 12,
-          completed_lectures: 8,
-          progress_percentage: 67,
-          next_chapter: 'Chapter 09 — Mutexes & Priority Inversion',
-          runtime_formatted: 'Next: 34m runtime'
-        }
-      },
-      {
-        id: 'node_06',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '06',
-        title: 'STM32 & Bare-Metal Peripheral Drivers',
-        description: 'STM32CubeIDE ecosystem, comparison of HAL vs LL registers, advanced timers, hardware PWM generation, and multi-channel ADC DMA circular sampling.',
-        status: 'in_progress',
-        progress_percentage: 20,
-        hours_logged: 4,
-        tags: ['stm32', 'peripherals', 'pwm', 'dma'],
-        attached_course: {
-          id: 'course_stm32_scratch',
-          title: 'STM32 Development from Scratch',
-          provider: 'Embedded System Pro',
-          total_lectures: 10,
-          completed_lectures: 2,
-          progress_percentage: 20,
-          runtime_formatted: '2 of 10 Lectures'
-        }
-      },
-      {
-        id: 'node_07',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '07',
-        title: 'ESP32 & Wireless IoT Connectivity',
-        description: 'Dual-core FreeRTOS scheduling, Wi-Fi 802.11 stack initialization, BLE Mesh protocols, MQTT cloud telemetry with TLS, and ultra-low power co-processor modes.',
-        status: 'locked',
-        progress_percentage: 0,
-        hours_logged: 0,
-        tags: ['esp32', 'iot', 'wireless'],
-        prerequisite_label: 'Prerequisite: RTOS',
-        suggested_course_title: 'ESP32 IoT Production Systems'
-      },
-      {
-        id: 'node_08',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '08',
-        title: 'Controller Area Network (CAN Bus) & Automotive',
-        description: 'CAN 2.0B and CAN-FD differential signaling, arbitration IDs, bit-stuffing error states, transceivers, and ISO 14229 / OBD-II diagnostic message stacks.',
-        status: 'locked',
-        progress_percentage: 0,
-        hours_logged: 0,
-        tags: ['can-bus', 'automotive'],
-        prerequisite_label: 'Upcoming'
-      },
-      {
-        id: 'node_09',
-        roadmap_id: 'track_embedded_systems',
-        node_number: '09',
-        title: 'Embedded Linux & Yocto Project',
-        description: 'U-Boot initialization, Device Tree Source (.dts) configuration, compiling custom Linux kernel builds, and assembling minimal embedded root filesystems using Yocto/BitBake recipes.',
-        status: 'capstone',
-        progress_percentage: 0,
-        hours_logged: 0,
-        tags: ['embedded-linux', 'yocto', 'kernel'],
-        prerequisite_label: 'Capstone Milestone'
+interface RoadmapTrackRow {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  category: string;
+  updated_at: string;
+  nodes?: RoadmapNodeRow[];
+}
+
+interface RoadmapNodeRow {
+  id: string;
+  roadmap_id: string;
+  node_number: string;
+  title: string;
+  description: string;
+  status: RoadmapNode['status'];
+  progress_percentage: number;
+  hours_logged: number;
+  tags: string[] | null;
+  prerequisite_node_id: string | null;
+  prerequisite_label: string | null;
+  suggested_course_title: string | null;
+  learning_item_id: string | null;
+  course_progress_percentage: number;
+  course_total_lectures: number | null;
+  learning_item?: {
+    id: string;
+    title: string;
+    author: string | null;
+    total_duration_seconds: number | null;
+  } | null;
+}
+
+const TRACK_SELECT = '*, nodes:roadmap_nodes(*, learning_item:learning_items(id, title, author, total_duration_seconds))';
+
+function formatRuntime(seconds: number | null): string | undefined {
+  if (!seconds || seconds < 1) return undefined;
+  const totalMinutes = Math.round(seconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+
+function mapNode(row: RoadmapNodeRow): RoadmapNode {
+  const course = row.learning_item;
+  const attachedCourse = row.learning_item_id && course
+    ? {
+        id: course.id,
+        title: course.title,
+        provider: course.author || 'YouTube',
+        total_lectures: row.course_total_lectures ?? undefined,
+        progress_percentage: row.course_progress_percentage,
+        runtime_formatted: formatRuntime(course.total_duration_seconds)
       }
-    ]
-  },
-  {
-    id: 'track_distributed_systems',
-    user_id: 'default',
-    title: 'Distributed Systems Architect',
-    description: 'Master fault-tolerant consensus, distributed transactions, event streaming pipelines, and geo-replicated data stores.',
-    category: 'Cloud & Distributed Infrastructure',
-    status_badge: 'IN PROGRESS',
+    : null;
+
+  return {
+    id: row.id,
+    roadmap_id: row.roadmap_id,
+    node_number: row.node_number,
+    title: row.title,
+    description: row.description,
+    status: row.status,
+    progress_percentage: row.progress_percentage,
+    hours_logged: Number(row.hours_logged),
+    tags: row.tags || [],
+    prerequisite_node_id: row.prerequisite_node_id,
+    prerequisite_label: row.prerequisite_label,
+    suggested_course_title: row.suggested_course_title,
+    attached_course: attachedCourse
+  };
+}
+
+function mapTrack(row: RoadmapTrackRow): RoadmapTrack {
+  const nodes = (row.nodes || [])
+    .map(mapNode)
+    .sort((left, right) => Number(left.node_number) - Number(right.node_number));
+  const completed = nodes.filter((node) => node.status === 'completed').length;
+  const active = nodes.filter((node) => node.status === 'active' || node.status === 'in_progress').length;
+
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    status_badge: 'ACTIVE SEQUENCE',
     author: 'Created by You',
-    last_updated: 'Last updated yesterday',
-    total_nodes_count: 7,
-    completed_nodes_count: 3,
-    active_nodes_count: 1,
-    mastery_percentage: 42,
-    pipeline_state: '3 of 7 Active',
-    linked_courses_count: 3,
-    total_hours_logged: 41,
-    estimated_completion_date: 'Jun 15, 2026',
-    pacing_status: 'On track with weekly target',
-    nodes: [
-      {
-        id: 'node_dist_01',
-        roadmap_id: 'track_distributed_systems',
-        node_number: '01',
-        title: 'Distributed Systems Fundamentals & RPC',
-        description: 'CAP theorem, vector clocks, serialization protocols (Protobuf / gRPC), and network partition failure modes.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 12,
-        tags: ['distributed', 'grpc', 'cap-theorem']
-      },
-      {
-        id: 'node_dist_02',
-        roadmap_id: 'track_distributed_systems',
-        node_number: '02',
-        title: 'Consensus Protocols: Paxos & Raft',
-        description: 'Leader election, log replication, safety invariants, joint consensus cluster membership changes, and snapshotting.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 16,
-        tags: ['raft', 'paxos', 'consensus']
-      },
-      {
-        id: 'node_dist_03',
-        roadmap_id: 'track_distributed_systems',
-        node_number: '03',
-        title: 'Event Streaming & Kafka Architecture',
-        description: 'Partition logs, consumer rebalancing, zero-copy socket transfers, schema registries, and exactly-once semantics.',
-        status: 'active',
-        progress_percentage: 45,
-        hours_logged: 13,
-        tags: ['kafka', 'streaming', 'event-driven']
-      },
-      {
-        id: 'node_dist_04',
-        roadmap_id: 'track_distributed_systems',
-        node_number: '04',
-        title: 'Distributed Transactions & 2PC / Sagas',
-        description: 'Two-phase commit coordinator failure modes, Saga orchestrators vs choreography, and TCC compensations.',
-        status: 'locked',
-        progress_percentage: 0,
-        hours_logged: 0,
-        tags: ['transactions', '2pc', 'sagas']
-      }
-    ]
-  },
-  {
-    id: 'track_compilers',
-    user_id: 'default',
-    title: 'Compilers & Virtual Machines',
-    description: 'Lexing, AST generation, LLVM IR optimization passes, register allocation, and WebAssembly JIT runtime development.',
-    category: 'Programming Languages & Runtimes',
-    status_badge: 'PLANNED',
-    author: 'Created by You',
-    last_updated: 'Last updated 3 days ago',
-    total_nodes_count: 8,
-    completed_nodes_count: 2,
-    active_nodes_count: 1,
-    mastery_percentage: 25,
-    pipeline_state: '2 of 8 Active',
-    linked_courses_count: 2,
-    total_hours_logged: 22,
-    estimated_completion_date: 'Aug 30, 2026',
-    pacing_status: 'Pacing steady',
-    nodes: [
-      {
-        id: 'node_comp_01',
-        roadmap_id: 'track_compilers',
-        node_number: '01',
-        title: 'Lexical Analysis & Parsing Algorithms',
-        description: 'Regular expressions, DFAs, recursive descent parsers, Pratt precedence climbing, and AST synthesis.',
-        status: 'completed',
-        progress_percentage: 100,
-        hours_logged: 11,
-        tags: ['lexing', 'parsing', 'ast']
-      },
-      {
-        id: 'node_comp_02',
-        roadmap_id: 'track_compilers',
-        node_number: '02',
-        title: 'Type Checking & Semantic Analysis',
-        description: 'Hindley-Milner type inference, symbol tables, lexical scoping rules, and borrow checker semantics.',
-        status: 'active',
-        progress_percentage: 30,
-        hours_logged: 11,
-        tags: ['type-systems', 'semantics']
-      }
-    ]
-  }
-];
+    last_updated: row.updated_at,
+    total_nodes_count: nodes.length,
+    completed_nodes_count: completed,
+    active_nodes_count: active,
+    mastery_percentage: nodes.length ? Math.round((completed / nodes.length) * 100) : 0,
+    pipeline_state: `${completed + active} of ${nodes.length} Active`,
+    linked_courses_count: nodes.filter((node) => node.attached_course).length,
+    total_hours_logged: nodes.reduce((total, node) => total + node.hours_logged, 0),
+    estimated_completion_date: 'TBD',
+    pacing_status: 'No pace estimate',
+    nodes
+  };
+}
 
 export class RoadmapsRepository {
-  // In-memory cache synced per process / browser session with local storage fallback
-  private customTracks: Map<string, RoadmapTrack[]> = new Map();
-
   async listTracks(client: SupabaseClient, userId: string): Promise<RoadmapTrack[]> {
-    const userTracks = this.customTracks.get(userId);
-    if (userTracks && userTracks.length > 0) {
-      return userTracks;
+    const { data, error } = await client
+      .from('roadmap_tracks')
+      .select(TRACK_SELECT)
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      logger.error('Failed to list roadmap tracks', { operation: 'listTracks', userId, error: error.message });
+      throw new AppError('DATABASE_ERROR', 'Failed to load roadmaps.', 500);
     }
 
-    return [];
+    return ((data || []) as RoadmapTrackRow[]).map(mapTrack);
   }
 
   async getTrackById(client: SupabaseClient, userId: string, trackId: string): Promise<RoadmapTrack | null> {
-    const tracks = await this.listTracks(client, userId);
-    const found = tracks.find((t) => t.id === trackId);
-    return found || null;
+    const { data, error } = await client
+      .from('roadmap_tracks')
+      .select(TRACK_SELECT)
+      .eq('id', trackId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      logger.error('Failed to get roadmap track', { operation: 'getTrackById', userId, trackId, error: error.message });
+      throw new AppError('DATABASE_ERROR', 'Failed to load roadmap.', 500);
+    }
+
+    return data ? mapTrack(data as RoadmapTrackRow) : null;
   }
 
   async createTrack(
     client: SupabaseClient,
     userId: string,
-    track: {
-      title: string;
-      description: string;
-      category?: string;
-    }
+    track: { title: string; description: string; category?: string }
   ): Promise<RoadmapTrack> {
-    const tracks = await this.listTracks(client, userId);
-    const id = `track_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-    const newTrack: RoadmapTrack = {
-      id,
-      user_id: userId,
-      title: track.title,
-      description: track.description || 'Self-directed learning roadmap track.',
-      category: track.category || 'Engineering',
-      status_badge: 'ACTIVE SEQUENCE',
-      author: 'Created by You',
-      last_updated: 'Just now',
-      total_nodes_count: 1,
-      completed_nodes_count: 0,
-      active_nodes_count: 1,
-      mastery_percentage: 0,
-      pipeline_state: '1 Active',
-      linked_courses_count: 0,
-      total_hours_logged: 0,
-      estimated_completion_date: 'TBD',
-      pacing_status: 'Ready to begin',
-      nodes: [
-        {
-          id: `node_${Date.now()}_1`,
-          roadmap_id: id,
-          node_number: '01',
-          title: 'Foundations & Setup',
-          description: 'Core concepts and environment configuration.',
-          status: 'active',
-          progress_percentage: 0,
-          hours_logged: 0,
-          tags: ['foundation', 'getting-started']
-        }
-      ]
-    };
+    const { data: trackId, error } = await client.rpc('create_roadmap_track', {
+      p_user_id: userId,
+      p_title: track.title,
+      p_description: track.description || '',
+      p_category: track.category || 'Engineering'
+    });
 
-    tracks.push(newTrack);
-    this.customTracks.set(userId, tracks);
-    return newTrack;
+    if (error || !trackId) {
+      logger.error('Failed to create roadmap track', {
+        operation: 'createTrack',
+        userId,
+        error: error?.message || 'The database did not return a roadmap ID.'
+      });
+      throw new AppError('DATABASE_ERROR', 'Failed to create roadmap.', 500);
+    }
+
+    const created = await this.getTrackById(client, userId, trackId);
+    if (!created) throw new AppError('DATABASE_ERROR', 'Roadmap was created but could not be loaded.', 500);
+    return created;
   }
 
   async appendNode(
     client: SupabaseClient,
     userId: string,
     trackId: string,
-    node: {
-      title: string;
-      description: string;
-      tags?: string[];
-    }
+    node: { title: string; description: string; tags?: string[] }
   ): Promise<RoadmapTrack> {
     const track = await this.getTrackById(client, userId, trackId);
-    if (!track) {
-      throw new AppError('NOT_FOUND', 'Roadmap track not found', 404);
-    }
+    if (!track) throw new AppError('NOT_FOUND', 'Roadmap track not found.', 404);
 
     const nextIndex = track.nodes.length + 1;
     const nodeNumber = nextIndex < 10 ? `0${nextIndex}` : `${nextIndex}`;
-    const newNode: RoadmapNode = {
-      id: `node_${Date.now()}_${nextIndex}`,
+    const { error } = await client.from('roadmap_nodes').insert({
       roadmap_id: trackId,
+      user_id: userId,
       node_number: nodeNumber,
       title: node.title,
-      description: node.description || 'Milestone sequence objectives.',
+      description: node.description || '',
       status: 'locked',
-      progress_percentage: 0,
-      hours_logged: 0,
       tags: node.tags || ['curriculum']
-    };
+    });
 
-    track.nodes.push(newNode);
-    track.total_nodes_count = track.nodes.length;
-    track.pipeline_state = `${track.active_nodes_count} of ${track.total_nodes_count} Active`;
-    return track;
+    if (error) {
+      logger.error('Failed to append roadmap node', { operation: 'appendNode', userId, trackId, error: error.message });
+      throw new AppError('DATABASE_ERROR', 'Failed to add roadmap milestone.', 500);
+    }
+
+    await this.touchTrack(client, userId, trackId);
+    const updated = await this.getTrackById(client, userId, trackId);
+    if (!updated) throw new AppError('NOT_FOUND', 'Roadmap track not found.', 404);
+    return updated;
   }
 
   async updateNode(
@@ -403,32 +203,121 @@ export class RoadmapsRepository {
     nodeId: string,
     updates: Partial<RoadmapNode>
   ): Promise<RoadmapTrack> {
-    const track = await this.getTrackById(client, userId, trackId);
-    if (!track) {
-      throw new AppError('NOT_FOUND', 'Roadmap track not found', 404);
+    const patch: Record<string, unknown> = {};
+    const directFields = [
+      'title',
+      'description',
+      'status',
+      'progress_percentage',
+      'hours_logged',
+      'tags',
+      'prerequisite_node_id',
+      'prerequisite_label',
+      'suggested_course_title'
+    ] as const;
+
+    for (const field of directFields) {
+      if (updates[field] !== undefined) patch[field] = updates[field];
     }
 
-    const node = track.nodes.find((n) => n.id === nodeId);
-    if (!node) {
-      throw new AppError('NOT_FOUND', 'Milestone node not found', 404);
+    if (updates.prerequisite_node_id) {
+      const { data: prerequisite, error: prerequisiteError } = await client
+        .from('roadmap_nodes')
+        .select('id')
+        .eq('id', updates.prerequisite_node_id)
+        .eq('roadmap_id', trackId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (prerequisiteError) {
+        logger.error('Failed to verify roadmap prerequisite', {
+          operation: 'updateNode:verifyPrerequisite',
+          userId,
+          trackId,
+          error: prerequisiteError.message
+        });
+        throw new AppError('DATABASE_ERROR', 'Failed to verify the prerequisite milestone.', 500);
+      }
+      if (!prerequisite) throw new AppError('NOT_FOUND', 'Prerequisite milestone was not found.', 404);
     }
 
-    Object.assign(node, updates);
+    if (updates.attached_course !== undefined) {
+      const course = updates.attached_course;
+      if (course) {
+        const { data: libraryItem, error: libraryError } = await client
+          .from('learning_items')
+          .select('id')
+          .eq('id', course.id)
+          .eq('user_id', userId)
+          .eq('status', 'ready')
+          .maybeSingle();
 
-    // Recompute track aggregate metrics
-    const completed = track.nodes.filter((n) => n.status === 'completed').length;
-    const active = track.nodes.filter((n) => n.status === 'active' || n.status === 'in_progress').length;
-    track.completed_nodes_count = completed;
-    track.active_nodes_count = active;
-    track.mastery_percentage = Math.round((completed / track.nodes.length) * 100);
-    track.pipeline_state = `${completed + active} of ${track.nodes.length} Active`;
+        if (libraryError) {
+          logger.error('Failed to verify roadmap course ownership', {
+            operation: 'updateNode:verifyLibraryItem',
+            userId,
+            learningItemId: course.id,
+            error: libraryError.message
+          });
+          throw new AppError('DATABASE_ERROR', 'Failed to verify the selected library course.', 500);
+        }
+        if (!libraryItem) throw new AppError('NOT_FOUND', 'Selected course was not found in your library.', 404);
 
-    return track;
+        patch.learning_item_id = course.id;
+        patch.course_progress_percentage = course.progress_percentage;
+        patch.course_total_lectures = course.total_lectures ?? null;
+      } else {
+        patch.learning_item_id = null;
+        patch.course_progress_percentage = 0;
+        patch.course_total_lectures = null;
+      }
+    }
+
+    patch.updated_at = new Date().toISOString();
+    const { data, error } = await client
+      .from('roadmap_nodes')
+      .update(patch)
+      .eq('id', nodeId)
+      .eq('roadmap_id', trackId)
+      .eq('user_id', userId)
+      .select('id')
+      .maybeSingle();
+
+    if (error) {
+      logger.error('Failed to update roadmap node', { operation: 'updateNode', userId, trackId, nodeId, error: error.message });
+      throw new AppError('DATABASE_ERROR', 'Failed to update roadmap milestone.', 500);
+    }
+    if (!data) throw new AppError('NOT_FOUND', 'Milestone node not found.', 404);
+
+    await this.touchTrack(client, userId, trackId);
+    const updated = await this.getTrackById(client, userId, trackId);
+    if (!updated) throw new AppError('NOT_FOUND', 'Roadmap track not found.', 404);
+    return updated;
   }
 
   async deleteTrack(client: SupabaseClient, userId: string, trackId: string): Promise<void> {
-    const tracks = await this.listTracks(client, userId);
-    const updated = tracks.filter((t) => t.id !== trackId);
-    this.customTracks.set(userId, updated);
+    const { error } = await client
+      .from('roadmap_tracks')
+      .delete()
+      .eq('id', trackId)
+      .eq('user_id', userId);
+
+    if (error) {
+      logger.error('Failed to delete roadmap track', { operation: 'deleteTrack', userId, trackId, error: error.message });
+      throw new AppError('DATABASE_ERROR', 'Failed to delete roadmap.', 500);
+    }
+  }
+
+  private async touchTrack(client: SupabaseClient, userId: string, trackId: string): Promise<void> {
+    const { error } = await client
+      .from('roadmap_tracks')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', trackId)
+      .eq('user_id', userId);
+
+    if (error) {
+      logger.error('Failed to update roadmap timestamp', { operation: 'touchTrack', userId, trackId, error: error.message });
+      throw new AppError('DATABASE_ERROR', 'Failed to update roadmap.', 500);
+    }
   }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { LearningItem, LibraryProgress } from '@/lib/types';
+import { formatPercentage } from '@/lib/utils/formatPercentage';
 import styles from './ContinueLearningCard.module.css';
 
 export interface ContinueLearningCardProps {
@@ -11,6 +12,7 @@ export interface ContinueLearningCardProps {
 export function ContinueLearningCard({ item }: ContinueLearningCardProps) {
   const href = `/library/${item.id}`;
   const pct = item.progress?.progress_percentage || 0;
+  const formattedPct = formatPercentage(pct);
   const isCompleted = item.progress?.is_completed || false;
   const isInProgress = pct > 0 && !isCompleted;
 
@@ -67,8 +69,8 @@ export function ContinueLearningCard({ item }: ContinueLearningCardProps) {
 
         <div className={styles.progressSection}>
           <div className={styles.progressHeader}>
-            <span>{isCompleted ? 'All items finished' : `Progress: ${pct}%`}</span>
-            <span className={styles.progressPercent}>{isCompleted ? '100%' : `${pct}% Complete`}</span>
+            <span>{isCompleted ? 'All items finished' : `Progress: ${formattedPct}%`}</span>
+            <span className={styles.progressPercent}>{isCompleted ? '100%' : `${formattedPct}% Complete`}</span>
           </div>
 
           <div
@@ -77,7 +79,7 @@ export function ContinueLearningCard({ item }: ContinueLearningCardProps) {
             aria-valuenow={isCompleted ? 100 : pct}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`${item.title} progress: ${pct}%`}
+            aria-label={`${item.title} progress: ${formattedPct}%`}
           >
             <div
               className={`${styles.progressBarFill} ${

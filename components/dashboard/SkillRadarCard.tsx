@@ -8,82 +8,140 @@ export interface SkillRadarCardProps {
   overallScore?: number;
 }
 
-export function SkillRadarCard({ domains = [], overallScore }: SkillRadarCardProps) {
-  // Generic educational mastery dimensions
-  const genericAxes = [
-    { label: 'Retention', value: 85 },
-    { label: 'Focus Depth', value: 80 },
-    { label: 'Consistency', value: 75 },
-    { label: 'Volume', value: 70 },
-    { label: 'Pacing', value: 80 },
-    { label: 'Velocity', value: 75 }
-  ];
+export interface RadarAxis {
+  label: string;
+  value: number;
+}
 
-  const axes = domains.length >= 6
-    ? domains.slice(0, 6).map((d) => ({ label: d.name, value: d.percentage }))
-    : genericAxes;
+export interface RadarPoint {
+  x: number;
+  y: number;
+}
 
-  const score = overallScore !== undefined
-    ? overallScore
-    : domains.length > 0
-    ? Math.round(domains.reduce((acc, d) => acc + d.percentage, 0) / domains.length)
-    : 0;
+export function buildRadarGeometry(
+  axes: RadarAxis[],
+  center = 110,
+  radius = 70
+): { dataPoints: RadarPoint[]; axisPoints: RadarPoint[]; labelPoints: RadarPoint[]; ringPoints: string[] } | null {
+  if (axes.length < 3) return null;
+
+  const pointAt = (index: number, pointRadius: number): RadarPoint => {
+    const angle = (Math.PI * 2 * index) / axes.length - Math.PI / 2;
+    const value = Math.max(0, Math.min(100, Number.isFinite(axes[index].value) ? axes[index].value : 0));
+    const scaledRadius = (value / 100) * pointRadius;
+
+    return {
+      x: center + Math.cos(angle) * scaledRadius,
+      y: center + Math.sin(angle) * scaledRadius
+    };
+  };
+
+  const coordinateAt = (index: number, pointRadius: number): RadarPoint => {
+    const angle = (Math.PI * 2 * index) / axes.length - Math.PI / 2;
+    return {
+      x: center + Math.cos(angle) * pointRadius,
+      y: center + Math.sin(angle) * pointRadius
+    };
+  };
+
+  return {
+    dataPoints: axes.map((_, index) => pointAt(index, radius)),
+    axisPoints: axes.map((_, index) => coordinateAt(index, radius)),
+    labelPoints: axes.map((_, index) => coordinateAt(index, radius + 27)),
+    ringPoints: [0.25, 0.5, 0.75, 1].map((scale) =>
+      axes.map((_, index) => {
+        const point = coordinateAt(index, radius * scale);
+        return `${point.x},${point.y}`;
+      }).join(' ')
+    )
+  };
+}
+
+export function SkillRadarCard({ domains = [] }: SkillRadarCardProps) {
+  const axes = domains
+    .filter((domain) => domain.name.trim().length > 0)
+    .slice(0, 6)
+    .map((domain) => ({
+      label: domain.name,
+      value: Math.max(0, Math.min(100, Number.isFinite(domain.percentage) ? domain.percentage : 0))
+    }));
+  const geometry = buildRadarGeometry(axes);
+  const largestDomain = axes.reduce<RadarAxis | null>(
+    (largest, axis) => !largest || axis.value > largest.value ? axis : largest,
+    null
+  );
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.titleArea}>
           <h3 className={styles.title}>Study Dimension Radar</h3>
-          <p className={styles.subtitle}>6-dimensional competency graph</p>
+          <p className={styles.subtitle}>Distribution across your learning library</p>
         </div>
-        <div className={styles.scoreBadge}>
-          <div>{score} / 100</div>
-          <div style={{ fontSize: '9px', fontWeight: 500 }}>Mastery</div>
-        </div>
+        <div className={styles.scoreBadge}>{axes.length} {axes.length === 1 ? 'domain' : 'domains'}</div>
       </div>
 
       <div className={styles.radarWrapper}>
-        <svg className={styles.radarSvg} viewBox="0 0 200 200" aria-label="Study radar competency chart">
-          {/* Concentric hexagonal webs */}
-          <polygon points="100,20 169,60 169,140 100,180 31,140 31,60" className={styles.webRing} />
-          <polygon points="100,44 148,72 148,128 100,156 52,128 52,72" className={styles.webRing} />
-          <polygon points="100,68 128,84 128,116 100,132 72,116 72,84" className={styles.webRing} />
-
-          {/* Axes */}
-          <line x1="100" y1="100" x2="100" y2="20" className={styles.webAxis} />
-          <line x1="100" y1="100" x2="169" y2="60" className={styles.webAxis} />
-          <line x1="100" y1="100" x2="169" y2="140" className={styles.webAxis} />
-          <line x1="100" y1="100" x2="100" y2="180" className={styles.webAxis} />
-          <line x1="100" y1="100" x2="31" y2="140" className={styles.webAxis} />
-          <line x1="100" y1="100" x2="31" y2="60" className={styles.webAxis} />
-
-          {/* Skill Filled Shape */}
-          {score > 0 ? (
+        {geometry ? (
+          <svg
+            className={styles.radarSvg}
+            viewBox="0 0 220 220"
+            role="img"
+            aria-label="Learning library distribution radar chart"
+          >
+            {geometry.ringPoints.map((points, index) => (
+              <polygon key={index} points={points} className={styles.webRing} />
+            ))}
+            {geometry.axisPoints.map((point, index) => (
+              <line
+                key={axes[index].label}
+                x1="110"
+                y1="110"
+                x2={point.x}
+                y2={point.y}
+                className={styles.webAxis}
+              />
+            ))}
             <polygon
-              points="100,35 155,70 148,125 100,160 45,130 55,75"
+              points={geometry.dataPoints.map((point) => `${point.x},${point.y}`).join(' ')}
               className={styles.skillPolygon}
             />
-          ) : (
-            <polygon
-              points="100,100 100,100 100,100 100,100 100,100 100,100"
-              className={styles.skillPolygon}
-            />
-          )}
-
-          {/* Labels */}
-          <text x="100" y="14" className={styles.axisLabel}>{axes[0].label}</text>
-          <text x="175" y="58" className={styles.axisLabel} style={{ textAnchor: 'start' }}>{axes[1].label}</text>
-          <text x="175" y="146" className={styles.axisLabel} style={{ textAnchor: 'start' }}>{axes[2].label}</text>
-          <text x="100" y="196" className={styles.axisLabel}>{axes[3].label}</text>
-          <text x="25" y="146" className={styles.axisLabel} style={{ textAnchor: 'end' }}>{axes[4].label}</text>
-          <text x="25" y="58" className={styles.axisLabel} style={{ textAnchor: 'end' }}>{axes[5].label}</text>
-        </svg>
+            {geometry.dataPoints.map((point, index) => (
+              <circle key={axes[index].label} cx={point.x} cy={point.y} r="3" className={styles.skillPoint}>
+                <title>{`${axes[index].label}: ${axes[index].value}% of courses`}</title>
+              </circle>
+            ))}
+            {geometry.labelPoints.map((point, index) => (
+              <text
+                key={axes[index].label}
+                x={point.x}
+                y={point.y}
+                className={styles.axisLabel}
+                textAnchor={point.x < 96 ? 'end' : point.x > 124 ? 'start' : 'middle'}
+                dominantBaseline={point.y < 100 ? 'auto' : 'hanging'}
+              >
+                <title>{axes[index].label}</title>
+                {axes[index].label.length > 14 ? `${axes[index].label.slice(0, 13)}…` : axes[index].label}
+              </text>
+            ))}
+          </svg>
+        ) : (
+          <div className={styles.emptyState}>
+            <p>{axes.length ? 'Import courses across at least three domains to display a radar chart.' : 'Your library has no learning dimensions yet.'}</p>
+            {axes.map((axis) => (
+              <span key={axis.label}>{axis.label}: {axis.value}% of courses</span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.footer}>
-        <span>Overall Learning Score: <strong>{score} / 100</strong></span>
+        <span>
+          {largestDomain
+            ? <>Largest domain: <strong>{largestDomain.label} ({largestDomain.value}%)</strong></>
+            : 'Import learning content to build your library distribution.'}
+        </span>
       </div>
     </div>
   );
 }
-

@@ -46,3 +46,13 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--sf-color-border, #e2e8f0);
 }
+
+.emptyLibrary {
+  color: var(--sf-color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.emptyLibrary a {
+  color: var(--sf-color-primary);
+  font-weight: 600;
+}

@@ -61,7 +61,11 @@ export default function RoadmapsPage() {
     if (!activeTrack) return;
     await updateNode(activeTrack.id, nodeId, {
       attached_course: courseData,
-      status: courseData.progress_percentage === 100 ? 'completed' : 'in_progress',
+      status: courseData.progress_percentage === 100
+        ? 'completed'
+        : courseData.progress_percentage > 0
+        ? 'in_progress'
+        : 'active',
       progress_percentage: courseData.progress_percentage
     });
     showToast(`Course "${courseData.title}" linked to milestone!`);
@@ -99,6 +103,11 @@ export default function RoadmapsPage() {
 
   return (
     <div className={styles.page}>
+      {error && (
+        <Alert variant="error" title="Roadmap action failed">
+          {error}
+        </Alert>
+      )}
       {toastMessage && (
         <div className={styles.toast}>
           <span>✓</span>
@@ -162,17 +171,7 @@ export default function RoadmapsPage() {
                 <RoadmapActiveInspector
                   track={activeTrack}
                   node={selectedNode}
-                  onLinkCourseSubmit={(courseTitle) => {
-                    handleAttachCourseSubmit(selectedNode.id, {
-                      id: `course_${Date.now()}`,
-                      title: courseTitle,
-                      provider: 'LearnUp Catalog',
-                      total_lectures: 12,
-                      completed_lectures: 0,
-                      progress_percentage: 0,
-                      runtime_formatted: '0 of 12 Lectures (0%)'
-                    });
-                  }}
+                  onAttachCourseClick={() => setAttachingNode(selectedNode)}
                 />
               )}
 

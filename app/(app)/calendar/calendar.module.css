@@ -825,15 +825,28 @@
 }
 
 .formErrorBanner {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background: var(--sf-color-error-bg);
+  border: 1px solid var(--sf-color-error-border);
+  color: var(--sf-color-error-text);
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 0.8125rem;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.dataError {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sf-space-3);
+  padding: var(--sf-space-3) var(--sf-space-4);
+  border: 1px solid var(--sf-color-error-border);
+  border-radius: var(--sf-radius-lg);
+  background: var(--sf-color-error-bg);
+  color: var(--sf-color-error-text);
+  font-size: var(--sf-text-sm);
 }
 
 .formGroup {

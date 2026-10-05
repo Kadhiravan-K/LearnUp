@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { CalendarRepository } from '@/lib/db/calendar-repository';
 import { formatErrorResponse } from '@/lib/errors';
 import { logger } from '@/lib/logging';
 
 export const dynamic = 'force-dynamic';
-
-const calendarRepo = new CalendarRepository();
 
 /**
  * GET /api/calendar/sync/google
@@ -14,15 +11,17 @@ const calendarRepo = new CalendarRepository();
  */
 export async function GET(request: Request) {
   try {
-    const { user, supabase } = await requireAuth(request);
-    const syncState = await calendarRepo.getSyncState(supabase, user.id, 'google');
+    await requireAuth(request);
     const isConfigured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
     return NextResponse.json({
       data: {
-        ...(syncState || { provider: 'google', last_synced_at: null, sync_token: null }),
+        provider: 'google',
+        last_synced_at: null,
         is_configured: isConfigured,
-        is_connected: Boolean(syncState?.sync_token)
+        is_connected: false,
+        is_available: false,
+        message: 'Google Calendar OAuth and synchronization are not implemented yet.'
       }
     }, { status: 200 });
   } catch (err) {
@@ -42,31 +41,13 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const { user, supabase } = await requireAuth(request);
-    const body = await request.json().catch(() => ({}));
-    const isConfigured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
-
-    if (!isConfigured) {
-      return NextResponse.json({
-        data: {
-          success: false,
-          is_configured: false,
-          message: 'Google Calendar OAuth credentials are not configured in environment. Configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable live sync.'
-        }
-      }, { status: 200 });
-    }
-
-    const token = body.syncToken || `sync_${Date.now()}`;
-    const syncState = await calendarRepo.setSyncState(supabase, user.id, 'google', token);
-
+    await requireAuth(request);
     return NextResponse.json({
-      data: {
-        success: true,
-        is_configured: true,
-        message: 'Google Calendar sync completed',
-        syncState
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Google Calendar synchronization is not available yet. No events were synced.'
       }
-    }, { status: 200 });
+    }, { status: 501 });
   } catch (err) {
     const { status, body } = formatErrorResponse(err);
     logger.error('Failed to execute Google Calendar sync', {

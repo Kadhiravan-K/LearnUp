@@ -1,6 +1,32 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
+  test('keeps rendered rewards surfaces in sync with light and dark theme tokens', async ({ browser }) => {
+    const context = await browser.newContext();
+    await context.addCookies([{
+      name: 'LearnUp_guest_mode',
+      value: 'true',
+      domain: 'localhost',
+      path: '/',
+    }]);
+
+    const page = await context.newPage();
+    await page.goto('/rewards', { waitUntil: 'networkidle' });
+    await expect(page.getByText('No rewards to display')).toBeVisible();
+
+    const emptyState = page.getByText('No rewards to display').locator('..');
+    await expect.poll(() => emptyState.evaluate((element) => getComputedStyle(element).backgroundColor))
+      .toBe('rgb(248, 250, 252)');
+
+    await page.evaluate(() => localStorage.setItem('LearnUp_theme', 'dark'));
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByText('No rewards to display')).toBeVisible();
+    await expect.poll(() => emptyState.evaluate((element) => getComputedStyle(element).backgroundColor))
+      .toBe('rgb(11, 15, 25)');
+
+    await context.close();
+  });
+
   test('verifies computed rendered styles switch correctly across reloads', async ({ browser }) => {
     // 1. Start with a fresh browser context
     const context = await browser.newContext({

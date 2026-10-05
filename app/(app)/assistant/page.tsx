@@ -79,7 +79,7 @@ export default function AssistantPage() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', padding: '24px' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>AI Study Assistant</h1>
-        <p style={{ color: '#666', fontSize: '14px' }}>
+        <p style={{ color: 'var(--sf-color-text-secondary)', fontSize: '14px' }}>
           Chat interface for AI-powered learning assistance. Backend integration required for production use.
         </p>
       </div>
@@ -90,14 +90,14 @@ export default function AssistantPage() {
           flex: 1,
           overflow: 'auto',
           marginBottom: '16px',
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--sf-color-border)',
           borderRadius: '8px',
           padding: '16px',
-          backgroundColor: '#f9fafb'
+          backgroundColor: 'var(--sf-color-bg-secondary)'
         }}
       >
         {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#999', paddingTop: '24px' }}>
+          <div style={{ textAlign: 'center', color: 'var(--sf-color-text-tertiary)', paddingTop: '24px' }}>
             <p>No messages yet. Start a conversation below.</p>
           </div>
         ) : (
@@ -115,8 +115,8 @@ export default function AssistantPage() {
                   maxWidth: '70%',
                   padding: '12px 16px',
                   borderRadius: '8px',
-                  backgroundColor: msg.sender === 'user' ? '#3b82f6' : '#e5e7eb',
-                  color: msg.sender === 'user' ? 'white' : '#1f2937',
+                  backgroundColor: msg.sender === 'user' ? 'var(--sf-color-primary)' : 'var(--sf-color-border)',
+                  color: msg.sender === 'user' ? 'var(--sf-color-text-on-primary)' : 'var(--sf-color-text-primary)',
                   wordWrap: 'break-word'
                 }}
               >
@@ -129,7 +129,7 @@ export default function AssistantPage() {
           ))
         )}
         {isLoading && (
-          <div style={{ textAlign: 'center', color: '#999' }}>
+          <div style={{ textAlign: 'center', color: 'var(--sf-color-text-tertiary)' }}>
             <p>AI is thinking...</p>
           </div>
         )}
@@ -141,10 +141,10 @@ export default function AssistantPage() {
           style={{
             padding: '12px',
             marginBottom: '16px',
-            backgroundColor: '#fee2e2',
-            border: '1px solid #fecaca',
+            backgroundColor: 'var(--sf-color-error-bg)',
+            border: '1px solid var(--sf-color-error-border)',
             borderRadius: '6px',
-            color: '#991b1b',
+            color: 'var(--sf-color-error-text)',
             fontSize: '14px'
           }}
         >
@@ -159,7 +159,7 @@ export default function AssistantPage() {
           display: 'flex',
           gap: '8px',
           padding: '16px',
-          backgroundColor: '#f3f4f6',
+          backgroundColor: 'var(--sf-color-surface-hover)',
           borderRadius: '8px'
         }}
       >
@@ -172,7 +172,7 @@ export default function AssistantPage() {
           style={{
             flex: 1,
             padding: '12px',
-            border: '1px solid #d1d5db',
+            border: '1px solid var(--sf-color-input-border)',
             borderRadius: '6px',
             fontSize: '14px',
             fontFamily: 'inherit',
@@ -184,8 +184,8 @@ export default function AssistantPage() {
           disabled={isLoading || !input.trim()}
           style={{
             padding: '12px 24px',
-            backgroundColor: isLoading || !input.trim() ? '#d1d5db' : '#3b82f6',
-            color: 'white',
+            backgroundColor: isLoading || !input.trim() ? 'var(--sf-color-input-border)' : 'var(--sf-color-primary)',
+            color: 'var(--sf-color-text-on-primary)',
             border: 'none',
             borderRadius: '6px',
             cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
@@ -198,7 +198,7 @@ export default function AssistantPage() {
         </button>
       </form>
 
-      <div style={{ marginTop: '12px', fontSize: '12px', color: '#999', textAlign: 'center' }}>
+      <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--sf-color-text-tertiary)', textAlign: 'center' }}>
         <p>🔗 API integration required for production use. See /api/assistant/ endpoints.</p>
       </div>
     </div>

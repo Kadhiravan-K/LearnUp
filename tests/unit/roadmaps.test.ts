@@ -1,58 +1,244 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { RoadmapsRepository } from '@/lib/db/roadmaps-repository';
+import type { RoadmapNode } from '@/lib/types';
 
-describe('Learning Roadmaps & Progression (SF-Roadmaps)', () => {
+type Row = Record<string, any>;
+
+class MockQuery {
+  private action: 'select' | 'insert' | 'update' | 'delete' = 'select';
+  private payload: Row | Row[] | null = null;
+  private filters: Array<[string, unknown]> = [];
+  private selects = false;
+
+  constructor(private readonly database: MockSupabase, private readonly table: string) {}
+
+  select() {
+    this.selects = true;
+    return this;
+  }
+
+  insert(payload: Row | Row[]) {
+    this.action = 'insert';
+    this.payload = payload;
+    return this;
+  }
+
+  update(payload: Row) {
+    this.action = 'update';
+    this.payload = payload;
+    return this;
+  }
+
+  delete() {
+    this.action = 'delete';
+    return this;
+  }
+
+  eq(field: string, value: unknown) {
+    this.filters.push([field, value]);
+    return this;
+  }
+
+  order() {
+    return this;
+  }
+
+  maybeSingle() {
+    return this.execute(true);
+  }
+
+  then(resolve: (value: any) => unknown, reject: (reason: unknown) => unknown) {
+    return Promise.resolve(this.execute(false)).then(resolve, reject);
+  }
+
+  private execute(single: boolean): { data: Row | Row[] | null; error: null } {
+    const rows = this.database.tables[this.table] || [];
+    const matches = (row: Row) => this.filters.every(([field, value]) => row[field] === value);
+
+    if (this.action === 'insert') {
+      const inserted = (Array.isArray(this.payload) ? this.payload : [this.payload]).filter(Boolean) as Row[];
+      rows.push(...inserted);
+      return { data: this.selects ? (single ? inserted[0] || null : inserted) : null, error: null };
+    }
+
+    const matchingRows = rows.filter(matches);
+    if (this.action === 'update') {
+      for (const row of matchingRows) Object.assign(row, this.payload);
+    } else if (this.action === 'delete') {
+      this.database.tables[this.table] = rows.filter((row) => !matches(row));
+    }
+
+    const selectedRows = this.action === 'select' && this.table === 'roadmap_tracks'
+      ? matchingRows.map((track) => ({
+          ...track,
+          nodes: (this.database.tables.roadmap_nodes || [])
+            .filter((node) => node.roadmap_id === track.id)
+            .map((node) => ({
+              ...node,
+              learning_item: (this.database.tables.learning_items || [])
+                .find((item) => item.id === node.learning_item_id) || null
+            }))
+        }))
+      : matchingRows;
+    return { data: this.selects ? (single ? selectedRows[0] || null : selectedRows) : null, error: null };
+  }
+}
+
+class MockSupabase {
+  tables: Record<string, Row[]> = {
+    roadmap_tracks: [],
+    roadmap_nodes: [],
+    learning_items: [
+      {
+        id: 'course-owner-one',
+        user_id: 'user-one',
+        title: 'Systems Course',
+        author: 'LearnUp',
+        total_duration_seconds: 5400,
+        status: 'ready'
+      },
+      {
+        id: 'course-owner-two',
+        user_id: 'user-two',
+        title: 'Private Course',
+        author: 'LearnUp',
+        total_duration_seconds: 3600,
+        status: 'ready'
+      }
+    ]
+  };
+
+  from(table: string) {
+    return new MockQuery(this, table);
+  }
+
+  async rpc(name: string, args: Row) {
+    if (name !== 'create_roadmap_track') return { data: null, error: { message: 'Unknown procedure' } };
+    const id = `track-${this.tables.roadmap_tracks.length + 1}`;
+    const now = new Date().toISOString();
+    this.tables.roadmap_tracks.push({
+      id,
+      user_id: args.p_user_id,
+      title: args.p_title,
+      description: args.p_description,
+      category: args.p_category,
+      updated_at: now
+    });
+    this.tables.roadmap_nodes.push({
+      id: `node-${this.tables.roadmap_nodes.length + 1}`,
+      roadmap_id: id,
+      user_id: args.p_user_id,
+      node_number: '01',
+      title: 'Foundations & Setup',
+      description: 'Core concepts and environment configuration.',
+      status: 'active',
+      progress_percentage: 0,
+      hours_logged: 0,
+      tags: ['foundation', 'getting-started'],
+      prerequisite_node_id: null,
+      prerequisite_label: null,
+      suggested_course_title: null,
+      learning_item_id: null,
+      course_progress_percentage: 0,
+      course_total_lectures: null
+    });
+    return { data: id, error: null };
+  }
+}
+
+describe('RoadmapsRepository', () => {
   const repository = new RoadmapsRepository();
-  const mockClient = {} as any;
-  const testUserId = 'test_user_roadmaps_1';
 
-  it('provides zero tracks initially', async () => {
-    const tracks = await repository.listTracks(mockClient, testUserId);
-    expect(tracks.length).toBe(0);
+  it('lists no tracks for a user with no saved roadmaps', async () => {
+    const supabase = new MockSupabase();
+
+    await expect(repository.listTracks(supabase as never, 'user-one')).resolves.toEqual([]);
   });
 
-  it('allows creating a custom roadmap track', async () => {
-    const newTrack = await repository.createTrack(mockClient, testUserId, {
-      title: 'Distributed Consensus & Raft Internals',
-      description: 'Zero-downtime leader election and log compaction algorithms.'
+  it('persists created tracks and milestones beyond the repository instance', async () => {
+    const supabase = new MockSupabase();
+    const created = await repository.createTrack(supabase as never, 'user-one', {
+      title: 'Distributed Systems',
+      description: 'Study consensus and replication.'
     });
+    const anotherRepository = new RoadmapsRepository();
+    const listed = await anotherRepository.listTracks(supabase as never, 'user-one');
 
-    expect(newTrack.id).toBeDefined();
-    expect(newTrack.title).toBe('Distributed Consensus & Raft Internals');
-    expect(newTrack.nodes.length).toBe(1);
-
-    const allTracks = await repository.listTracks(mockClient, testUserId);
-    expect(allTracks.some((t) => t.id === newTrack.id)).toBe(true);
+    expect(created.id).toBeTruthy();
+    expect(created.nodes).toHaveLength(1);
+    expect(listed.map((track) => track.id)).toContain(created.id);
+    expect(listed[0].nodes[0].title).toBe('Foundations & Setup');
   });
 
-  it('appends a milestone node to an existing track', async () => {
-    const tracks = await repository.listTracks(mockClient, testUserId);
-    const track = tracks[0];
-    const initialNodeCount = track.nodes.length;
-
-    const updatedTrack = await repository.appendNode(mockClient, testUserId, track.id, {
-      title: 'Hardware Cryptographic Accelerators',
-      description: 'AES-GCM, ECC, and secure boot hardware root of trust.'
+  it('appends and updates milestones and links a course from the same user library', async () => {
+    const supabase = new MockSupabase();
+    const track = await repository.createTrack(supabase as never, 'user-one', {
+      title: 'Systems',
+      description: ''
     });
+    const appended = await repository.appendNode(supabase as never, 'user-one', track.id, {
+      title: 'Concurrency',
+      description: 'Threads and synchronization.'
+    });
+    const node = appended.nodes[1];
+    const updated = await repository.updateNode(supabase as never, 'user-one', track.id, node.id, {
+      status: 'in_progress',
+      progress_percentage: 35,
+      attached_course: {
+        id: 'course-owner-one',
+        title: 'Systems Course',
+        progress_percentage: 35,
+        total_lectures: 12
+      }
+    } satisfies Partial<RoadmapNode>);
 
-    expect(updatedTrack.nodes.length).toBe(initialNodeCount + 1);
-    const lastNode = updatedTrack.nodes[updatedTrack.nodes.length - 1];
-    expect(lastNode.title).toBe('Hardware Cryptographic Accelerators');
-    expect(lastNode.status).toBe('locked');
+    expect(updated.nodes).toHaveLength(2);
+    expect(updated.nodes[1].status).toBe('in_progress');
+    expect(updated.nodes[1].attached_course).toMatchObject({
+      id: 'course-owner-one',
+      title: 'Systems Course',
+      progress_percentage: 35,
+      total_lectures: 12,
+      runtime_formatted: '1h 30m'
+    });
+    expect(updated.linked_courses_count).toBe(1);
   });
 
-  it('updates milestone node status and course links', async () => {
-    const tracks = await repository.listTracks(mockClient, testUserId);
-    const track = tracks[0];
+  it('rejects linking a different user’s library course', async () => {
+    const supabase = new MockSupabase();
+    const track = await repository.createTrack(supabase as never, 'user-one', {
+      title: 'Systems',
+      description: ''
+    });
     const node = track.nodes[0];
 
-    const updated = await repository.updateNode(mockClient, testUserId, track.id, node.id, {
-      status: 'completed',
-      progress_percentage: 100
+    await expect(repository.updateNode(supabase as never, 'user-one', track.id, node.id, {
+      attached_course: {
+        id: 'course-owner-two',
+        title: 'Private Course',
+        progress_percentage: 0
+      }
+    })).rejects.toMatchObject({ statusCode: 404 });
+    expect(supabase.tables.roadmap_nodes[0].learning_item_id).toBeNull();
+  });
+
+  it('does not return or delete another user’s tracks', async () => {
+    const supabase = new MockSupabase();
+    const userOneTrack = await repository.createTrack(supabase as never, 'user-one', {
+      title: 'One',
+      description: ''
+    });
+    const userTwoTrack = await repository.createTrack(supabase as never, 'user-two', {
+      title: 'Two',
+      description: ''
     });
 
-    const updatedNode = updated.nodes.find((n) => n.id === node.id);
-    expect(updatedNode?.status).toBe('completed');
-    expect(updatedNode?.progress_percentage).toBe(100);
+    await expect(repository.getTrackById(supabase as never, 'user-one', userTwoTrack.id)).resolves.toBeNull();
+    await repository.deleteTrack(supabase as never, 'user-one', userTwoTrack.id);
+    await expect(repository.getTrackById(supabase as never, 'user-two', userTwoTrack.id)).resolves.toMatchObject({
+      title: 'Two'
+    });
+    await repository.deleteTrack(supabase as never, 'user-one', userOneTrack.id);
+    await expect(repository.listTracks(supabase as never, 'user-one')).resolves.toEqual([]);
   });
 });

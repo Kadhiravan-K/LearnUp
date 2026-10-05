@@ -4,7 +4,6 @@ import {
   formatCourseMOCForObsidian,
   syncToObsidian,
   syncToGitHub,
-  generateStudyEvents,
   syncToGoogleCalendar,
   syncToNotion,
   AVAILABLE_CONNECTORS,
@@ -125,25 +124,13 @@ describe('External App Connectors & Local Vault Sync System', () => {
     });
   });
 
-  describe('3. Google Calendar Focus & Spaced Repetition Engine', () => {
-    it('generates calendar study events with Leitner intervals and Pomodoro tags', () => {
-      const events = generateStudyEvents();
-
-      expect(events.length).toBeGreaterThan(0);
-      const focusBlock = events.find((e: any) => e.summary.includes('Focus Sprint'));
-      expect(focusBlock).toBeDefined();
-      expect(focusBlock?.colorId).toBe('9'); // Blueberry/Indigo
-
-      const srsBlock = events.find((e: any) => e.summary.includes('Spaced Repetition Review'));
-      expect(srsBlock).toBeDefined();
-      expect(srsBlock?.colorId).toBe('10'); // Green
-    });
-
-    it('syncs scheduled events to Google Calendar', async () => {
+  describe('3. Google Calendar Connector', () => {
+    it('does not report successful sync without a real Google Calendar integration', async () => {
       const result = await syncToGoogleCalendar({ calendarId: 'primary' });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
       expect(result.connectorType).toBe('google_calendar');
-      expect(result.syncedCount).toBe(2);
+      expect(result.syncedCount).toBe(0);
+      expect(result.message).toContain('No events were sent');
     });
   });
 

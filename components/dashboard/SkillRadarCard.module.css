@@ -71,13 +71,13 @@
 }
 
 .skillPolygon {
-  fill: rgba(99, 102, 241, 0.2);
-  stroke: #6366F1;
+  fill: color-mix(in srgb, var(--sf-color-primary) 20%, transparent);
+  stroke: var(--sf-color-primary);
   stroke-width: 2;
 }
 
 .skillPoint {
-  fill: #6366F1;
+  fill: var(--sf-color-primary);
 }
 
 .axisLabel {
@@ -106,4 +106,14 @@
 
 .deepLink:hover {
   text-decoration: underline;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sf-space-2);
+  color: var(--sf-color-text-secondary);
+  font-size: var(--sf-text-xs);
+  text-align: center;
 }

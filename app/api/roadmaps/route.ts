@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic';
 const repository = new RoadmapsRepository();
 
 const createRoadmapSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional().default(''),
-  category: z.string().optional().default('Engineering')
+  title: z.string().trim().min(1, 'Title is required').max(200),
+  description: z.string().max(5000).optional().default(''),
+  category: z.string().trim().min(1).max(100).optional().default('Engineering')
 });
 
 /**

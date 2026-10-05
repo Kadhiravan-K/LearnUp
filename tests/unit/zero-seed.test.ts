@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -50,6 +51,23 @@ describe('SF-051 — Zero-Seed Production Invariants', () => {
     expect(seederContent).toContain('NODE_ENV');
     expect(seederContent).toContain('production');
     expect(seederContent).toContain('supabase.co');
+    expect(seederContent).toContain("'--local'");
+  });
+
+  it('refuses to run the demo seeder in production', () => {
+    const seederPath = path.join(projectRoot, 'scripts', 'seed-demo.mjs');
+    const result = spawnSync(process.execPath, [seederPath], {
+      cwd: projectRoot,
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54401'
+      },
+      encoding: 'utf8'
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(`${result.stdout}${result.stderr}`).toContain('blocked in production');
   });
 
   it('verifies demo.sql exists for explicit developer seeding only', () => {

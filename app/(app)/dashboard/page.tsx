@@ -7,6 +7,7 @@ import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { createClient } from '@/lib/supabase/browser';
 import { MetricSummaryCard } from '@/components/dashboard/MetricSummaryCard';
 import { ContinueLearningCard } from '@/components/dashboard/ContinueLearningCard';
+import { formatPercentage } from '@/lib/utils/formatPercentage';
 import { StreakWidget } from '@/components/dashboard/StreakWidget';
 import { FocusEngineWidget } from '@/components/dashboard/FocusEngineWidget';
 import { AIAssistantWidget } from '@/components/dashboard/AIAssistantWidget';
@@ -244,6 +245,7 @@ export default function DashboardPage() {
                 {/* Secondary Courses Compact Rows */}
                 {secondaryItems.map((item) => {
                   const pct = item.progress?.progress_percentage || 0;
+                  const formattedPct = formatPercentage(pct);
                   return (
                     <Link
                       key={item.id}
@@ -256,10 +258,10 @@ export default function DashboardPage() {
                         <div className={styles.compactInfo}>
                           <div className={styles.compactTitleRow}>
                             <span className={styles.compactTitle}>{item.title}</span>
-                            <span className={styles.compactPctBadge}>{pct}%</span>
+                            <span className={styles.compactPctBadge}>{formattedPct}%</span>
                           </div>
                           <span className={styles.compactMeta}>
-                            {item.type === 'playlist' ? 'Course Playlist' : 'Video Lecture'} &bull; {pct > 0 ? `${pct}% complete` : 'Not started'}
+                            {item.type === 'playlist' ? 'Course Playlist' : 'Video Lecture'} &bull; {pct > 0 ? `${formattedPct}% complete` : 'Not started'}
                           </span>
                         </div>
                       </div>

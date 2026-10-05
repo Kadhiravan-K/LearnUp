@@ -1,9 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal/Modal';
 import { Button } from '@/components/ui/Button/Button';
 import { Alert } from '@/components/ui/Alert/Alert';
+import Link from 'next/link';
+import { useLibrary } from '@/lib/hooks/useLibrary';
+import { learningItemsApi } from '@/lib/api/learning-items';
+import { formatPercentage } from '@/lib/utils/formatPercentage';
 import type { RoadmapNode, AttachedCourseData } from '@/lib/types';
 import styles from './AttachCourseModal.module.css';
 
@@ -15,38 +19,50 @@ export interface AttachCourseModalProps {
 }
 
 export function AttachCourseModal({ isOpen, onClose, node, onSubmit }: AttachCourseModalProps) {
-  const [courseTitle, setCourseTitle] = useState(node.attached_course?.title || node.suggested_course_title || '');
-  const [provider, setProvider] = useState(node.attached_course?.provider || 'Embedded Expert IO');
-  const [totalLectures, setTotalLectures] = useState(node.attached_course?.total_lectures || 12);
-  const [completedLectures, setCompletedLectures] = useState(node.attached_course?.completed_lectures || 0);
+  const { items: courses, isLoading: isLoadingCourses, error: coursesError } = useLibrary();
+  const [selectedCourseId, setSelectedCourseId] = useState(node.attached_course?.id || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setSelectedCourseId(node.attached_course?.id || '');
+    setError(null);
+  }, [node.id, node.attached_course?.id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!courseTitle.trim()) {
-      setError('Course title is required');
+    const course = courses.find((item) => item.id === selectedCourseId);
+    if (!course) {
+      setError('Select a course from your library before linking this milestone.');
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
     try {
-      const pct = Math.min(100, Math.round((completedLectures / Math.max(1, totalLectures)) * 100));
+      const progressPercentage = course.progress?.progress_percentage ?? 0;
+      let totalLectures = 1;
+      if (course.type === 'playlist') {
+        const courseDetails = await learningItemsApi.getLearningItem(course.id);
+        totalLectures = courseDetails.videos?.length ?? 0;
+        if (totalLectures === 0) {
+          throw new Error('This playlist has no available videos to attach.');
+        }
+      }
+
       const courseData: AttachedCourseData = {
-        id: `course_${Date.now()}`,
-        title: courseTitle.trim(),
-        provider: provider.trim(),
+        id: course.id,
+        title: course.title,
+        provider: course.author || 'YouTube',
         total_lectures: totalLectures,
-        completed_lectures: completedLectures,
-        progress_percentage: pct,
-        runtime_formatted: `${completedLectures} of ${totalLectures} Lectures (${pct}%)`
+        progress_percentage: progressPercentage,
+        runtime_formatted: `${formatPercentage(progressPercentage)}% complete`
       };
 
       await onSubmit(node.id, courseData);
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to attach course');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to attach course');
     } finally {
       setIsSubmitting(false);
     }
@@ -56,73 +72,42 @@ export function AttachCourseModal({ isOpen, onClose, node, onSubmit }: AttachCou
     <Modal isOpen={isOpen} onClose={onClose} title={`Attach Course to Node ${node.node_number}: ${node.title}`}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <Alert variant="error">{error}</Alert>}
+        {coursesError && <Alert variant="error">{coursesError}</Alert>}
 
         <div className={styles.field}>
-          <label htmlFor="course-title" className={styles.label}>
-            Course / Playlist Title
+          <label htmlFor="library-course" className={styles.label}>
+            Course from your library
           </label>
-          <input
-            id="course-title"
-            type="text"
+          <select
+            id="library-course"
             className={styles.input}
-            placeholder="e.g. FreeRTOS Architecture & Real-Time Kernel"
-            value={courseTitle}
-            onChange={(e) => setCourseTitle(e.target.value)}
-            autoFocus
-          />
+            value={selectedCourseId}
+            onChange={(event) => setSelectedCourseId(event.target.value)}
+            disabled={isLoadingCourses || isSubmitting}
+            required
+          >
+            <option value="">
+              {isLoadingCourses ? 'Loading library...' : 'Choose a course or playlist'}
+            </option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title} ({course.type})
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor="provider-name" className={styles.label}>
-            Educational Provider / Channel
-          </label>
-          <input
-            id="provider-name"
-            type="text"
-            className={styles.input}
-            placeholder="e.g. Embedded Expert IO / MIT OpenCourseWare"
-            value={provider}
-            onChange={(e) => setProvider(e.target.value)}
-          />
-        </div>
-
-        <div className={styles.rowTwo}>
-          <div className={styles.field}>
-            <label htmlFor="total-lec" className={styles.label}>
-              Total Lectures
-            </label>
-            <input
-              id="total-lec"
-              type="number"
-              min="1"
-              max="500"
-              className={styles.input}
-              value={totalLectures}
-              onChange={(e) => setTotalLectures(parseInt(e.target.value, 10) || 1)}
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="completed-lec" className={styles.label}>
-              Completed Lectures
-            </label>
-            <input
-              id="completed-lec"
-              type="number"
-              min="0"
-              max={totalLectures}
-              className={styles.input}
-              value={completedLectures}
-              onChange={(e) => setCompletedLectures(parseInt(e.target.value, 10) || 0)}
-            />
-          </div>
-        </div>
+        {courses.length === 0 && !isLoadingCourses && (
+          <p className={styles.emptyLibrary}>
+            Your library is empty. <Link href="/library">Import a course first</Link>, then attach it here.
+          </p>
+        )}
 
         <div className={styles.actions}>
           <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" isLoading={isSubmitting}>
+          <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={!selectedCourseId || isLoadingCourses}>
             Confirm Link
           </Button>
         </div>
