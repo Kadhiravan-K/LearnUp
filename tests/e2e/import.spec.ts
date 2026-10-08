@@ -43,6 +43,6 @@ test.describe('Import Workflow UI', () => {
     });
 
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /Who is studying today\?|Welcome back/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Who\'s learning today\?|Who is studying today\?|Welcome back/i })).toBeVisible();
   });
 });

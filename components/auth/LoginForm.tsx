@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { Alert } from '@/components/ui/Alert/Alert';
 import Link from 'next/link';
 import styles from './LoginForm.module.css';
+import { MfaChallengeForm } from './MfaChallengeForm';
 
 export interface LoginFormProps {
   initialEmail?: string;
@@ -26,6 +27,31 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showMfa, setShowMfa] = useState(false);
+  const [pendingSessionData, setPendingSessionData] = useState<any>(null);
+
+  const handleSuccess = (data: any) => {
+    try {
+      const namePart = email.split('@')[0];
+      const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+      const existing = JSON.parse(localStorage.getItem('LearnUp_saved_profiles') || '[]');
+      const filtered = existing.filter((p: { email: string }) => p.email?.toLowerCase() !== email.toLowerCase());
+      const newProfile = {
+        id: data.session?.user?.id || String(Date.now()),
+        name: displayName,
+        email: email,
+        initials: displayName.slice(0, 2).toUpperCase(),
+        color: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+        lastActive: new Date().toISOString()
+      };
+      localStorage.setItem('LearnUp_saved_profiles', JSON.stringify([newProfile, ...filtered]));
+      localStorage.removeItem('LearnUp_is_guest');
+    } catch {
+      // Ignore
+    }
+    document.cookie = 'LearnUp_guest_mode=; path=/; max-age=0; SameSite=Lax';
+    window.location.href = '/dashboard';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,31 +85,16 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
       }
 
       if (data.session) {
-        // Save to browser saved profiles for profile chooser
-        try {
-          const namePart = email.split('@')[0];
-          const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-          const existing = JSON.parse(localStorage.getItem('LearnUp_saved_profiles') || '[]');
-          const filtered = existing.filter((p: { email: string }) => p.email?.toLowerCase() !== email.toLowerCase());
-          const newProfile = {
-            id: data.session.user.id || String(Date.now()),
-            name: displayName,
-            email: email,
-            initials: displayName.slice(0, 2).toUpperCase(),
-            color: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-            lastActive: new Date().toISOString()
-          };
-          localStorage.setItem('LearnUp_saved_profiles', JSON.stringify([newProfile, ...filtered]));
-          localStorage.removeItem('LearnUp_is_guest');
-        } catch {
-          // Ignore
+        // Check if MFA is required
+        const { data: mfaData, error: mfaError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (!mfaError && mfaData.nextLevel === 'aal2' && mfaData.currentLevel === 'aal1') {
+          setPendingSessionData(data);
+          setShowMfa(true);
+          setIsLoading(false);
+          return;
         }
 
-        // Clear guest mode cookie
-        document.cookie = 'LearnUp_guest_mode=; path=/; max-age=0; SameSite=Lax';
-
-        // Full page navigation so middleware reads cookies
-        window.location.href = '/dashboard';
+        handleSuccess(data);
       } else {
         setError('Login succeeded but no session was returned. Please verify your account.');
         setIsLoading(false);
@@ -93,6 +104,15 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
       setIsLoading(false);
     }
   };
+
+  if (showMfa) {
+    return (
+      <MfaChallengeForm 
+        onSuccess={() => handleSuccess(pendingSessionData)} 
+        onCancel={() => { setShowMfa(false); setIsLoading(false); }} 
+      />
+    );
+  }
 
   return (
     <div className={styles.card}>

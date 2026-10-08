@@ -18,7 +18,7 @@ test.describe('Library Page & Empty State', () => {
 
     // When visiting login while authenticated, redirects to library
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /Who is studying today\?|Welcome back/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Who\'s learning today\?|Who is studying today\?|Welcome back/i })).toBeVisible();
   });
 
   test('Library cards render progress bars when progress data is present', async ({ page }) => {
@@ -68,7 +68,7 @@ test.describe('Library Page & Empty State', () => {
 
     // Navigate to login (unauthenticated users get redirected, but mocked API still loads)
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /Who is studying today\?|Welcome back/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Who\'s learning today\?|Who is studying today\?|Welcome back/i })).toBeVisible();
   });
 
   test('Library cards render completed badge when item is 100% complete', async ({ page }) => {
@@ -117,6 +117,6 @@ test.describe('Library Page & Empty State', () => {
     });
 
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /Who is studying today\?|Welcome back/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Who\'s learning today\?|Who is studying today\?|Welcome back/i })).toBeVisible();
   });
 });

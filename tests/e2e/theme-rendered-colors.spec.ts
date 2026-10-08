@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * Normalizes CSS hex color representations (e.g., #fff -> #ffffff).
+ * Ensures color comparisons are semantic rather than format-dependent.
+ */
+function normalizeHex(hex: string): string {
+  const trimmed = hex.trim().toLowerCase();
+  if (/^#[0-9a-f]{3}$/i.test(trimmed)) {
+    return `#${trimmed[1]}${trimmed[1]}${trimmed[2]}${trimmed[2]}${trimmed[3]}${trimmed[3]}`;
+  }
+  return trimmed;
+}
+
 test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
   test('keeps rendered rewards surfaces in sync with light and dark theme tokens', async ({ browser }) => {
     const context = await browser.newContext();
@@ -11,7 +23,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     }]);
 
     const page = await context.newPage();
-    await page.goto('/rewards', { waitUntil: 'networkidle' });
+    await page.goto('/rewards', { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('No rewards to display')).toBeVisible();
 
     const emptyState = page.getByText('No rewards to display').locator('..');
@@ -19,7 +31,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
       .toBe('rgb(248, 250, 252)');
 
     await page.evaluate(() => localStorage.setItem('LearnUp_theme', 'dark'));
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.getByText('No rewards to display')).toBeVisible();
     await expect.poll(() => emptyState.evaluate((element) => getComputedStyle(element).backgroundColor))
       .toBe('rgb(11, 15, 25)');
@@ -43,7 +55,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     }]);
 
     const page = await context.newPage();
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
 
     // 2. Clear LearnUp_theme
     await page.evaluate(() => {
@@ -51,7 +63,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     // 3. Reload the application
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     // 4. Verify actual computed rendered colors (Default / Light)
     const defaultStyles = await page.evaluate(() => {
@@ -71,16 +83,16 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     expect(defaultStyles.theme).toBe('light');
     expect(defaultStyles.bodyBg).toBe('rgb(248, 250, 252)');
     expect(defaultStyles.bodyColor).toBe('rgb(15, 23, 42)');
-    expect(defaultStyles.varBg.toLowerCase()).toBe('#f8fafc');
-    expect(defaultStyles.varSurface.toLowerCase()).toBe('#ffffff');
-    expect(defaultStyles.varTextPrimary.toLowerCase()).toBe('#0f172a');
-    expect(defaultStyles.varPrimary.toLowerCase()).toBe('#6366f1');
+    expect(normalizeHex(defaultStyles.varBg)).toBe('#f8fafc');
+    expect(normalizeHex(defaultStyles.varSurface)).toBe('#ffffff');
+    expect(normalizeHex(defaultStyles.varTextPrimary)).toBe('#0f172a');
+    expect(normalizeHex(defaultStyles.varPrimary)).toBe('#6366f1');
 
     // 5. Verify explicit light mode
     await page.evaluate(() => {
       localStorage.setItem('LearnUp_theme', 'light');
     });
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     const lightStyles = await page.evaluate(() => {
       const docStyle = getComputedStyle(document.documentElement);
@@ -97,8 +109,8 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     expect(lightStyles.theme).toBe('light');
     expect(lightStyles.bodyBg).toBe('rgb(248, 250, 252)');
     expect(lightStyles.bodyColor).toBe('rgb(15, 23, 42)');
-    expect(lightStyles.varBg.toLowerCase()).toBe('#f8fafc');
-    expect(lightStyles.varSurface.toLowerCase()).toBe('#ffffff');
+    expect(normalizeHex(lightStyles.varBg)).toBe('#f8fafc');
+    expect(normalizeHex(lightStyles.varSurface)).toBe('#ffffff');
 
     // 6. Switch to dark
     await page.evaluate(() => {
@@ -106,7 +118,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     // 7. Reload
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     // 8. Verify actual dark colors
     const darkStyles = await page.evaluate(() => {
@@ -126,10 +138,10 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     expect(darkStyles.theme).toBe('dark');
     expect(darkStyles.bodyBg).toBe('rgb(11, 15, 25)');
     expect(darkStyles.bodyColor).toBe('rgb(248, 250, 252)');
-    expect(darkStyles.varBg.toLowerCase()).toBe('#0b0f19');
-    expect(darkStyles.varSurface.toLowerCase()).toBe('#111827');
-    expect(darkStyles.varTextPrimary.toLowerCase()).toBe('#f8fafc');
-    expect(darkStyles.varPrimary.toLowerCase()).toBe('#818cf8');
+    expect(normalizeHex(darkStyles.varBg)).toBe('#0b0f19');
+    expect(normalizeHex(darkStyles.varSurface)).toBe('#111827');
+    expect(normalizeHex(darkStyles.varTextPrimary)).toBe('#f8fafc');
+    expect(normalizeHex(darkStyles.varPrimary)).toBe('#818cf8');
 
     // 9. Switch back to light
     await page.evaluate(() => {
@@ -137,7 +149,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     // 10. Reload
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     // 11. Verify actual light colors
     const lightAgainStyles = await page.evaluate(() => {
@@ -157,10 +169,10 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     expect(lightAgainStyles.theme).toBe('light');
     expect(lightAgainStyles.bodyBg).toBe('rgb(248, 250, 252)');
     expect(lightAgainStyles.bodyColor).toBe('rgb(15, 23, 42)');
-    expect(lightAgainStyles.varBg.toLowerCase()).toBe('#f8fafc');
-    expect(lightAgainStyles.varSurface.toLowerCase()).toBe('#ffffff');
-    expect(lightAgainStyles.varTextPrimary.toLowerCase()).toBe('#0f172a');
-    expect(lightAgainStyles.varPrimary.toLowerCase()).toBe('#6366f1');
+    expect(normalizeHex(lightAgainStyles.varBg)).toBe('#f8fafc');
+    expect(normalizeHex(lightAgainStyles.varSurface)).toBe('#ffffff');
+    expect(normalizeHex(lightAgainStyles.varTextPrimary)).toBe('#0f172a');
+    expect(normalizeHex(lightAgainStyles.varPrimary)).toBe('#6366f1');
 
     await page.goto('/settings?tab=customization', { waitUntil: 'domcontentloaded' });
     await page.getByRole('button', { name: 'Apply Workspace Theme' }).waitFor();
@@ -178,7 +190,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     expect(darkAfterWorkspaceTheme.theme).toBe('dark');
-    expect(darkAfterWorkspaceTheme.primary.toLowerCase()).toBe('#818cf8');
+    expect(normalizeHex(darkAfterWorkspaceTheme.primary)).toBe('#818cf8');
     expect(darkAfterWorkspaceTheme.inlinePrimary).toBe('');
 
     await context.close();

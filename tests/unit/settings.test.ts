@@ -18,11 +18,12 @@ describe('Settings Navigation & Account Logic (SF-036)', () => {
     expect(headerConfig.title).toBe('Settings');
   });
 
-  it('contains all 12 settings tabs in the navigation bar', () => {
-    expect(SETTINGS_TABS).toHaveLength(12);
+  it('contains all 13 settings tabs in the navigation bar', () => {
+    expect(SETTINGS_TABS).toHaveLength(13);
     const tabIds = SETTINGS_TABS.map((t) => t.id);
     expect(tabIds).toEqual([
       'account',
+      'security',
       'appearance',
       'customization',
       'focus-timer',

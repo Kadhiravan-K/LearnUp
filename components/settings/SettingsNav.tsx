@@ -11,6 +11,7 @@ export interface SettingsNavProps {
 
 export const SETTINGS_TABS = [
   { id: 'account', label: 'Account', icon: '👤' },
+  { id: 'security', label: 'Security & MFA', icon: '🔒' },
   { id: 'appearance', label: 'Appearance', icon: '🎨' },
   { id: 'customization', label: 'Customization Studio', icon: '🎛️', badge: 'NEW' },
   { id: 'focus-timer', label: 'Focus & Timer', icon: '⏱' },

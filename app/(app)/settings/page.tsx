@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/browser';
 import { UserSettings, ThemeMode, AccentColor, PlayerLayout } from '@/lib/types';
 import { DEFAULT_USER_SETTINGS } from '@/lib/db/settings-repository';
 import { SettingsNav, SETTINGS_TABS } from '@/components/settings/SettingsNav';
+import { MfaSettings } from '@/components/settings/MfaSettings';
 import { AccountSection } from '@/components/settings/AccountSection';
 import { AppearanceSection } from '@/components/settings/AppearanceSection';
 import { CustomizationSection } from '@/components/settings/CustomizationSection';
@@ -255,6 +256,11 @@ export default function SettingsPage() {
 
         {/* Right Content Column - Displays ONLY the Active Screen */}
         <main className={styles.contentColumn}>
+          
+          {activeTab === 'security' && (
+            <MfaSettings />
+          )}
+
           {activeTab === 'account' && (
             <AccountSection
               username={settings.username || userEmail.split('@')[0] || 'learner'}
