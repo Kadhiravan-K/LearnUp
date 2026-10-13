@@ -29,9 +29,17 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Use getSession() — reads from cookie locally, no network call.
-  const { data: { session } } = await supabase.auth.getSession();
   const isGuestMode = request.cookies.get('LearnUp_guest_mode')?.value === 'true';
+  let session = null;
+
+  if (!isGuestMode) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      session = data?.session ?? null;
+    } catch {
+      // Ignore auth error
+    }
+  }
 
   const pathname = request.nextUrl.pathname;
   const isLibraryRoute = pathname.startsWith('/library');

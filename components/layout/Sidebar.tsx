@@ -617,7 +617,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </button>
 
           <div className={`${styles.userCard} ${isCollapsed ? styles.userCardCollapsed : ''}`}>
-            <div className={styles.userLeft} title={isCollapsed ? `${userName} (${userEmail || ''})` : undefined}>
+            <Link
+              href="/settings"
+              className={styles.userLeft}
+              title={isCollapsed ? `${userName} (${userEmail || ''}) - Settings` : 'Account Settings'}
+              style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+            >
               <div className={styles.userAvatar}>
                 {userInitial}
               </div>
@@ -627,7 +632,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   <span className={styles.userEmail}>{userEmail || 'learner@LearnUp.local'}</span>
                 </div>
               )}
-            </div>
+            </Link>
             {!isCollapsed && (
               <button
                 type="button"

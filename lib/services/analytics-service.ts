@@ -45,6 +45,29 @@ export class AnalyticsService {
   private bookmarksRepo = new BookmarksRepository();
 
   async getUserAnalytics(client: SupabaseClient, userId: string): Promise<UserAnalyticsData> {
+    if (userId === '00000000-0000-0000-0000-000000000001') {
+      return {
+        totalHours: 0,
+        totalMinutes: 0,
+        dailyAverageMinutes: 0,
+        activeStreakDays: 0,
+        longestStreakDays: 0,
+        completedCoursesCount: 0,
+        inProgressCoursesCount: 0,
+        totalCoursesCount: 0,
+        totalLecturesWatched: 0,
+        totalFocusSessions: 0,
+        skillDomains: [],
+        consistencyHeatmap: [],
+        modalityDistribution: {
+          videoMinutes: 0,
+          focusMinutes: 0,
+          notesCount: 0,
+          bookmarksCount: 0
+        }
+      };
+    }
+
     const [courses, progressList, focusSessions, notes, bookmarks] = await Promise.all([
       this.learningRepo.listItems(client, userId).catch(() => []),
       this.progressRepo.getLibraryProgress(client, userId).catch(() => []),

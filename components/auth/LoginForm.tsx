@@ -1,20 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
-import { createClient } from '@/lib/supabase/browser';
+import React, { useState, useEffect } from 'react';
+import { createClient, formatAuthError } from '@/lib/supabase/browser';
 import { Input } from '@/components/ui/Input/Input';
 import { Button } from '@/components/ui/Button/Button';
 import { Alert } from '@/components/ui/Alert/Alert';
+import { addOrUpdateSavedProfile } from '@/lib/auth/profileCookies';
 import Link from 'next/link';
 import styles from './LoginForm.module.css';
 import { MfaChallengeForm } from './MfaChallengeForm';
 
 export interface LoginFormProps {
   initialEmail?: string;
+  initialPassword?: string;
   onBackToProfiles?: () => void;
 }
 
-export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProps) {
+export function LoginForm({
+  initialEmail = '',
+  initialPassword = '',
+  onBackToProfiles
+}: LoginFormProps) {
   let supabase: ReturnType<typeof createClient> | null = null;
   let initError: string | null = null;
   try {
@@ -24,27 +30,29 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
   }
 
   const [email, setEmail] = useState(initialEmail);
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(initialPassword);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showMfa, setShowMfa] = useState(false);
   const [pendingSessionData, setPendingSessionData] = useState<any>(null);
 
+  useEffect(() => {
+    if (initialEmail) {
+      setEmail(initialEmail);
+    }
+    if (initialPassword) {
+      setPassword(initialPassword);
+    }
+  }, [initialEmail, initialPassword]);
+
   const handleSuccess = (data: any) => {
     try {
-      const namePart = email.split('@')[0];
-      const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-      const existing = JSON.parse(localStorage.getItem('LearnUp_saved_profiles') || '[]');
-      const filtered = existing.filter((p: { email: string }) => p.email?.toLowerCase() !== email.toLowerCase());
-      const newProfile = {
+      addOrUpdateSavedProfile({
         id: data.session?.user?.id || String(Date.now()),
-        name: displayName,
         email: email,
-        initials: displayName.slice(0, 2).toUpperCase(),
-        color: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-        lastActive: new Date().toISOString()
-      };
-      localStorage.setItem('LearnUp_saved_profiles', JSON.stringify([newProfile, ...filtered]));
+        password: password || undefined,
+        name: email.split('@')[0],
+      });
       localStorage.removeItem('LearnUp_is_guest');
     } catch {
       // Ignore
@@ -68,6 +76,17 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
       return;
     }
 
+    // Persist profile to cookies & localStorage for easy login
+    try {
+      addOrUpdateSavedProfile({
+        email: email,
+        password: password,
+        name: email.split('@')[0],
+      });
+    } catch {
+      // Ignore
+    }
+
     setIsLoading(true);
 
     try {
@@ -77,10 +96,8 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
       });
 
       if (signInError) {
-        import('@/lib/supabase/browser').then(({ formatAuthError }) => {
-          setError(formatAuthError(signInError));
-          setIsLoading(false);
-        });
+        setError(formatAuthError(signInError));
+        setIsLoading(false);
         return;
       }
 
@@ -100,7 +117,7 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
         setIsLoading(false);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setError(formatAuthError(err));
       setIsLoading(false);
     }
   };
@@ -134,9 +151,28 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
         </div>
 
         {error && (
-          <Alert variant="error" className={styles.alert}>
-            {error}
-          </Alert>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
+            <Alert variant="error" className={styles.alert}>
+              {error}
+            </Alert>
+            {error.includes('Local Supabase is not running') && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+                  try {
+                    localStorage.setItem('LearnUp_is_guest', 'true');
+                  } catch {
+                    // Ignore
+                  }
+                  window.location.href = '/dashboard';
+                }}
+              >
+                Enter Guest Mode Immediately &rarr;
+              </Button>
+            )}
+          </div>
         )}
 
         <div className={styles.fields}>
@@ -158,7 +194,7 @@ export function LoginForm({ initialEmail = '', onBackToProfiles }: LoginFormProp
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             disabled={isLoading}
-            autoFocus={Boolean(initialEmail)}
+            autoFocus={Boolean(initialEmail && !initialPassword)}
             required
           />
         </div>

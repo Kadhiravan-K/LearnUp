@@ -38,6 +38,10 @@ export class ProgressRepository {
   }
 
   async getLibraryProgress(client: SupabaseClient, userId: string): Promise<LibraryProgress[]> {
+    if (userId === '00000000-0000-0000-0000-000000000001') {
+      return [];
+    }
+
     const { data, error } = await client
       .from('library_progress_view')
       .select('*')

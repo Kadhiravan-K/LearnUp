@@ -92,12 +92,25 @@ export interface ILearningItemRepository {
   ): Promise<LearningItemWithVideos>;
 }
 
+const GUEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+const guestItemsStore: Map<string, LearningItemWithVideos> =
+  ((globalThis as any).__learnup_guest_items_store ??= new Map<string, LearningItemWithVideos>());
+
 export class LearningItemRepository implements ILearningItemRepository {
   async findBySourceKey(
     client: SupabaseClient,
     userId: string,
     sourceKey: string
   ): Promise<LearningItem | null> {
+    if (userId === GUEST_USER_ID) {
+      for (const item of guestItemsStore.values()) {
+        if (item.normalized_source_key === sourceKey) {
+          return item;
+        }
+      }
+      return null;
+    }
+
     const { data, error } = await client
       .from('learning_items')
       .select('*')
@@ -134,6 +147,38 @@ export class LearningItemRepository implements ILearningItemRepository {
       thumbnailUrl: string | null;
     }
   ): Promise<LearningItem> {
+    if (item.userId === GUEST_USER_ID) {
+      for (const existing of guestItemsStore.values()) {
+        if (existing.normalized_source_key === item.normalizedSourceKey) {
+          throw new AppError('VALIDATION_ERROR', 'This video is already in your library.', 409);
+        }
+      }
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
+      const newItem: LearningItemWithVideos = {
+        id,
+        user_id: item.userId,
+        type: 'video',
+        youtube_video_id: item.youtubeVideoId,
+        youtube_playlist_id: null,
+        source_url: item.sourceUrl,
+        normalized_source_key: item.normalizedSourceKey,
+        title: item.title,
+        description: item.description || null,
+        skill_domain: item.skillDomain || 'Systems Architecture',
+        tags: item.tags || [],
+        author: item.author || null,
+        total_duration_seconds: item.totalDurationSeconds || 0,
+        thumbnail_url: item.thumbnailUrl,
+        status: 'ready',
+        created_at: now,
+        updated_at: now,
+        videos: []
+      };
+      guestItemsStore.set(id, newItem);
+      return newItem;
+    }
+
     const fullPayload: Record<string, any> = {
       user_id: item.userId,
       type: 'video',
@@ -222,6 +267,49 @@ export class LearningItemRepository implements ILearningItemRepository {
       durationFormatted?: string;
     }>
   ): Promise<LearningItemWithVideos> {
+    if (item.userId === GUEST_USER_ID) {
+      for (const existing of guestItemsStore.values()) {
+        if (existing.normalized_source_key === item.normalizedSourceKey) {
+          throw new AppError('VALIDATION_ERROR', 'This playlist is already in your library.', 409);
+        }
+      }
+      const playlistId = crypto.randomUUID();
+      const now = new Date().toISOString();
+      const childVideos: LearningItemVideo[] = videos.map((v, idx) => ({
+        id: crypto.randomUUID(),
+        learning_item_id: playlistId,
+        youtube_video_id: v.videoId,
+        title: v.title,
+        thumbnail_url: v.thumbnailUrl,
+        source_position: v.sourcePosition ?? idx,
+        duration_seconds: v.durationSeconds ?? 2800,
+        duration_formatted: v.durationFormatted ?? '45:00',
+        created_at: now
+      }));
+      const newPlaylist: LearningItemWithVideos = {
+        id: playlistId,
+        user_id: item.userId,
+        type: 'playlist',
+        youtube_video_id: null,
+        youtube_playlist_id: item.youtubePlaylistId,
+        source_url: item.sourceUrl,
+        normalized_source_key: item.normalizedSourceKey,
+        title: item.title,
+        description: item.description || null,
+        skill_domain: item.skillDomain || 'Systems Architecture',
+        tags: item.tags || [],
+        author: item.author || null,
+        total_duration_seconds: item.totalDurationSeconds || 0,
+        thumbnail_url: item.thumbnailUrl,
+        status: 'ready',
+        created_at: now,
+        updated_at: now,
+        videos: childVideos
+      };
+      guestItemsStore.set(playlistId, newPlaylist);
+      return newPlaylist;
+    }
+
     // 1. Insert parent playlist record with status 'importing'
     const fullPayload: Record<string, any> = {
       user_id: item.userId,
@@ -382,6 +470,12 @@ export class LearningItemRepository implements ILearningItemRepository {
   }
 
   async listItems(client: SupabaseClient, userId: string): Promise<LearningItem[]> {
+    if (userId === GUEST_USER_ID) {
+      return Array.from(guestItemsStore.values()).sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+
     const { data, error } = await client
       .from('learning_items')
       .select('*')
@@ -405,6 +499,14 @@ export class LearningItemRepository implements ILearningItemRepository {
     userId: string,
     itemId: string
   ): Promise<LearningItemWithVideos> {
+    if (userId === GUEST_USER_ID) {
+      const item = guestItemsStore.get(itemId);
+      if (!item) {
+        throw new AppError('NOT_FOUND', 'Learning item not found', 404);
+      }
+      return item;
+    }
+
     const { data: item, error: itemError } = await client
       .from('learning_items')
       .select('*')
@@ -453,6 +555,14 @@ export class LearningItemRepository implements ILearningItemRepository {
   }
 
   async deleteItem(client: SupabaseClient, userId: string, itemId: string): Promise<void> {
+    if (userId === GUEST_USER_ID) {
+      if (!guestItemsStore.has(itemId)) {
+        throw new AppError('NOT_FOUND', 'Learning item not found', 404);
+      }
+      guestItemsStore.delete(itemId);
+      return;
+    }
+
     // Check existence and ownership first
     const { data: existing, error: checkError } = await client
       .from('learning_items')
@@ -502,6 +612,20 @@ export class LearningItemRepository implements ILearningItemRepository {
       tags?: string[];
     }
   ): Promise<LearningItem> {
+    if (userId === GUEST_USER_ID) {
+      const item = guestItemsStore.get(itemId);
+      if (!item) {
+        throw new AppError('NOT_FOUND', 'Learning item not found', 404);
+      }
+      const updated: LearningItemWithVideos = {
+        ...item,
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+      guestItemsStore.set(itemId, updated);
+      return updated;
+    }
+
     const updatePayload: Record<string, any> = {
       updated_at: new Date().toISOString()
     };
@@ -543,6 +667,31 @@ export class LearningItemRepository implements ILearningItemRepository {
       duration_seconds?: number | null;
     }>
   ): Promise<LearningItemWithVideos> {
+    if (userId === GUEST_USER_ID) {
+      const item = guestItemsStore.get(itemId);
+      if (!item) {
+        throw new AppError('NOT_FOUND', 'Learning item not found', 404);
+      }
+      const now = new Date().toISOString();
+      const updatedVideos: LearningItemVideo[] = videos.map((v, idx) => ({
+        id: v.id || crypto.randomUUID(),
+        learning_item_id: itemId,
+        youtube_video_id: v.youtube_video_id,
+        title: v.title,
+        thumbnail_url: v.thumbnail_url || null,
+        source_position: v.source_position ?? idx,
+        duration_seconds: v.duration_seconds !== null && v.duration_seconds !== undefined ? v.duration_seconds : undefined,
+        created_at: now
+      }));
+      const updated: LearningItemWithVideos = {
+        ...item,
+        videos: updatedVideos,
+        updated_at: now
+      };
+      guestItemsStore.set(itemId, updated);
+      return updated;
+    }
+
     // 1. Verify parent ownership
     const parent = await this.getItemWithVideos(client, userId, itemId);
     if (!parent) {

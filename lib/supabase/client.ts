@@ -20,12 +20,31 @@ export function getSupabaseEnv() {
   return { url, anonKey };
 }
 
+function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const timeoutMs = 8000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  if (init?.signal) {
+    init.signal.addEventListener('abort', () => controller.abort());
+  }
+
+  return fetch(input, {
+    ...init,
+    signal: controller.signal
+  }).finally(() => clearTimeout(timer));
+}
+
 /**
  * Creates a public/anon Supabase client.
  */
 export function createAnonClient(): SupabaseClient {
   const { url, anonKey } = getSupabaseEnv();
-  return createClient(url, anonKey);
+  return createClient(url, anonKey, {
+    global: {
+      fetch: fetchWithTimeout
+    }
+  });
 }
 
 /**
@@ -38,7 +57,8 @@ export function createScopedClient(accessToken: string): SupabaseClient {
     global: {
       headers: {
         Authorization: `Bearer ${accessToken}`
-      }
+      },
+      fetch: fetchWithTimeout
     }
   });
 }

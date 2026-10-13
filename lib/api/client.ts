@@ -12,16 +12,31 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  let accessToken: string | undefined;
+
+  const isGuest = typeof window !== 'undefined' && localStorage.getItem('LearnUp_is_guest') === 'true';
+
+  if (!isGuest) {
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        accessToken = session.access_token;
+      }
+    } catch {
+      // Safe fallback
+    }
+  }
 
   const headers = new Headers(options.headers);
   if (!headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
   
-  if (session?.access_token) {
-    headers.set('Authorization', `Bearer ${session.access_token}`);
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
+  } else if (isGuest) {
+    headers.set('Authorization', 'Bearer guest-session');
   }
 
   let response: Response;

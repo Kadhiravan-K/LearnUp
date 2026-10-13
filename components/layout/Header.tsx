@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/browser';
 import { useLearnUpTheme } from '@/lib/theme/ThemeProvider';
@@ -204,9 +205,14 @@ export function Header({ onToggleSidebar, isSidebarOpen = false }: HeaderProps) 
             )}
           </button>
 
-          <div className={styles.userAvatar} title={userEmail || 'Alex'}>
+          <Link
+            href="/settings"
+            className={styles.userAvatar}
+            title={userEmail ? `${userEmail} (Account Settings)` : 'Account Settings'}
+            aria-label="Account Settings"
+          >
             {userInitial}
-          </div>
+          </Link>
         </div>
       </div>
     </header>

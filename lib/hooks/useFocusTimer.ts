@@ -21,7 +21,7 @@ export function useFocusTimer(initialMode?: FocusMode): FocusTimerContextType {
   const context = useContext(FocusTimerContext);
 
   // Standalone fallback hook for tests running outside FocusTimerProvider
-  const standalone = useStandaloneFocusTimer(initialMode || 'sprint');
+  const standalone = useStandaloneFocusTimer(initialMode || 'sprint', !context);
 
   if (context) {
     return context;
@@ -30,7 +30,7 @@ export function useFocusTimer(initialMode?: FocusMode): FocusTimerContextType {
   return standalone;
 }
 
-function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerContextType {
+function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint', shouldFetchStats: boolean = true): FocusTimerContextType {
   const [pomodoroConfig, setPomodoroConfig] = useState<PomodoroCycleConfig>(DEFAULT_POMODORO_CONFIG);
   const [mode, setMode] = useState<FocusMode>(initialMode);
   const [totalSeconds, setTotalSeconds] = useState<number>(MODE_DURATIONS[initialMode]);
@@ -79,8 +79,10 @@ function useStandaloneFocusTimer(initialMode: FocusMode = 'sprint'): FocusTimerC
   }, []);
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    if (shouldFetchStats) {
+      fetchStats();
+    }
+  }, [fetchStats, shouldFetchStats]);
 
   // Handle mode change
   const selectMode = useCallback((newMode: FocusMode, customSecs?: number) => {

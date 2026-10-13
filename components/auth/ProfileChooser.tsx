@@ -4,26 +4,21 @@ import React, { useState, useEffect } from "react";
 import { useLearnUpTheme } from "@/lib/theme/ThemeProvider";
 import { ProfileUnlockModal } from "./ProfileUnlockModal";
 import { ProfileSecurityModal } from "./ProfileSecurityModal";
+import { AddProfileModal } from "./AddProfileModal";
+import {
+  getStoredProfiles,
+  saveStoredProfiles,
+  addOrUpdateSavedProfile,
+  type ProfileLockType,
+  type SavedProfile,
+} from "@/lib/auth/profileCookies";
 import styles from "./ProfileChooser.module.css";
 
-export type ProfileLockType =
-  "none" | "pin-4" | "pin-6" | "pin-custom" | "password";
-
-export interface SavedProfile {
-  id: string;
-  name: string;
-  email: string;
-  color: string;
-  initials: string;
-  lastActive: string;
-  lockType?: ProfileLockType;
-  pinLength?: number;
-  hashedPin?: string;
-  hasLock?: boolean;
-}
+// Re-export for compatibility with other modules and tests
+export type { ProfileLockType, SavedProfile };
 
 export interface ProfileChooserProps {
-  onSelectSignIn: (email?: string) => void;
+  onSelectSignIn: (email?: string, password?: string) => void;
   onSelectSignUp: () => void;
   onSelectGuest: () => void;
 }
@@ -46,23 +41,19 @@ export function ProfileChooser({
   const { isDark, toggleTheme } = useLearnUpTheme();
   const [profiles, setProfiles] = useState<SavedProfile[]>([]);
 
-  // Security modals state
+  // Modals state
   const [unlockTargetProfile, setUnlockTargetProfile] =
     useState<SavedProfile | null>(null);
   const [securityEditProfile, setSecurityEditProfile] =
     useState<SavedProfile | null>(null);
+  const [isAddProfileOpen, setIsAddProfileOpen] = useState(false);
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("LearnUp_saved_profiles");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setProfiles(parsed);
-        }
-      }
+      const loaded = getStoredProfiles();
+      setProfiles(loaded);
     } catch {
-      // Ignore parse error
+      // Ignore
     }
   }, []);
 
@@ -74,24 +65,20 @@ export function ProfileChooser({
 
   const saveProfilesToStorage = (updated: SavedProfile[]) => {
     setProfiles(updated);
-    try {
-      localStorage.setItem("LearnUp_saved_profiles", JSON.stringify(updated));
-    } catch {
-      // Ignore
-    }
+    saveStoredProfiles(updated);
   };
 
   const handleProfileClick = (profile: SavedProfile) => {
     if (profile.lockType && profile.lockType !== "none") {
       setUnlockTargetProfile(profile);
     } else {
-      onSelectSignIn(profile.email);
+      onSelectSignIn(profile.email, profile.password);
     }
   };
 
   const handleUnlockSuccess = (profile: SavedProfile) => {
     setUnlockTargetProfile(null);
-    onSelectSignIn(profile.email);
+    onSelectSignIn(profile.email, profile.password);
   };
 
   const handleRemoveProfile = (e: React.MouseEvent, id: string) => {
@@ -116,6 +103,18 @@ export function ProfileChooser({
     setSecurityEditProfile(null);
   };
 
+  const handleSaveNewProfile = (newProf: {
+    name: string;
+    email: string;
+    password?: string;
+  }) => {
+    const created = addOrUpdateSavedProfile(newProf);
+    const updated = getStoredProfiles();
+    setProfiles(updated);
+    setIsAddProfileOpen(false);
+    onSelectSignIn(created.email, created.password);
+  };
+
   const handleStartGuestMode = () => {
     // Set guest session cookie for server middleware
     document.cookie =
@@ -132,12 +131,12 @@ export function ProfileChooser({
     if (!profile.lockType || profile.lockType === "none") {
       return null;
     }
-    if (profile.lockType === "pin-4") return "ðŸ”’ 4-Digit PIN";
-    if (profile.lockType === "pin-6") return "ðŸ”’ 6-Digit PIN";
+    if (profile.lockType === "pin-4") return "🔒 4-Digit PIN";
+    if (profile.lockType === "pin-6") return "🔒 6-Digit PIN";
     if (profile.lockType === "pin-custom")
-      return `ðŸ”’ ${profile.pinLength || 4}-Digit PIN`;
-    if (profile.lockType === "password") return "ðŸ”’ Password";
-    return "ðŸ”’ Protected";
+      return `🔒 ${profile.pinLength || 4}-Digit PIN`;
+    if (profile.lockType === "password") return "🔒 Password";
+    return "🔒 Protected";
   };
 
   return (
@@ -227,7 +226,7 @@ export function ProfileChooser({
                     title="Configure PIN / Password lock"
                     aria-label={`Configure security lock for ${p.name}`}
                   >
-                    ðŸ”’
+                    🔒
                   </button>
                   <button
                     type="button"
@@ -262,11 +261,11 @@ export function ProfileChooser({
           {/* Add Profile / Create Account Card */}
           <div
             className={`${styles.profileCard} ${styles.addCard}`}
-            onClick={onSelectSignUp}
+            onClick={() => setIsAddProfileOpen(true)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                onSelectSignUp();
+                setIsAddProfileOpen(true);
               }
             }}
             role="button"
@@ -287,7 +286,7 @@ export function ProfileChooser({
             onClick={handleStartGuestMode}
             aria-label="Browse as guest without signing in"
           >
-            <span>ðŸ•¶ï¸</span>
+            <span>🕶️</span>
             <span>Browse as Guest</span>
           </button>
 
@@ -310,6 +309,14 @@ export function ProfileChooser({
         </div>
       </div>
 
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={isAddProfileOpen}
+        onClose={() => setIsAddProfileOpen(false)}
+        onSaveProfile={handleSaveNewProfile}
+        onGoToSignUp={onSelectSignUp}
+      />
+
       {/* Profile Unlock Modal */}
       <ProfileUnlockModal
         profile={unlockTargetProfile}
@@ -318,7 +325,7 @@ export function ProfileChooser({
         onUnlock={handleUnlockSuccess}
         onFallbackSignIn={(email) => {
           setUnlockTargetProfile(null);
-          onSelectSignIn(email);
+          onSelectSignIn(email, unlockTargetProfile?.password);
         }}
       />
 

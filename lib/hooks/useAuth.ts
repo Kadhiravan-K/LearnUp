@@ -10,14 +10,23 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // If client is in guest mode, resolve auth loading immediately
+    if (typeof window !== 'undefined' && localStorage.getItem('LearnUp_is_guest') === 'true') {
+      setIsLoading(false);
+    }
+
     const supabase = createClient();
 
     // Fetch initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+      });
 
     // Subscribe to ongoing session/auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {

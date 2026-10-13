@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/browser";
+import { createClient, formatAuthError } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input/Input";
 import { Button } from "@/components/ui/Button/Button";
 import { Alert } from "@/components/ui/Alert/Alert";
+import { addOrUpdateSavedProfile } from "@/lib/auth/profileCookies";
 import Link from "next/link";
 import styles from "./SignupForm.module.css";
 
@@ -70,6 +71,17 @@ export function SignupForm() {
       return;
     }
 
+    // Persist profile to cookies & localStorage for easy login
+    try {
+      addOrUpdateSavedProfile({
+        email,
+        password,
+        name: email.split("@")[0],
+      });
+    } catch {
+      // Ignore
+    }
+
     setIsLoading(true);
 
     try {
@@ -79,10 +91,8 @@ export function SignupForm() {
       });
 
       if (signUpError) {
-        import("@/lib/supabase/browser").then(({ formatAuthError }) => {
-          setError(formatAuthError(signUpError));
-          setIsLoading(false);
-        });
+        setError(formatAuthError(signUpError));
+        setIsLoading(false);
         return;
       }
 
@@ -99,9 +109,7 @@ export function SignupForm() {
         setIsLoading(false);
       }
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred.",
-      );
+      setError(formatAuthError(err));
       setIsLoading(false);
     }
   };
@@ -115,9 +123,28 @@ export function SignupForm() {
         </div>
 
         {error && (
-          <Alert variant="error" className={styles.alert}>
-            {error}
-          </Alert>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem' }}>
+            <Alert variant="error" className={styles.alert}>
+              {error}
+            </Alert>
+            {error.includes('Local Supabase is not running') && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+                  try {
+                    localStorage.setItem('LearnUp_is_guest', 'true');
+                  } catch {
+                    // Ignore
+                  }
+                  window.location.href = '/dashboard';
+                }}
+              >
+                Enter Guest Mode Immediately &rarr;
+              </Button>
+            )}
+          </div>
         )}
 
         {success && (
@@ -134,7 +161,8 @@ export function SignupForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            disabled={isLoading || !!success}
+            disabled={isLoading}
+            autoFocus
             required
           />
           <Input
@@ -142,8 +170,9 @@ export function SignupForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 6 characters"
             autoComplete="new-password"
-            disabled={isLoading || !!success}
+            disabled={isLoading}
             required
           />
           <Input
@@ -151,21 +180,20 @@ export function SignupForm() {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Repeat your password"
             autoComplete="new-password"
-            disabled={isLoading || !!success}
+            disabled={isLoading}
             required
           />
         </div>
 
-        {!success && (
-          <Button
-            type="submit"
-            className={styles.submitBtn}
-            isLoading={isLoading}
-          >
-            Sign Up
-          </Button>
-        )}
+        <Button
+          type="submit"
+          className={styles.submitBtn}
+          isLoading={isLoading}
+        >
+          Sign Up
+        </Button>
 
         <div className={styles.footer}>
           Already have an account?{" "}

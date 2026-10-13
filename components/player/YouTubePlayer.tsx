@@ -299,51 +299,63 @@ export const YouTubePlayer = forwardRef<YouTubePlayerRef, YouTubePlayerProps>(fu
 
   // Player Ready
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
-    playerRef.current = event.target;
-    setIsReady(true);
-    setHasError(false);
-    if (startSeconds > 0) {
-      event.target.seekTo(startSeconds, true);
-      setCurrentTime(startSeconds);
+    try {
+      playerRef.current = event.target;
+      setIsReady(true);
+      setHasError(false);
+      if (startSeconds > 0 && event.target?.seekTo) {
+        event.target.seekTo(startSeconds, true);
+        setCurrentTime(startSeconds);
+      }
+      const dur = event.target?.getDuration ? event.target.getDuration() : 0;
+      if (dur) setDuration(dur);
+      if (event.target?.setVolume) event.target.setVolume(volume);
+    } catch (e) {
+      console.warn('YouTube onReady error caught:', e);
     }
-    const dur = event.target.getDuration();
-    if (dur) setDuration(dur);
-    event.target.setVolume(volume);
   };
 
   // Player Error Handler
   const onPlayerError: YouTubeProps['onError'] = (event) => {
-    setIsPlaying(false);
-    setHasError(true);
-    const errorCode = event.data;
-    let msg = 'Unable to play this video. It may be private, deleted, or restricted from embedded playback.';
-    if (errorCode === 101 || errorCode === 150) {
-      msg = 'The video owner does not allow embedding this video on external sites.';
-    } else if (errorCode === 100) {
-      msg = 'This video has been removed or marked as private.';
+    try {
+      setIsPlaying(false);
+      setHasError(true);
+      const errorCode = event?.data;
+      let msg = 'Unable to play this video. It may be private, deleted, or restricted from embedded playback.';
+      if (errorCode === 101 || errorCode === 150) {
+        msg = 'The video owner does not allow embedding this video on external sites.';
+      } else if (errorCode === 100) {
+        msg = 'This video has been removed or marked as private.';
+      }
+      setErrorMessage(msg);
+    } catch (e) {
+      console.warn('YouTube onError handling error caught:', e);
     }
-    setErrorMessage(msg);
   };
 
   // Player State Change
   const onPlayerStateChange: YouTubeProps['onStateChange'] = (event) => {
-    if (event.data === 1) {
-      setIsPlaying(true);
-      startPolling(event.target);
-    } else if (event.data === 2) {
-      setIsPlaying(false);
-      stopPolling();
-      syncProgress(event.target);
-    } else if (event.data === 0) {
-      setIsPlaying(false);
-      stopPolling();
-      syncProgress(event.target);
-      if (sleepTimerMinutes === 'end') {
-        setSleepTimerMinutes('off');
+    try {
+      if (event.data === 1) {
+        setIsPlaying(true);
+        startPolling(event.target);
+      } else if (event.data === 2) {
+        setIsPlaying(false);
+        stopPolling();
+        syncProgress(event.target);
+      } else if (event.data === 0) {
+        setIsPlaying(false);
+        stopPolling();
+        syncProgress(event.target);
+        if (sleepTimerMinutes === 'end') {
+          setSleepTimerMinutes('off');
+        }
+        if (onCompleted) {
+          onCompleted();
+        }
       }
-      if (onCompleted) {
-        onCompleted();
-      }
+    } catch (e) {
+      console.warn('YouTube onStateChange handling error caught:', e);
     }
   };
 

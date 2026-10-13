@@ -11,6 +11,7 @@ export function AuthLoginClient() {
   const isFormMode = searchParams?.get('mode') === 'form';
   const [view, setView] = useState<'profiles' | 'login'>(isFormMode ? 'login' : 'profiles');
   const [selectedEmail, setSelectedEmail] = useState('');
+  const [selectedPassword, setSelectedPassword] = useState('');
 
   useEffect(() => {
     const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -19,8 +20,9 @@ export function AuthLoginClient() {
     }
   }, [searchParams]);
 
-  const handleSelectSignIn = (email?: string) => {
+  const handleSelectSignIn = (email?: string, password?: string) => {
     setSelectedEmail(email || '');
+    setSelectedPassword(password || '');
     setView('login');
   };
 
@@ -44,6 +46,7 @@ export function AuthLoginClient() {
     return (
       <LoginForm
         initialEmail={selectedEmail}
+        initialPassword={selectedPassword}
         onBackToProfiles={() => setView('profiles')}
       />
     );

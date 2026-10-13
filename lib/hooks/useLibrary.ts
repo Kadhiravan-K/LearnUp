@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { learningItemsApi } from '@/lib/api/learning-items';
 import type { LearningItem, LibraryProgress } from '@/lib/types';
-import { ApiError } from '@/lib/api/client';
+import { apiFetch, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 export type LibraryItemWithProgress = LearningItem & { progress?: LibraryProgress };
@@ -17,20 +17,15 @@ export function useLibrary() {
       setIsLoading(true);
       setError(null);
       
-      const [itemsData, progressRes] = await Promise.all([
+      const [itemsData, progressDataRes] = await Promise.all([
         learningItemsApi.listLearningItems(),
-        fetch('/api/progress/library').catch((err) => {
+        apiFetch<{ data: LibraryProgress[] }>('/api/progress/library').catch((err) => {
           console.warn('Failed to fetch progress data, library will render without progress indicators:', err);
           return null;
         })
       ]);
 
-      let progressData: LibraryProgress[] = [];
-      if (progressRes && progressRes.ok) {
-        progressData = (await progressRes.json()).data || [];
-      } else if (progressRes && !progressRes.ok) {
-        console.warn('Progress API returned non-ok status:', progressRes.status);
-      }
+      const progressData: LibraryProgress[] = progressDataRes?.data || [];
 
       const progressMap = new Map(progressData.map(p => [p.learning_item_id, p]));
 

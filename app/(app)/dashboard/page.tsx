@@ -30,13 +30,15 @@ export default function DashboardPage() {
     let isMounted = true;
     async function loadUser() {
       try {
+        if (typeof window !== 'undefined' && localStorage.getItem('LearnUp_is_guest') === 'true') {
+          if (isMounted) setUserName('Guest');
+          return;
+        }
         const { data: { session } } = await supabase.auth.getSession();
         if (isMounted) {
           if (session?.user?.email) {
             const namePart = session.user.email.split('@')[0];
             setUserName(namePart.charAt(0).toUpperCase() + namePart.slice(1));
-          } else if (localStorage.getItem('LearnUp_is_guest') === 'true') {
-            setUserName('Guest');
           }
         }
       } catch {

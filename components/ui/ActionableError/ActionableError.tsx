@@ -240,7 +240,62 @@ function resolveDiagnosticGuide(rawError: string, errorCode?: string): Diagnosti
     };
   }
 
-  // 5. Default Generic Error
+  // 5. Database Service Offline / Unreachable
+  if (
+    code === 'DATABASE_ERROR' ||
+    err.includes('database') ||
+    err.includes('failed to query library') ||
+    err.includes('failed to save')
+  ) {
+    return {
+      category: 'Database Service Diagnostic',
+      icon: '🗄️',
+      title: 'Database Service Offline',
+      summary: 'LearnUp could not connect to the database to save your learning item.',
+      primaryActionLabel: '🚀 Use Instant Guest Mode',
+      primaryAction: () => {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('LearnUp_guest_mode', 'true');
+          localStorage.setItem('LearnUp_is_guest', 'true');
+          document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+          window.location.reload();
+        }
+      },
+      secondaryActionLabel: '🔄 Try Again',
+      secondaryAction: (_, onRetry) => onRetry?.(),
+      blog: {
+        overview:
+          'When running LearnUp locally, persistent storage requires Docker Desktop and the local Supabase container.',
+        whyItHappens:
+          'The local Supabase database is not currently running. You can either use Instant Guest Mode to test immediately without Docker, or launch Docker Desktop and start Supabase.',
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Use Instant Guest Mode (No Setup Required)',
+            description:
+              'Enable Guest Mode to import videos, track playback, and take notes locally without running a database.',
+            buttonText: 'Switch to Guest Mode',
+            onClick: () => {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('LearnUp_guest_mode', 'true');
+                localStorage.setItem('LearnUp_is_guest', 'true');
+                document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+                window.location.reload();
+              }
+            }
+          },
+          {
+            stepNumber: 2,
+            title: 'Or Start Docker Desktop & Supabase',
+            description:
+              'If you want full multi-device persistent accounts, launch Docker Desktop on your machine and run `npx supabase start`.'
+          }
+        ]
+      }
+    };
+  }
+
+  // 6. Default Generic Error
   return {
     category: 'System Diagnostic',
     icon: '⚠️',
