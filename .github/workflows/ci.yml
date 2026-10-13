@@ -32,9 +32,33 @@ jobs:
 
       - name: Extract Supabase Environment Variables
         run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(supabase status -o env | grep ANON_KEY | cut -d '=' -f 2 | tr -d '\"' | tr -d '\r')" >> $GITHUB_ENV
-          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o env | grep SERVICE_ROLE_KEY | cut -d '=' -f 2 | tr -d '\"' | tr -d '\r')" >> $GITHUB_ENV
+          SUPABASE_STATUS=$(supabase status -o env)
+          API_URL=$(echo "$SUPABASE_STATUS" | grep '^API_URL=' | cut -d '=' -f 2- | tr -d '\"' | tr -d '\r')
+          ANON_KEY=$(echo "$SUPABASE_STATUS" | grep '^ANON_KEY=' | cut -d '=' -f 2- | tr -d '\"' | tr -d '\r')
+          SERVICE_ROLE_KEY=$(echo "$SUPABASE_STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d '=' -f 2- | tr -d '\"' | tr -d '\r')
+
+          if [ -z "$API_URL" ] || [ -z "$ANON_KEY" ]; then
+            echo "::error::Failed to extract Supabase environment variables from status output"
+            echo "$SUPABASE_STATUS"
+            exit 1
+          fi
+
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_ENV
+
+          echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL" > .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> .env.local
+
+      - name: Verify Supabase Health
+        run: |
+          echo "Verifying connection to Supabase at $NEXT_PUBLIC_SUPABASE_URL..."
+          curl -s -f -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" "$NEXT_PUBLIC_SUPABASE_URL/auth/v1/health" || {
+            echo "::error::Supabase Auth health check failed at $NEXT_PUBLIC_SUPABASE_URL"
+            exit 1
+          }
+          echo "Supabase services are healthy and responsive."
 
       - name: Install NPM Dependencies
         run: npm ci
