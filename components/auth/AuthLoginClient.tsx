@@ -5,13 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ProfileChooser } from './ProfileChooser';
 import { LoginForm } from './LoginForm';
 
+import { getOrCreateGuestSessionId } from '@/lib/auth/guest-session';
+
 export function AuthLoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isFormMode = searchParams?.get('mode') === 'form';
   const [view, setView] = useState<'profiles' | 'login'>(isFormMode ? 'login' : 'profiles');
   const [selectedEmail, setSelectedEmail] = useState('');
-  const [selectedPassword, setSelectedPassword] = useState('');
 
   useEffect(() => {
     const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -20,9 +21,8 @@ export function AuthLoginClient() {
     }
   }, [searchParams]);
 
-  const handleSelectSignIn = (email?: string, password?: string) => {
+  const handleSelectSignIn = (email?: string) => {
     setSelectedEmail(email || '');
-    setSelectedPassword(password || '');
     setView('login');
   };
 
@@ -31,10 +31,12 @@ export function AuthLoginClient() {
   };
 
   const handleSelectGuest = () => {
-    // Set guest session cookie for server middleware
+    const guestId = getOrCreateGuestSessionId();
     document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+    document.cookie = `LearnUp_guest_session_id=${guestId}; path=/; max-age=86400; SameSite=Lax`;
     try {
       localStorage.setItem('LearnUp_is_guest', 'true');
+      localStorage.setItem('LearnUp_guest_session_id', guestId);
     } catch {
       // Ignore
     }
@@ -46,7 +48,6 @@ export function AuthLoginClient() {
     return (
       <LoginForm
         initialEmail={selectedEmail}
-        initialPassword={selectedPassword}
         onBackToProfiles={() => setView('profiles')}
       />
     );

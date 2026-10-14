@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/browser';
+import { getGuestAuthToken } from '@/lib/auth/guest-session';
 import styles from './VibeCodeGenerator.module.css';
 
 export interface VibeCodeGeneratorProps {
@@ -39,7 +40,10 @@ export function VibeCodeGenerator({
         typeof window !== 'undefined' &&
         (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
       ) {
-        headers['Authorization'] = 'Bearer guest-session';
+        const guestToken = getGuestAuthToken();
+        if (guestToken) {
+          headers['Authorization'] = `Bearer ${guestToken}`;
+        }
       }
 
       const res = await fetch('/api/plugins/vibe-code', {

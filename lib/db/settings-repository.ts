@@ -1,7 +1,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { isGuestUserId } from '../auth/guest-session';
 import { AppError } from '../errors';
 import { logger } from '../logging';
 import { UserSettings, UpdateUserSettingsInput } from '../types';
+
+const guestSettingsStores = (globalThis as unknown as {
+  __learnup_guest_settings_stores?: Map<string, UserSettings>;
+}).__learnup_guest_settings_stores ??= new Map<string, UserSettings>();
 
 export const DEFAULT_USER_SETTINGS: Omit<UserSettings, 'user_id' | 'created_at' | 'updated_at'> = {
   username: '',
@@ -42,6 +47,21 @@ export interface ISettingsRepository {
 
 export class SettingsRepository implements ISettingsRepository {
   async getByUserId(client: SupabaseClient, userId: string): Promise<UserSettings> {
+    if (isGuestUserId(userId)) {
+      let settings = guestSettingsStores.get(userId);
+      if (!settings) {
+        const now = new Date().toISOString();
+        settings = {
+          user_id: userId,
+          ...DEFAULT_USER_SETTINGS,
+          created_at: now,
+          updated_at: now
+        };
+        guestSettingsStores.set(userId, settings);
+      }
+      return { ...settings };
+    }
+
     const { data, error } = await client
       .from('user_settings')
       .select('*')
@@ -87,6 +107,17 @@ export class SettingsRepository implements ISettingsRepository {
   }
 
   async update(client: SupabaseClient, userId: string, updates: UpdateUserSettingsInput): Promise<UserSettings> {
+    if (isGuestUserId(userId)) {
+      const existing = await this.getByUserId(client, userId);
+      const updated: UserSettings = {
+        ...existing,
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+      guestSettingsStores.set(userId, updated);
+      return { ...updated };
+    }
+
     const { data, error } = await client
       .from('user_settings')
       .upsert({
@@ -117,6 +148,11 @@ export class SettingsRepository implements ISettingsRepository {
   }
 
   async deleteByUserId(client: SupabaseClient, userId: string): Promise<void> {
+    if (isGuestUserId(userId)) {
+      guestSettingsStores.delete(userId);
+      return;
+    }
+
     const { error } = await client
       .from('user_settings')
       .delete()

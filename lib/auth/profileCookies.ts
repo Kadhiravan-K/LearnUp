@@ -9,7 +9,6 @@ export interface SavedProfile {
   id: string;
   name: string;
   email: string;
-  password?: string;
   color: string;
   initials: string;
   lastActive: string;
@@ -23,7 +22,29 @@ export const PROFILE_STORAGE_KEY = 'LearnUp_saved_profiles';
 export const PROFILE_COOKIE_KEY = 'LearnUp_saved_profiles';
 
 /**
+ * Sanitizes profile records by removing any insecure persisted passwords.
+ */
+function sanitizeProfiles(profiles: unknown[]): { sanitized: SavedProfile[]; hadPasswords: boolean } {
+  let hadPasswords = false;
+  const sanitized: SavedProfile[] = [];
+
+  for (const raw of profiles) {
+    if (raw && typeof raw === 'object') {
+      const p = { ...(raw as Record<string, any>) };
+      if ('password' in p) {
+        hadPasswords = true;
+        delete p.password;
+      }
+      sanitized.push(p as SavedProfile);
+    }
+  }
+
+  return { sanitized, hadPasswords };
+}
+
+/**
  * Retrieves saved user profiles from browser cookies with localStorage fallback.
+ * Automatically sanitizes any legacy persisted passwords.
  */
 export function getStoredProfiles(): SavedProfile[] {
   if (typeof window === 'undefined') return [];
@@ -35,7 +56,11 @@ export function getStoredProfiles(): SavedProfile[] {
       const decoded = decodeURIComponent(match[1]);
       const parsed = JSON.parse(decoded);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        const { sanitized, hadPasswords } = sanitizeProfiles(parsed);
+        if (hadPasswords) {
+          saveStoredProfiles(sanitized);
+        }
+        return sanitized;
       }
     }
   } catch {
@@ -48,13 +73,10 @@ export function getStoredProfiles(): SavedProfile[] {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // Sync back to cookie so both are populated
-        try {
-          document.cookie = `${PROFILE_COOKIE_KEY}=${encodeURIComponent(JSON.stringify(parsed))}; path=/; max-age=31536000; SameSite=Lax`;
-        } catch {
-          // ignore
-        }
-        return parsed;
+        const { sanitized, hadPasswords } = sanitizeProfiles(parsed);
+        // Sync back to cookie and localStorage
+        saveStoredProfiles(sanitized);
+        return sanitized;
       }
     }
   } catch {
@@ -66,10 +88,12 @@ export function getStoredProfiles(): SavedProfile[] {
 
 /**
  * Persists user profiles to both browser cookies and localStorage.
+ * Guaranteed never to write raw passwords.
  */
 export function saveStoredProfiles(profiles: SavedProfile[]): void {
   if (typeof window === 'undefined') return;
-  const json = JSON.stringify(profiles);
+  const { sanitized } = sanitizeProfiles(profiles);
+  const json = JSON.stringify(sanitized);
 
   // 1. Save to document.cookie (1-year max-age, Lax, path=/)
   try {
@@ -87,10 +111,11 @@ export function saveStoredProfiles(profiles: SavedProfile[]): void {
 }
 
 /**
- * Adds a new profile or updates an existing one with username and password.
+ * Adds a new profile or updates an existing one with username and display metadata.
+ * Passwords are never persisted in profile records.
  */
 export function addOrUpdateSavedProfile(
-  profileData: Partial<SavedProfile> & { email: string; password?: string }
+  profileData: Partial<SavedProfile> & { email: string }
 ): SavedProfile {
   const current = getStoredProfiles();
   const normalizedEmail = profileData.email.trim();
@@ -103,14 +128,15 @@ export function addOrUpdateSavedProfile(
 
   let target: SavedProfile;
   if (existingIndex >= 0) {
+    const existing = current[existingIndex];
     target = {
-      ...current[existingIndex],
+      ...existing,
       ...profileData,
       email: normalizedEmail,
-      name: profileData.name || current[existingIndex].name || defaultDisplayName,
-      password: profileData.password !== undefined ? profileData.password : current[existingIndex].password,
+      name: profileData.name || existing.name || defaultDisplayName,
       lastActive: new Date().toISOString()
     };
+    delete (target as any).password;
     current[existingIndex] = target;
   } else {
     target = {
@@ -123,6 +149,7 @@ export function addOrUpdateSavedProfile(
       ...profileData,
       email: normalizedEmail,
     };
+    delete (target as any).password;
     current.unshift(target);
   }
 

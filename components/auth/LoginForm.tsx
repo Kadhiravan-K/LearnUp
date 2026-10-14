@@ -6,19 +6,18 @@ import { Input } from '@/components/ui/Input/Input';
 import { Button } from '@/components/ui/Button/Button';
 import { Alert } from '@/components/ui/Alert/Alert';
 import { addOrUpdateSavedProfile } from '@/lib/auth/profileCookies';
+import { clearGuestSession, getOrCreateGuestSessionId } from '@/lib/auth/guest-session';
 import Link from 'next/link';
 import styles from './LoginForm.module.css';
 import { MfaChallengeForm } from './MfaChallengeForm';
 
 export interface LoginFormProps {
   initialEmail?: string;
-  initialPassword?: string;
   onBackToProfiles?: () => void;
 }
 
 export function LoginForm({
   initialEmail = '',
-  initialPassword = '',
   onBackToProfiles
 }: LoginFormProps) {
   let supabase: ReturnType<typeof createClient> | null = null;
@@ -30,7 +29,7 @@ export function LoginForm({
   }
 
   const [email, setEmail] = useState(initialEmail);
-  const [password, setPassword] = useState(initialPassword);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showMfa, setShowMfa] = useState(false);
@@ -40,24 +39,20 @@ export function LoginForm({
     if (initialEmail) {
       setEmail(initialEmail);
     }
-    if (initialPassword) {
-      setPassword(initialPassword);
-    }
-  }, [initialEmail, initialPassword]);
+  }, [initialEmail]);
 
   const handleSuccess = (data: any) => {
     try {
       addOrUpdateSavedProfile({
         id: data.session?.user?.id || String(Date.now()),
         email: email,
-        password: password || undefined,
         name: email.split('@')[0],
       });
-      localStorage.removeItem('LearnUp_is_guest');
+      clearGuestSession();
     } catch {
       // Ignore
     }
-    document.cookie = 'LearnUp_guest_mode=; path=/; max-age=0; SameSite=Lax';
+    clearGuestSession();
     window.location.href = '/dashboard';
   };
 
@@ -76,11 +71,10 @@ export function LoginForm({
       return;
     }
 
-    // Persist profile to cookies & localStorage for easy login
+    // Persist non-sensitive profile metadata to cookies & localStorage for easy profile switching
     try {
       addOrUpdateSavedProfile({
         email: email,
-        password: password,
         name: email.split('@')[0],
       });
     } catch {
@@ -160,9 +154,12 @@ export function LoginForm({
                 type="button"
                 variant="secondary"
                 onClick={() => {
+                  const guestId = getOrCreateGuestSessionId();
                   document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+                  document.cookie = `LearnUp_guest_session_id=${guestId}; path=/; max-age=86400; SameSite=Lax`;
                   try {
                     localStorage.setItem('LearnUp_is_guest', 'true');
+                    localStorage.setItem('LearnUp_guest_session_id', guestId);
                   } catch {
                     // Ignore
                   }
@@ -194,7 +191,7 @@ export function LoginForm({
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             disabled={isLoading}
-            autoFocus={Boolean(initialEmail && !initialPassword)}
+            autoFocus={Boolean(initialEmail)}
             required
           />
         </div>

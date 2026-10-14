@@ -6,6 +6,7 @@ import {
   LearningItemVideo,
   LearningItemWithVideos
 } from '../types';
+import { isGuestUserId } from '../auth/guest-session';
 
 export interface ILearningItemRepository {
   findBySourceKey(
@@ -92,9 +93,22 @@ export interface ILearningItemRepository {
   ): Promise<LearningItemWithVideos>;
 }
 
-const GUEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-const guestItemsStore: Map<string, LearningItemWithVideos> =
-  ((globalThis as any).__learnup_guest_items_store ??= new Map<string, LearningItemWithVideos>());
+// Partitioned in-memory store for guest learning items: Map<guestUserId, Map<itemId, LearningItemWithVideos>>
+const guestUserStores: Map<string, Map<string, LearningItemWithVideos>> =
+  ((globalThis as any).__learnup_guest_user_stores ??= new Map<string, Map<string, LearningItemWithVideos>>());
+
+export function getGuestStoreForUser(userId: string): Map<string, LearningItemWithVideos> {
+  let store = guestUserStores.get(userId);
+  if (!store) {
+    store = new Map<string, LearningItemWithVideos>();
+    guestUserStores.set(userId, store);
+  }
+  return store;
+}
+
+export function clearGuestStoresForTesting(): void {
+  guestUserStores.clear();
+}
 
 export class LearningItemRepository implements ILearningItemRepository {
   async findBySourceKey(
@@ -102,8 +116,9 @@ export class LearningItemRepository implements ILearningItemRepository {
     userId: string,
     sourceKey: string
   ): Promise<LearningItem | null> {
-    if (userId === GUEST_USER_ID) {
-      for (const item of guestItemsStore.values()) {
+    if (isGuestUserId(userId)) {
+      const store = getGuestStoreForUser(userId);
+      for (const item of store.values()) {
         if (item.normalized_source_key === sourceKey) {
           return item;
         }
@@ -147,8 +162,9 @@ export class LearningItemRepository implements ILearningItemRepository {
       thumbnailUrl: string | null;
     }
   ): Promise<LearningItem> {
-    if (item.userId === GUEST_USER_ID) {
-      for (const existing of guestItemsStore.values()) {
+    if (isGuestUserId(item.userId)) {
+      const store = getGuestStoreForUser(item.userId);
+      for (const existing of store.values()) {
         if (existing.normalized_source_key === item.normalizedSourceKey) {
           throw new AppError('VALIDATION_ERROR', 'This video is already in your library.', 409);
         }
@@ -175,7 +191,7 @@ export class LearningItemRepository implements ILearningItemRepository {
         updated_at: now,
         videos: []
       };
-      guestItemsStore.set(id, newItem);
+      store.set(id, newItem);
       return newItem;
     }
 
@@ -267,8 +283,9 @@ export class LearningItemRepository implements ILearningItemRepository {
       durationFormatted?: string;
     }>
   ): Promise<LearningItemWithVideos> {
-    if (item.userId === GUEST_USER_ID) {
-      for (const existing of guestItemsStore.values()) {
+    if (isGuestUserId(item.userId)) {
+      const store = getGuestStoreForUser(item.userId);
+      for (const existing of store.values()) {
         if (existing.normalized_source_key === item.normalizedSourceKey) {
           throw new AppError('VALIDATION_ERROR', 'This playlist is already in your library.', 409);
         }
@@ -306,7 +323,7 @@ export class LearningItemRepository implements ILearningItemRepository {
         updated_at: now,
         videos: childVideos
       };
-      guestItemsStore.set(playlistId, newPlaylist);
+      store.set(playlistId, newPlaylist);
       return newPlaylist;
     }
 
@@ -470,8 +487,9 @@ export class LearningItemRepository implements ILearningItemRepository {
   }
 
   async listItems(client: SupabaseClient, userId: string): Promise<LearningItem[]> {
-    if (userId === GUEST_USER_ID) {
-      return Array.from(guestItemsStore.values()).sort(
+    if (isGuestUserId(userId)) {
+      const store = getGuestStoreForUser(userId);
+      return Array.from(store.values()).sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
     }
@@ -499,8 +517,9 @@ export class LearningItemRepository implements ILearningItemRepository {
     userId: string,
     itemId: string
   ): Promise<LearningItemWithVideos> {
-    if (userId === GUEST_USER_ID) {
-      const item = guestItemsStore.get(itemId);
+    if (isGuestUserId(userId)) {
+      const store = getGuestStoreForUser(userId);
+      const item = store.get(itemId);
       if (!item) {
         throw new AppError('NOT_FOUND', 'Learning item not found', 404);
       }
@@ -555,11 +574,12 @@ export class LearningItemRepository implements ILearningItemRepository {
   }
 
   async deleteItem(client: SupabaseClient, userId: string, itemId: string): Promise<void> {
-    if (userId === GUEST_USER_ID) {
-      if (!guestItemsStore.has(itemId)) {
+    if (isGuestUserId(userId)) {
+      const store = getGuestStoreForUser(userId);
+      if (!store.has(itemId)) {
         throw new AppError('NOT_FOUND', 'Learning item not found', 404);
       }
-      guestItemsStore.delete(itemId);
+      store.delete(itemId);
       return;
     }
 
@@ -612,8 +632,9 @@ export class LearningItemRepository implements ILearningItemRepository {
       tags?: string[];
     }
   ): Promise<LearningItem> {
-    if (userId === GUEST_USER_ID) {
-      const item = guestItemsStore.get(itemId);
+    if (isGuestUserId(userId)) {
+      const store = getGuestStoreForUser(userId);
+      const item = store.get(itemId);
       if (!item) {
         throw new AppError('NOT_FOUND', 'Learning item not found', 404);
       }
@@ -622,7 +643,7 @@ export class LearningItemRepository implements ILearningItemRepository {
         ...updates,
         updated_at: new Date().toISOString()
       };
-      guestItemsStore.set(itemId, updated);
+      store.set(itemId, updated);
       return updated;
     }
 
@@ -667,8 +688,9 @@ export class LearningItemRepository implements ILearningItemRepository {
       duration_seconds?: number | null;
     }>
   ): Promise<LearningItemWithVideos> {
-    if (userId === GUEST_USER_ID) {
-      const item = guestItemsStore.get(itemId);
+    if (isGuestUserId(userId)) {
+      const store = getGuestStoreForUser(userId);
+      const item = store.get(itemId);
       if (!item) {
         throw new AppError('NOT_FOUND', 'Learning item not found', 404);
       }
@@ -688,7 +710,7 @@ export class LearningItemRepository implements ILearningItemRepository {
         videos: updatedVideos,
         updated_at: now
       };
-      guestItemsStore.set(itemId, updated);
+      store.set(itemId, updated);
       return updated;
     }
 

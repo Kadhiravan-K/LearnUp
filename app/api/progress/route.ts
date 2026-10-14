@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { isGuestUserId } from '@/lib/auth/guest-session';
 import { ProgressRepository } from '@/lib/db/progress-repository';
 import { AppError } from '@/lib/errors';
 import { logger } from '@/lib/logging';
@@ -25,7 +26,7 @@ export async function PUT(request: Request) {
       throw new AppError('VALIDATION_ERROR', 'Invalid duration payload', 400);
     }
 
-    if (user.id === '00000000-0000-0000-0000-000000000001') {
+    if (isGuestUserId(user.id)) {
       return NextResponse.json({
         data: {
           youtube_video_id: youtubeVideoId,

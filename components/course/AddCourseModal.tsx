@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CoursePreviewData } from '@/lib/types';
 import { isValidYouTubeUrl, extractMultipleYouTubeUrls } from '@/lib/utils/url';
 import { createClient } from '@/lib/supabase/browser';
+import { getGuestAuthToken } from '@/lib/auth/guest-session';
 import { ActionableError } from '@/components/ui/ActionableError/ActionableError';
 import { YouTubeImportLoader } from '@/components/ui/LoadingAnimation/YouTubeImportLoader';
 import styles from './AddCourseModal.module.css';
@@ -90,7 +91,10 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       } else if (typeof window !== 'undefined' && (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')) {
-        headers['Authorization'] = 'Bearer guest-session';
+        const guestToken = getGuestAuthToken();
+        if (guestToken) {
+          headers['Authorization'] = `Bearer ${guestToken}`;
+        }
       }
 
       const payload = validUrls.length > 1
@@ -217,7 +221,10 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       } else if (typeof window !== 'undefined' && (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')) {
-        headers['Authorization'] = 'Bearer guest-session';
+        const guestToken = getGuestAuthToken();
+        if (guestToken) {
+          headers['Authorization'] = `Bearer ${guestToken}`;
+        }
       }
 
       const payload = {

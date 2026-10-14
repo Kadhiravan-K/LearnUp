@@ -6,7 +6,7 @@ import styles from './AddProfileModal.module.css';
 export interface AddProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaveProfile: (profile: { name: string; email: string; password?: string }) => void;
+  onSaveProfile: (profile: { name: string; email: string }) => void;
   onGoToSignUp?: () => void;
 }
 
@@ -18,7 +18,6 @@ export function AddProfileModal({
 }: AddProfileModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -43,12 +42,10 @@ export function AddProfileModal({
     onSaveProfile({
       name: trimmedName,
       email: trimmedEmail,
-      password: password || undefined
     });
 
     setName('');
     setEmail('');
-    setPassword('');
     onClose();
   };
 
@@ -62,7 +59,7 @@ export function AddProfileModal({
           </button>
         </div>
         <p className={styles.subtitle}>
-          Save your account credentials on this browser using cookies and local storage for 1-click access.
+          Save your learning profile on this browser for 1-click account switching.
         </p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -91,19 +88,6 @@ export function AddProfileModal({
               placeholder="you@example.com"
               className={styles.input}
               required
-            />
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label htmlFor="profile-password" className={styles.label}>Password</label>
-            <input
-              id="profile-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password to save"
-              className={styles.input}
-              autoComplete="current-password"
             />
           </div>
 

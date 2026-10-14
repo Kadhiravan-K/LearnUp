@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/browser';
+import { getGuestAuthToken } from '@/lib/auth/guest-session';
 import type { RoadmapTrack, RoadmapNode } from '@/lib/types';
 
 function getResponseError(payload: unknown, fallback: string): Error {
@@ -37,7 +38,10 @@ export function useRoadmaps() {
         typeof window !== 'undefined' &&
         (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
     ) {
-        headers['Authorization'] = 'Bearer guest-session';
+        const guestToken = getGuestAuthToken();
+        if (guestToken) {
+          headers['Authorization'] = `Bearer ${guestToken}`;
+        }
     }
     return headers;
   }, []);

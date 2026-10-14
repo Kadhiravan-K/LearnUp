@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/browser';
 import type { ErrorCode } from '@/lib/errors';
+import { getGuestAuthToken } from '@/lib/auth/guest-session';
 
 export class ApiError extends Error {
   public code: ErrorCode | 'NETWORK_ERROR' | 'UNKNOWN_ERROR';
@@ -36,7 +37,10 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
   } else if (isGuest) {
-    headers.set('Authorization', 'Bearer guest-session');
+    const guestToken = getGuestAuthToken();
+    if (guestToken) {
+      headers.set('Authorization', `Bearer ${guestToken}`);
+    }
   }
 
   let response: Response;

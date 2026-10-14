@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../errors';
 import { logger } from '../logging';
 import { FocusSession, FocusStats, FocusMode, SoundscapeProfile } from '../types';
+import { isGuestUserId } from '../auth/guest-session';
 
 export interface IFocusRepository {
   listByUser(client: SupabaseClient, userId: string, limit?: number): Promise<FocusSession[]>;
@@ -82,7 +83,7 @@ export class FocusRepository implements IFocusRepository {
   }
 
   async getStats(client: SupabaseClient, userId: string): Promise<FocusStats> {
-    if (userId === '00000000-0000-0000-0000-000000000001') {
+    if (isGuestUserId(userId)) {
       const daysOfWeekLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'Today'];
       return {
         todayFocusMinutes: 0,
@@ -118,7 +119,7 @@ export class FocusRepository implements IFocusRepository {
         userId,
         error: error.message
       });
-      if (userId === '00000000-0000-0000-0000-000000000001') {
+      if (isGuestUserId(userId)) {
         const daysOfWeekLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'Today'];
         return {
           todayFocusMinutes: 0,

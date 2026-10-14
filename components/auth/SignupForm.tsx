@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input/Input";
 import { Button } from "@/components/ui/Button/Button";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { addOrUpdateSavedProfile } from "@/lib/auth/profileCookies";
+import { getOrCreateGuestSessionId } from "@/lib/auth/guest-session";
 import Link from "next/link";
 import styles from "./SignupForm.module.css";
 
@@ -71,11 +72,10 @@ export function SignupForm() {
       return;
     }
 
-    // Persist profile to cookies & localStorage for easy login
+    // Persist non-sensitive profile metadata to cookies & localStorage for easy profile switching
     try {
       addOrUpdateSavedProfile({
         email,
-        password,
         name: email.split("@")[0],
       });
     } catch {
@@ -132,9 +132,12 @@ export function SignupForm() {
                 type="button"
                 variant="secondary"
                 onClick={() => {
+                  const guestId = getOrCreateGuestSessionId();
                   document.cookie = 'LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax';
+                  document.cookie = `LearnUp_guest_session_id=${guestId}; path=/; max-age=86400; SameSite=Lax`;
                   try {
                     localStorage.setItem('LearnUp_is_guest', 'true');
+                    localStorage.setItem('LearnUp_guest_session_id', guestId);
                   } catch {
                     // Ignore
                   }

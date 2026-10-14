@@ -48,14 +48,52 @@ export async function requireAuth(req: Request): Promise<AuthContext> {
   }
 
   // Handle guest mode session
-  if (token === 'guest-session' || (!token && cookieHeader.includes('LearnUp_guest_mode=true'))) {
-    const anonClient = createAnonClient();
+  if (token?.startsWith('guest-') || token === 'guest-session' || (!token && cookieHeader.includes('LearnUp_guest_mode=true'))) {
+    let guestSessionId: string | null = null;
+
+    if (token && token.startsWith('guest-') && token !== 'guest-session') {
+      const candidate = token.substring(6).trim();
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(candidate)) {
+        guestSessionId = candidate;
+      } else {
+        throw new AppError('UNAUTHORIZED', 'Invalid guest session identifier format.', 401);
+      }
+    } else {
+      // For fixed token === 'guest-session' or cookie-based guest mode,
+      // require a cryptographically valid unique session ID from the cookie.
+      // A static 'guest-session' header alone is NEVER trusted as a unique identity.
+      const matchGuestCookie = cookieHeader.match(/(?:^|;\s*)LearnUp_guest_session_id=([^;]+)/);
+      if (matchGuestCookie && matchGuestCookie[1]) {
+        const candidate = decodeURIComponent(matchGuestCookie[1]).trim();
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(candidate)) {
+          guestSessionId = candidate;
+        }
+      }
+    }
+
+    if (!guestSessionId) {
+      if (token === 'guest-session') {
+        throw new AppError('UNAUTHORIZED', 'Fixed guest-session token is untrusted without a unique session identifier.', 401);
+      }
+      throw new AppError('UNAUTHORIZED', 'Guest session requires a valid unique session identifier.', 401);
+    }
+
+    let anonClient: SupabaseClient;
+    try {
+      anonClient = createAnonClient();
+    } catch {
+      anonClient = {} as SupabaseClient;
+    }
+
+    const guestUserId = `guest-${guestSessionId}`;
     return {
       user: {
-        id: '00000000-0000-0000-0000-000000000001',
-        email: 'guest@LearnUp.local'
+        id: guestUserId,
+        email: `${guestUserId}@guest.learnup.local`
       },
-      accessToken: 'guest-session',
+      accessToken: `guest-${guestSessionId}`,
       supabase: anonClient
     };
   }

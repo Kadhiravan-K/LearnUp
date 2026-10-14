@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Note } from '@/lib/types';
 import { createClient } from '@/lib/supabase/browser';
+import { getGuestAuthToken } from '@/lib/auth/guest-session';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { Alert } from '@/components/ui/Alert/Alert';
 import { NoteEditor } from './NoteEditor';
@@ -32,7 +33,10 @@ export function NotesSection({ learningItemId, youtubeVideoId }: NotesSectionPro
         typeof window !== 'undefined' &&
         (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
       ) {
-        headers['Authorization'] = 'Bearer guest-session';
+        const guestToken = getGuestAuthToken();
+        if (guestToken) {
+          headers['Authorization'] = `Bearer ${guestToken}`;
+        }
       }
     } catch {}
     return headers;

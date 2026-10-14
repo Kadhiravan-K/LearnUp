@@ -12,13 +12,14 @@ import {
   type ProfileLockType,
   type SavedProfile,
 } from "@/lib/auth/profileCookies";
+import { getOrCreateGuestSessionId } from "@/lib/auth/guest-session";
 import styles from "./ProfileChooser.module.css";
 
 // Re-export for compatibility with other modules and tests
 export type { ProfileLockType, SavedProfile };
 
 export interface ProfileChooserProps {
-  onSelectSignIn: (email?: string, password?: string) => void;
+  onSelectSignIn: (email?: string) => void;
   onSelectSignUp: () => void;
   onSelectGuest: () => void;
 }
@@ -72,13 +73,13 @@ export function ProfileChooser({
     if (profile.lockType && profile.lockType !== "none") {
       setUnlockTargetProfile(profile);
     } else {
-      onSelectSignIn(profile.email, profile.password);
+      onSelectSignIn(profile.email);
     }
   };
 
   const handleUnlockSuccess = (profile: SavedProfile) => {
     setUnlockTargetProfile(null);
-    onSelectSignIn(profile.email, profile.password);
+    onSelectSignIn(profile.email);
   };
 
   const handleRemoveProfile = (e: React.MouseEvent, id: string) => {
@@ -106,21 +107,23 @@ export function ProfileChooser({
   const handleSaveNewProfile = (newProf: {
     name: string;
     email: string;
-    password?: string;
   }) => {
     const created = addOrUpdateSavedProfile(newProf);
     const updated = getStoredProfiles();
     setProfiles(updated);
     setIsAddProfileOpen(false);
-    onSelectSignIn(created.email, created.password);
+    onSelectSignIn(created.email);
   };
 
   const handleStartGuestMode = () => {
-    // Set guest session cookie for server middleware
+    const guestId = getOrCreateGuestSessionId();
     document.cookie =
       "LearnUp_guest_mode=true; path=/; max-age=86400; SameSite=Lax";
+    document.cookie =
+      `LearnUp_guest_session_id=${guestId}; path=/; max-age=86400; SameSite=Lax`;
     try {
       localStorage.setItem("LearnUp_is_guest", "true");
+      localStorage.setItem("LearnUp_guest_session_id", guestId);
     } catch {
       // Ignore
     }
@@ -325,7 +328,7 @@ export function ProfileChooser({
         onUnlock={handleUnlockSuccess}
         onFallbackSignIn={(email) => {
           setUnlockTargetProfile(null);
-          onSelectSignIn(email, unlockTargetProfile?.password);
+          onSelectSignIn(email);
         }}
       />
 

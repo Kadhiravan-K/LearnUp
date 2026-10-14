@@ -15,12 +15,20 @@ function normalizeHex(hex: string): string {
 test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
   test('keeps rendered rewards surfaces in sync with light and dark theme tokens', async ({ browser }) => {
     const context = await browser.newContext();
-    await context.addCookies([{
-      name: 'LearnUp_guest_mode',
-      value: 'true',
-      domain: 'localhost',
-      path: '/',
-    }]);
+    await context.addCookies([
+      {
+        name: 'LearnUp_guest_mode',
+        value: 'true',
+        domain: 'localhost',
+        path: '/',
+      },
+      {
+        name: 'LearnUp_guest_session_id',
+        value: '00000000-0000-4000-8000-000000000001',
+        domain: 'localhost',
+        path: '/',
+      }
+    ]);
 
     const page = await context.newPage();
     await page.goto('/rewards', { waitUntil: 'domcontentloaded' });
@@ -47,12 +55,20 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     // Support guest session access to dashboard
-    await context.addCookies([{
-      name: 'LearnUp_guest_mode',
-      value: 'true',
-      domain: 'localhost',
-      path: '/',
-    }]);
+    await context.addCookies([
+      {
+        name: 'LearnUp_guest_mode',
+        value: 'true',
+        domain: 'localhost',
+        path: '/',
+      },
+      {
+        name: 'LearnUp_guest_session_id',
+        value: '00000000-0000-4000-8000-000000000001',
+        domain: 'localhost',
+        path: '/',
+      }
+    ]);
 
     const page = await context.newPage();
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });

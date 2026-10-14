@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { Alert } from '@/components/ui/Alert/Alert';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { createClient } from '@/lib/supabase/browser';
+import { getGuestAuthToken } from '@/lib/auth/guest-session';
 import type { LearningItem, LearningItemVideo, LearningItemWithVideos } from '@/lib/types';
 import styles from './EditCourseModal.module.css';
 
@@ -56,7 +57,10 @@ export function EditCourseModal({ isOpen, onClose, onSuccess, item }: EditCourse
           typeof window !== 'undefined' &&
           (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
         ) {
-          headers['Authorization'] = 'Bearer guest-session';
+          const guestToken = getGuestAuthToken();
+          if (guestToken) {
+            headers['Authorization'] = `Bearer ${guestToken}`;
+          }
         }
 
         fetch(`/api/learning-items/${item.id}`, { headers })
@@ -168,7 +172,10 @@ export function EditCourseModal({ isOpen, onClose, onSuccess, item }: EditCourse
         typeof window !== 'undefined' &&
         (localStorage.getItem('LearnUp_is_guest') === 'true' || localStorage.getItem('LearnUp_guest_mode') === 'true')
       ) {
-        headers['Authorization'] = 'Bearer guest-session';
+        const guestToken = getGuestAuthToken();
+        if (guestToken) {
+          headers['Authorization'] = `Bearer ${guestToken}`;
+        }
       }
 
       const payload: Record<string, any> = {

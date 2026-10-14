@@ -1,15 +1,25 @@
 import type { Page } from '@playwright/test';
 
 export async function startGuestSession(page: Page) {
-  await page.context().addCookies([{
-    name: 'LearnUp_guest_mode',
-    value: 'true',
-    domain: 'localhost',
-    path: '/'
-  }]);
-  await page.addInitScript(() => {
+  const guestSessionId = '00000000-0000-4000-8000-000000000001';
+  await page.context().addCookies([
+    {
+      name: 'LearnUp_guest_mode',
+      value: 'true',
+      domain: 'localhost',
+      path: '/'
+    },
+    {
+      name: 'LearnUp_guest_session_id',
+      value: guestSessionId,
+      domain: 'localhost',
+      path: '/'
+    }
+  ]);
+  await page.addInitScript((id) => {
     localStorage.setItem('LearnUp_is_guest', 'true');
-  });
+    localStorage.setItem('LearnUp_guest_session_id', id);
+  }, guestSessionId);
   await page.route('**/api/**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',

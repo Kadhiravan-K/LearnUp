@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { isGuestUserId } from '@/lib/auth/guest-session';
 import { ProgressRepository } from '@/lib/db/progress-repository';
 import { AppError } from '@/lib/errors';
 import { logger } from '@/lib/logging';
@@ -13,7 +14,7 @@ export async function GET(
   try {
     const { user, supabase } = await requireAuth(request);
 
-    if (user.id === '00000000-0000-0000-0000-000000000001') {
+    if (isGuestUserId(user.id)) {
       return NextResponse.json({ data: { position_seconds: 0, is_completed: false } });
     }
 

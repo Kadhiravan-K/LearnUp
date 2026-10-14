@@ -4,6 +4,7 @@ import { ProgressRepository } from '../db/progress-repository';
 import { FocusRepository } from '../db/focus-repository';
 import { NotesRepository } from '../db/notes-repository';
 import { BookmarksRepository } from '../db/bookmarks-repository';
+import { isGuestUserId } from '../auth/guest-session';
 
 export interface UserAnalyticsData {
   totalHours: number;
@@ -45,7 +46,7 @@ export class AnalyticsService {
   private bookmarksRepo = new BookmarksRepository();
 
   async getUserAnalytics(client: SupabaseClient, userId: string): Promise<UserAnalyticsData> {
-    if (userId === '00000000-0000-0000-0000-000000000001') {
+    if (isGuestUserId(userId)) {
       return {
         totalHours: 0,
         totalMinutes: 0,

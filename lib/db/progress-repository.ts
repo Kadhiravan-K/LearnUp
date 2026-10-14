@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '../errors';
 import { logger } from '../logging';
 import { VideoProgress, LibraryProgress } from '../types';
+import { isGuestUserId } from '../auth/guest-session';
 
 export class ProgressRepository {
   async upsertProgress(
@@ -38,7 +39,7 @@ export class ProgressRepository {
   }
 
   async getLibraryProgress(client: SupabaseClient, userId: string): Promise<LibraryProgress[]> {
-    if (userId === '00000000-0000-0000-0000-000000000001') {
+    if (isGuestUserId(userId)) {
       return [];
     }
 
