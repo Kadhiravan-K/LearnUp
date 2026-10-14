@@ -47,12 +47,12 @@
 }
 
 .filterButton:focus-visible {
-  outline: 2px solid var(--sf-color-primary, #6366f1);
+  outline: 2px solid var(--sf-color-primary, #0F766E);
   outline-offset: 1px;
 }
 
 .filterButton.active {
-  background-color: var(--sf-color-primary, #6366f1);
+  background-color: var(--sf-color-primary, #0F766E);
   color: var(--sf-color-text-on-primary, #ffffff);
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);

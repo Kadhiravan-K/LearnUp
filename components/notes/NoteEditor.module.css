@@ -50,8 +50,8 @@
 }
 
 .modeTabActive {
-  background-color: var(--sf-color-primary, #6366F1);
-  color: #FFFFFF !important;
+  background-color: var(--sf-color-primary, #0F766E);
+  color: var(--sf-color-text-on-primary, #FFFFFF) !important;
 }
 
 .formattingButtons {
@@ -160,7 +160,7 @@
 .guideItem code {
   font-family: var(--sf-font-mono, monospace);
   font-size: 0.75rem;
-  color: var(--sf-color-primary, #6366F1);
+  color: var(--sf-color-primary, #0F766E);
 }
 
 .guideItem span {

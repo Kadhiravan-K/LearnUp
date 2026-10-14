@@ -7,6 +7,7 @@ import { ImportService } from '@/lib/services/import-service';
 import { LibraryService } from '@/lib/services/library-service';
 import { importRequestSchema, validateInput } from '@/lib/validation/schemas';
 import { YouTubeClient } from '@/lib/youtube/client';
+import { readBoundedJson } from '@/lib/utils/request';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -43,23 +44,7 @@ export async function POST(req: NextRequest) {
   try {
     const { user, supabase } = await requireAuth(req);
 
-    const contentLength = req.headers.get('content-length');
-    if (contentLength && parseInt(contentLength, 10) > 4096) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Payload too large' } },
-        { status: 413 }
-      );
-    }
-
-    let rawBody: unknown;
-    try {
-      rawBody = await req.json();
-    } catch {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid JSON request body' } },
-        { status: 400 }
-      );
-    }
+    const rawBody = await readBoundedJson(req);
 
     const payload = validateInput(importRequestSchema, rawBody);
 

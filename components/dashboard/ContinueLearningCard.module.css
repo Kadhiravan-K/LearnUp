@@ -177,7 +177,7 @@
 
 .progressBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #6366F1, #818CF8);
+  background: linear-gradient(90deg, var(--sf-color-primary, #0F766E), #2DD4BF);
   border-radius: var(--sf-radius-full);
   transition: width 0.3s ease;
 }
@@ -199,7 +199,7 @@
   align-items: center;
   gap: 6px;
   background-color: var(--sf-color-primary);
-  color: #ffffff;
+  color: var(--sf-color-text-on-primary, #ffffff);
   padding: 6px 14px;
   border-radius: var(--sf-radius-lg);
   font-size: var(--sf-text-xs);

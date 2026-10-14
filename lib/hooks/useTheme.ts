@@ -26,6 +26,7 @@ export function useTheme() {
     setResolvedTheme(effective);
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', effective);
+      document.documentElement.style.colorScheme = effective;
     }
   }, []);
 

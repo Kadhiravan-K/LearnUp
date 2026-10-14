@@ -38,20 +38,20 @@ describe('LearnUp Theme System — Architecture & Token Integrity', () => {
   it('verifies LearnUp Light / Default theme tokens and contrast', () => {
     expect(DEFAULT_THEME.name).toBe('LearnUp Default');
     expect(DEFAULT_THEME.tagline).toBe('Clean Productivity');
-    expect(DEFAULT_THEME.colors.primary).toBe('#6366F1');
-    expect(DEFAULT_THEME.colors.bg).toBe('#F8FAFC');
-    expect(DEFAULT_THEME.colors.textPrimary).toBe('#0F172A');
+    expect(DEFAULT_THEME.colors.primary).toBe('#0F766E');
+    expect(DEFAULT_THEME.colors.bg).toBe('#F7FAF9');
+    expect(DEFAULT_THEME.colors.textPrimary).toBe('#132B29');
     expect(LIGHT_THEME.colors.surface).toBe('#FFFFFF');
   });
 
   it('verifies LearnUp Dark theme tokens and contrast', () => {
     expect(DARK_THEME.name).toBe('LearnUp Dark');
-    expect(DARK_THEME.tagline).toBe('Midnight Void (OLED Focus)');
+    expect(DARK_THEME.tagline).toBe('Deep Obsidian Focus');
     expect(DARK_THEME.category).toBe('core');
-    expect(DARK_THEME.colors.primary).toBe('#818CF8');
-    expect(DARK_THEME.colors.bg).toBe('#0B0F19');
-    expect(DARK_THEME.colors.surface).toBe('#111827');
-    expect(DARK_THEME.colors.textPrimary).toBe('#F8FAFC');
+    expect(DARK_THEME.colors.primary).toBe('#5EEAD4');
+    expect(DARK_THEME.colors.bg).toBe('#111B1B');
+    expect(DARK_THEME.colors.surface).toBe('#1D2B2A');
+    expect(DARK_THEME.colors.textPrimary).toBe('#EDF7F4');
   });
 
   it('contains valid centralized motion system tokens', () => {

@@ -41,8 +41,8 @@
 }
 
 .iconWrapperPrimary {
-  background-color: #EEF2FF;
-  color: #6366F1;
+  background-color: var(--sf-color-primary-light);
+  color: var(--sf-color-primary);
 }
 
 .iconWrapperWarning {
@@ -61,8 +61,8 @@
 }
 
 :global([data-theme="dark"]) .iconWrapperPrimary {
-  background-color: #1E1B4B;
-  color: #818CF8;
+  background-color: var(--sf-color-primary-light);
+  color: var(--sf-color-primary);
 }
 
 :global([data-theme="dark"]) .iconWrapperWarning {

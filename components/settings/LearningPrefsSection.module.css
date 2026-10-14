@@ -232,17 +232,17 @@
 .fieldUnit {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #4F46E5;
+  color: var(--sf-color-primary, #0F766E);
 }
 
 .input {
   width: 100%;
   padding: 8px 12px;
   border-radius: var(--sf-radius-md);
-  border: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  border: 1px solid var(--sf-color-border, #E5E7EB);
+  background: var(--sf-color-bg, #F9FAFB);
   font-size: 0.875rem;
-  color: var(--sf-color-text);
+  color: var(--sf-color-text-primary);
   outline: none;
 }
 
@@ -255,12 +255,17 @@
   width: 100%;
   padding: 8px 12px;
   border-radius: var(--sf-radius-md);
-  border: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  border: 1px solid var(--sf-color-border, #E5E7EB);
+  background: var(--sf-color-bg, #F9FAFB);
   font-size: 0.875rem;
-  color: var(--sf-color-text);
+  color: var(--sf-color-text-primary);
   outline: none;
   cursor: pointer;
+}
+
+.select option {
+  background-color: var(--sf-color-surface);
+  color: var(--sf-color-text-primary);
 }
 
 .select:focus {

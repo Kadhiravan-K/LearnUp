@@ -1,6 +1,6 @@
 .section {
   background: var(--sf-color-surface);
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-lg);
   padding: 24px;
   display: flex;
@@ -13,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 16px;
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
 .titleArea {
@@ -30,7 +30,7 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--sf-color-text);
+  color: var(--sf-color-text-primary);
 }
 
 .engineBadge {
@@ -38,9 +38,10 @@
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 4px;
-  background: #F3F4F6;
-  color: #4B5563;
+  background: var(--sf-color-bg-elevated);
+  color: var(--sf-color-text-secondary);
   letter-spacing: 0.05em;
+  border: 1px solid var(--sf-color-border);
 }
 
 .group {
@@ -53,13 +54,13 @@
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #4B5563;
+  color: var(--sf-color-text-secondary);
 }
 
 /* Theme Cards Grid */
 .themeGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -71,7 +72,7 @@
 
 .themeCard {
   background: var(--sf-color-surface);
-  border: 1.5px solid #E5E7EB;
+  border: 1.5px solid var(--sf-color-border);
   border-radius: var(--sf-radius-md);
   padding: 12px;
   cursor: pointer;
@@ -83,7 +84,7 @@
 }
 
 .themeCard:hover {
-  border-color: #CBD5E1;
+  border-color: var(--sf-color-border-hover);
 }
 
 .themeCardActive {
@@ -106,7 +107,7 @@
 .themeName {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--sf-color-text);
+  color: var(--sf-color-text-primary);
 }
 
 .checkActive {
@@ -114,7 +115,7 @@
   height: 16px;
   border-radius: 50%;
   background: var(--sf-color-primary);
-  color: #FFFFFF;
+  color: var(--sf-color-text-on-primary, #FFFFFF);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,13 +127,13 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1px solid #D1D5DB;
+  border: 1px solid var(--sf-color-border);
 }
 
 /* Previews */
 .themePreviewLight {
-  background: var(--sf-color-bg);
-  border: 1px solid #E2E8F0;
+  background: #F7FAF9;
+  border: 1px solid #D2DFDC;
   border-radius: 6px;
   height: 48px;
   padding: 8px;
@@ -144,20 +145,20 @@
 .previewBarLight {
   width: 60%;
   height: 6px;
-  background: #E2E8F0;
+  background: #D2DFDC;
   border-radius: 3px;
 }
 
 .previewBlockLight {
   width: 30%;
   height: 12px;
-  background: #4F46E5;
+  background: #0F766E;
   border-radius: 3px;
 }
 
 .themePreviewDark {
-  background: var(--sf-color-surface);
-  border: 1px solid #1E293B;
+  background: #111B1B;
+  border: 1px solid #344743;
   border-radius: 6px;
   height: 48px;
   padding: 8px;
@@ -169,14 +170,14 @@
 .previewBarDark {
   width: 60%;
   height: 6px;
-  background: #334155;
+  background: #344743;
   border-radius: 3px;
 }
 
 .previewBlockDark {
   width: 30%;
   height: 12px;
-  background: #6366F1;
+  background: #5EEAD4;
   border-radius: 3px;
 }
 
@@ -185,17 +186,17 @@
   height: 48px;
   display: flex;
   overflow: hidden;
-  border: 1px solid #E2E8F0;
+  border: 1px solid var(--sf-color-border);
 }
 
 .previewSplitLight {
   flex: 1;
-  background: var(--sf-color-bg);
+  background: #F7FAF9;
 }
 
 .previewSplitDark {
   flex: 1;
-  background: var(--sf-color-surface);
+  background: #111B1B;
 }
 
 /* Accent Spectrum */
@@ -231,11 +232,11 @@
 }
 
 .colorIndigo {
-  background: #4F46E5;
+  background: #0F766E;
 }
 
 .colorViolet {
-  background: #7C3AED;
+  background: #0D9488;
 }
 
 .colorCobalt {
@@ -247,13 +248,13 @@
 }
 
 .dotActive {
-  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--sf-color-primary);
+  box-shadow: 0 0 0 2px var(--sf-color-surface), 0 0 0 4px var(--sf-color-primary);
 }
 
 /* Typography Card */
 .typographyCard {
-  background: #F9FAFB;
-  border: 1px solid #E5E7EB;
+  background: var(--sf-color-bg-elevated);
+  border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-md);
   padding: 12px 16px;
   display: flex;
@@ -270,7 +271,7 @@
 .typographyTitle {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--sf-color-text);
+  color: var(--sf-color-text-primary);
 }
 
 .typographyDesc {
@@ -283,7 +284,8 @@
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 4px;
-  background: #EEF2FF;
-  color: #4F46E5;
+  background: var(--sf-color-bg-hover);
+  color: var(--sf-color-primary);
   letter-spacing: 0.05em;
+  border: 1px solid var(--sf-color-border);
 }

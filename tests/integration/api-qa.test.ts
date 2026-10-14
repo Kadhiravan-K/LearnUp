@@ -145,12 +145,12 @@ describe('QA API Test Suite — Complete MVP Coverage', () => {
         expect(json.error.code).toBe('VALIDATION_ERROR');
       });
 
-      it('rejects oversized payload (413 Payload Too Large)', async () => {
+      it('rejects oversized payload exceeding maximum size limit (413 Payload Too Large)', async () => {
         const req = new Request('http://localhost:3000/api/learning-items', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Content-Length': '5000',
+            'Content-Length': '1048577',
             Authorization: 'Bearer token-a'
           },
           body: JSON.stringify({ url: 'https://youtube.com/watch?v=dQw4w9WgXcQ' })
@@ -159,6 +159,32 @@ describe('QA API Test Suite — Complete MVP Coverage', () => {
         expect(res.status).toBe(413);
         const json = await res.json();
         expect(json.error.message).toBe('Payload too large');
+      });
+
+      it('accepts legitimate payload larger than 4 KB without 413 error', async () => {
+        vi.spyOn(ImportService.prototype, 'importFromUrl').mockResolvedValue({
+          item: sampleVideoItem,
+          isDuplicate: false
+        });
+
+        // Create a legitimate payload with long description (> 4500 bytes)
+        const longDescription = 'A'.repeat(4500);
+        const bodyContent = JSON.stringify({
+          url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+          description: longDescription
+        });
+
+        const req = new Request('http://localhost:3000/api/learning-items', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': String(bodyContent.length),
+            Authorization: 'Bearer token-a'
+          },
+          body: bodyContent
+        });
+        const res = await importRoute(req as any);
+        expect(res.status).toBe(201);
       });
 
       it('rejects missing url field in JSON body (400 VALIDATION_ERROR)', async () => {

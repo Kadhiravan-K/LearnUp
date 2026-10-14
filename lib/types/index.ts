@@ -69,7 +69,8 @@ export interface CoursePreviewData {
 }
 
 export interface ImportCourseInput {
-  url: string;
+  url?: string;
+  urls?: string[];
   title?: string | null;
   description?: string | null;
   skillDomain?: string | null;

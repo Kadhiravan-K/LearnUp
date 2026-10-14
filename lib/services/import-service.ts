@@ -204,7 +204,10 @@ export class ImportService {
     user: AuthenticatedUser,
     inputOrUrl: string | ImportCourseInput
   ): Promise<{ item: LearningItemWithVideos; isDuplicate: boolean }> {
-    const rawUrl = typeof inputOrUrl === 'string' ? inputOrUrl : inputOrUrl.url;
+    const rawUrl =
+      typeof inputOrUrl === 'string'
+        ? inputOrUrl
+        : (inputOrUrl.url || (inputOrUrl.urls && inputOrUrl.urls.join('\n')) || '');
     const options: Partial<ImportCourseInput> = typeof inputOrUrl === 'string' ? {} : inputOrUrl;
 
     logger.info('Starting import workflow', {
@@ -352,9 +355,19 @@ export class ImportService {
 
       const finalItems = filteredItems.length > 0 ? filteredItems : playlistMeta.items;
 
+      // Deduplicate items by videoId preserving initial source position to avoid constraint violations
+      const seenVideoIds = new Set<string>();
+      const uniqueItems: typeof finalItems = [];
+      for (const item of finalItems) {
+        if (!seenVideoIds.has(item.videoId)) {
+          seenVideoIds.add(item.videoId);
+          uniqueItems.push(item);
+        }
+      }
+
       const defaultDurations = ['45:12', '52:40', '48:19', '54:02', '1:02:15', '41:30', '58:04', '38:50', '49:15', '55:20'];
 
-      const totalSecs = finalItems.length * 2800;
+      const totalSecs = uniqueItems.length * 2800;
 
       const savedPlaylist = await this.repository.createPlaylistItemWithVideos(
         client,
@@ -373,7 +386,7 @@ export class ImportService {
             ? options.customThumbnailUrl
             : playlistMeta.thumbnailUrl
         },
-        finalItems.map((item, idx) => ({
+        uniqueItems.map((item, idx) => ({
           videoId: item.videoId,
           title: item.title,
           thumbnailUrl: item.thumbnailUrl,

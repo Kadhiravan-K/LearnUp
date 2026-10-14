@@ -75,8 +75,8 @@
 }
 
 .iconActive {
-  background: #6366f1;
-  color: #ffffff;
+  background: var(--sf-color-primary, #0F766E);
+  color: var(--sf-color-text-on-primary, #ffffff);
 }
 
 .iconInProgress {
@@ -117,19 +117,19 @@
 }
 
 .nodeCard:hover {
-  border-color: #cbd5e1;
+  border-color: var(--sf-color-border-hover);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .nodeCardSelected {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 1px #6366f1, 0 4px 14px rgba(99, 102, 241, 0.12);
+  border-color: var(--sf-color-primary);
+  box-shadow: 0 0 0 1px var(--sf-color-primary), 0 4px 14px var(--sf-color-primary-light);
 }
 
 .nodeCardActiveHighlight {
-  border: 2px solid #6366f1;
+  border: 2px solid var(--sf-color-primary);
   background: var(--sf-color-surface, #ffffff);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
+  box-shadow: 0 8px 24px var(--sf-color-primary-light);
 }
 
 .cardHeader {
@@ -181,9 +181,9 @@
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 4px;
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: var(--sf-color-primary-light);
+  color: var(--sf-color-primary);
+  border: 1px solid var(--sf-color-primary);
 }
 
 .badgeInProgress {
@@ -253,7 +253,7 @@
 }
 
 .progressPct {
-  color: #6366f1;
+  color: var(--sf-color-primary);
   font-weight: 700;
 }
 
@@ -267,7 +267,7 @@
 
 .progressBarFill {
   height: 100%;
-  background: #6366f1;
+  background: var(--sf-color-primary);
   border-radius: 9999px;
   transition: width 0.3s ease;
 }
@@ -298,7 +298,7 @@
 .syllabusPre {
   font-size: 10px;
   font-weight: 700;
-  color: #6366f1;
+  color: var(--sf-color-primary);
   letter-spacing: 0.04em;
 }
 
@@ -317,18 +317,18 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 12px;
-  background: #6366f1;
-  color: #ffffff;
+  background: var(--sf-color-primary);
+  color: var(--sf-color-text-on-primary, #ffffff);
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 6px var(--sf-color-primary-light);
   transition: all 0.15s ease;
 }
 
 .continueLectureBtn:hover {
-  background: #4f46e5;
+  background: var(--sf-color-primary-hover);
 }
 
 /* Attached Course Strip */
@@ -404,14 +404,14 @@
   border-radius: 6px;
   font-size: 11px;
   font-weight: 600;
-  color: #6366f1;
+  color: var(--sf-color-primary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .attachBtn:hover {
-  background: rgba(99, 102, 241, 0.08);
-  border-color: #6366f1;
+  background: var(--sf-color-primary-light);
+  border-color: var(--sf-color-primary);
 }
 
 /* Card Footer */
@@ -444,7 +444,7 @@
   background: none;
   border: none;
   font-size: 11px;
-  color: #6366f1;
+  color: var(--sf-color-primary);
   cursor: pointer;
   padding: 0;
 }
@@ -473,6 +473,6 @@
 
 .appendNodeBtn:hover {
   background: var(--sf-color-surface, #ffffff);
-  border-color: #6366f1;
-  color: #6366f1;
+  border-color: var(--sf-color-primary);
+  color: var(--sf-color-primary);
 }

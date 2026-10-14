@@ -32,11 +32,11 @@ describe('LearnUp Theme System — Visual QA & Integration Verification', () => 
       expect(DEFAULT_THEME.id).toBe('light');
       expect(DEFAULT_THEME.name).toBe('LearnUp Default');
       expect(DEFAULT_THEME.tagline).toBe('Clean Productivity');
-      expect(DEFAULT_THEME.colors.bg).toBe('#F8FAFC');
+      expect(DEFAULT_THEME.colors.bg).toBe('#F7FAF9');
       expect(DEFAULT_THEME.colors.surface).toBe('#FFFFFF');
-      expect(DEFAULT_THEME.colors.textPrimary).toBe('#0F172A');
-      expect(DEFAULT_THEME.colors.primary).toBe('#6366F1');
-      expect(DEFAULT_THEME.colors.border).toBe('#E2E8F0');
+      expect(DEFAULT_THEME.colors.textPrimary).toBe('#132B29');
+      expect(DEFAULT_THEME.colors.primary).toBe('#0F766E');
+      expect(DEFAULT_THEME.colors.border).toBe('#E0E7E6');
     });
 
     it('ensures Default theme has no unnecessary glow or gaming effects', () => {
@@ -48,16 +48,16 @@ describe('LearnUp Theme System — Visual QA & Integration Verification', () => 
     it('uses deep dark surfaces and low-strain indigo accents', () => {
       expect(DARK_THEME.id).toBe('dark');
       expect(DARK_THEME.name).toBe('LearnUp Dark');
-      expect(DARK_THEME.tagline).toBe('Midnight Void (OLED Focus)');
-      expect(DARK_THEME.colors.bg).toBe('#0B0F19');
-      expect(DARK_THEME.colors.surface).toBe('#111827');
-      expect(DARK_THEME.colors.primary).toBe('#818CF8');
-      expect(DARK_THEME.colors.textPrimary).toBe('#F8FAFC');
-      expect(DARK_THEME.colors.textSecondary).toBe('#CBD5E1');
+      expect(DARK_THEME.tagline).toBe('Deep Obsidian Focus');
+      expect(DARK_THEME.colors.bg).toBe('#111B1B');
+      expect(DARK_THEME.colors.surface).toBe('#1D2B2A');
+      expect(DARK_THEME.colors.primary).toBe('#5EEAD4');
+      expect(DARK_THEME.colors.textPrimary).toBe('#EDF7F4');
+      expect(DARK_THEME.colors.textSecondary).toBe('#A4B9B4');
     });
 
     it('has precision focus ring and dark telemetry labels', () => {
-      expect(DARK_THEME.colors.focusRingColor).toBe('rgba(129, 140, 248, 0.5)');
+      expect(DARK_THEME.colors.focusRingColor).toBe('rgba(94, 234, 212, 0.45)');
       expect(DARK_THEME.telemetryLabels?.systemStatus).toBe('Dark Engine Active');
       expect(DARK_THEME.telemetryLabels?.learningCore).toBe('Low-Strain Focus');
     });

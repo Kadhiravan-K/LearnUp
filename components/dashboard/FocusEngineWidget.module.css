@@ -122,7 +122,7 @@
   width: 100%;
   padding: var(--sf-space-3);
   background-color: var(--sf-color-primary);
-  color: #ffffff;
+  color: var(--sf-color-text-on-primary, #ffffff);
   border: none;
   border-radius: var(--sf-radius-lg);
   font-size: var(--sf-text-sm);

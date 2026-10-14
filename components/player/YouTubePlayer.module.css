@@ -176,7 +176,7 @@
 
 .hudBarFill {
   width: 100%;
-  background: #6366F1;
+  background: var(--sf-color-primary);
   border-radius: 3px;
   transition: height 0.1s linear;
 }
@@ -291,7 +291,7 @@
   left: 0;
   top: 0;
   height: 100%;
-  background: #6366F1;
+  background: var(--sf-color-primary);
   border-radius: 2px;
 }
 
@@ -410,9 +410,9 @@
 }
 
 .ccActive .ccBadge {
-  background: #6366F1;
-  border-color: #6366F1;
-  color: #FFFFFF;
+  background: var(--sf-color-primary, #0F766E);
+  border-color: var(--sf-color-primary, #0F766E);
+  color: var(--sf-color-text-on-primary, #FFFFFF);
 }
 
 /* Settings Popover Menu */
@@ -474,6 +474,11 @@
   outline: none;
 }
 
+.popoverSelect option {
+  background-color: #1e293b;
+  color: #FFFFFF;
+}
+
 .popoverSliderRow {
   display: flex;
   flex-direction: column;
@@ -494,7 +499,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #6366F1;
+  background: var(--sf-color-primary, #0F766E);
   cursor: pointer;
 }
 
@@ -539,7 +544,7 @@
 }
 
 .toggleSwitch input:checked + .toggleSlider {
-  background-color: #6366F1;
+  background-color: var(--sf-color-primary, #0F766E);
 }
 
 .toggleSwitch input:checked + .toggleSlider:before {
@@ -598,8 +603,8 @@
   gap: 6px;
   margin-top: 6px;
   padding: 8px 16px;
-  background: var(--sf-color-primary, #6366f1);
-  color: #ffffff;
+  background: var(--sf-color-primary, #0F766E);
+  color: var(--sf-color-text-on-primary, #ffffff);
   font-size: 12px;
   font-weight: 600;
   border-radius: var(--sf-radius-md, 8px);

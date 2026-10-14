@@ -7,6 +7,7 @@ import { ImportService } from '@/lib/services/import-service';
 import { previewCourseSchema, validateInput } from '@/lib/validation/schemas';
 import { YouTubeClient } from '@/lib/youtube/client';
 import { extractMultipleYouTubeUrls } from '@/lib/youtube/parser';
+import { readBoundedJson } from '@/lib/utils/request';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -22,15 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     await requireAuth(req);
 
-    let rawBody: unknown;
-    try {
-      rawBody = await req.json();
-    } catch {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid JSON request body' } },
-        { status: 400 }
-      );
-    }
+    const rawBody = await readBoundedJson(req);
 
     const body = validateInput(previewCourseSchema, rawBody);
     const importService = new ImportService(repository, () => new YouTubeClient());

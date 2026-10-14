@@ -17,7 +17,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('LearnUp_theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}if(typeof window!=='undefined'){window.addEventListener('error',function(e){if(e&&(e.message==='Script error.'||(!e.error&&!e.message))){try{e.preventDefault();}catch(_){}}});}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('LearnUp_theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}if(typeof window!=='undefined'){window.addEventListener('error',function(e){if(e&&(e.message==='Script error.'||(!e.error&&!e.message))){try{e.preventDefault();}catch(_){}}});}})();`,
           }}
         />
       </head>

@@ -26,9 +26,9 @@
 .badge {
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-semibold);
-  color: #6366F1;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: var(--sf-color-primary);
+  background: var(--sf-color-primary-light);
+  border: 1px solid var(--sf-color-primary);
   padding: 2px 8px;
   border-radius: var(--sf-radius-full);
 }
@@ -67,8 +67,8 @@
 }
 
 .subTabActive {
-  background: var(--sf-color-primary-light, rgba(99, 102, 241, 0.15));
-  color: var(--sf-color-primary, #6366F1);
+  background: var(--sf-color-primary-light);
+  color: var(--sf-color-primary);
   font-weight: var(--sf-font-semibold);
 }
 
@@ -120,13 +120,13 @@
 
 .themeCard:hover {
   transform: translateY(-2px);
-  border-color: var(--sf-color-primary, #6366F1);
+  border-color: var(--sf-color-primary);
   box-shadow: var(--sf-shadow-md);
 }
 
 .themeCardActive {
-  border-color: var(--sf-color-primary, #6366F1);
-  box-shadow: 0 0 0 2px var(--sf-color-primary-light, rgba(99, 102, 241, 0.25));
+  border-color: var(--sf-color-primary);
+  box-shadow: 0 0 0 2px var(--sf-color-primary-light);
 }
 
 .themePreviewBox {
@@ -157,8 +157,8 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: var(--sf-color-primary, #6366F1);
-  color: #FFFFFF;
+  background: var(--sf-color-primary);
+  color: var(--sf-color-text-on-primary, #FFFFFF);
   font-size: 0.625rem;
   font-weight: 700;
   padding: 2px 6px;
@@ -188,7 +188,7 @@
 .themeBadge {
   font-size: 0.625rem;
   font-weight: 700;
-  background: rgba(99, 102, 241, 0.15);
+  background: var(--sf-color-primary-light);
   color: var(--sf-color-primary);
   padding: 2px 6px;
   border-radius: 4px;
@@ -261,9 +261,9 @@
 }
 
 .engineActive {
-  border-color: #6366F1;
-  background: rgba(99, 102, 241, 0.08);
-  box-shadow: 0 0 0 1px #6366F1;
+  border-color: var(--sf-color-primary);
+  background: var(--sf-color-primary-light);
+  box-shadow: 0 0 0 1px var(--sf-color-primary);
 }
 
 .engineRadio {
@@ -278,7 +278,7 @@
 }
 
 .engineActive .engineRadio {
-  border-color: #6366F1;
+  border-color: var(--sf-color-primary);
 }
 
 .engineActive .engineRadio::after {
@@ -286,7 +286,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #6366F1;
+  background: var(--sf-color-primary);
 }
 
 .engineDetails {
@@ -419,6 +419,11 @@
   font-size: var(--sf-text-sm);
 }
 
+.select option {
+  background-color: var(--sf-color-surface);
+  color: var(--sf-color-text-primary);
+}
+
 .colorInputRow {
   display: flex;
   align-items: center;
@@ -498,9 +503,9 @@
 }
 
 .themePluginToggleBtn:hover {
-  background: var(--sf-color-primary-light, rgba(99, 102, 241, 0.15));
-  color: var(--sf-color-primary, #6366F1);
-  border-color: var(--sf-color-primary, #6366F1);
+  background: var(--sf-color-primary-light);
+  color: var(--sf-color-primary);
+  border-color: var(--sf-color-primary);
 }
 
 .themeCardDisabled {

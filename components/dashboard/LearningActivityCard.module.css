@@ -95,12 +95,12 @@
   transition: height 0.3s ease;
 }
 
-.barMon { background-color: #818CF8; }
-.barTue { background-color: #6366F1; }
-.barWed { background-color: #A5B4FC; }
+.barMon { background-color: var(--sf-color-primary, #0F766E); opacity: 0.8; }
+.barTue { background-color: var(--sf-color-primary, #0F766E); }
+.barWed { background-color: var(--sf-color-primary, #0F766E); opacity: 0.6; }
 .barThu { background-color: #10B981; }
-.barFri { background-color: #6366F1; }
-.barSat { background-color: #4F46E5; }
+.barFri { background-color: var(--sf-color-primary, #0F766E); }
+.barSat { background-color: var(--sf-color-primary-hover, #0D9488); }
 .barSun { background-color: #F59E0B; }
 
 .barLabel {

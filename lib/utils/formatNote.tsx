@@ -21,13 +21,13 @@ export function renderFormattedNote(content: string): React.ReactNode {
             <div
               key={idx}
               style={{
-                background: 'rgba(99, 102, 241, 0.08)',
-                borderLeft: '3px solid var(--sf-color-primary, #6366F1)',
+                background: 'var(--sf-color-primary-light)',
+                borderLeft: '3px solid var(--sf-color-primary, #0F766E)',
                 padding: '10px 14px',
                 borderRadius: '6px',
                 fontFamily: 'var(--sf-font-mono, monospace)',
                 fontSize: '0.9375rem',
-                color: 'var(--sf-color-primary, #6366F1)',
+                color: 'var(--sf-color-primary, #0F766E)',
                 overflowX: 'auto',
                 margin: '4px 0'
               }}
@@ -67,7 +67,7 @@ export function renderFormattedNote(content: string): React.ReactNode {
         if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
           return (
             <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', paddingLeft: '8px' }}>
-              <span style={{ color: 'var(--sf-color-primary, #6366F1)', fontWeight: 700 }}>•</span>
+              <span style={{ color: 'var(--sf-color-primary, #0F766E)', fontWeight: 700 }}>•</span>
               <span>{renderInlineFormatting(trimmed.slice(2))}</span>
             </div>
           );
@@ -121,8 +121,8 @@ function renderInlineFormatting(text: string): React.ReactNode {
         <span
           key={i}
           style={{
-            background: 'rgba(99, 102, 241, 0.12)',
-            color: 'var(--sf-color-primary, #6366F1)',
+            background: 'var(--sf-color-primary-light)',
+            color: 'var(--sf-color-primary, #0F766E)',
             padding: '1px 6px',
             borderRadius: '4px',
             fontFamily: 'var(--sf-font-mono, monospace)',

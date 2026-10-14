@@ -30,21 +30,21 @@ export const THEME_OPTIONS: ThemeOption[] = [
     id: 'light',
     name: 'Daylight Minimal (Light)',
     category: 'core',
-    desc: 'Crisp high-readability design with snow white cards and deep slate typography.',
-    primaryColor: '#6366F1',
-    bgPreview: '#F8FAFC',
-    borderPreview: '#E2E8F0',
-    accentPreview: '#6366F1'
+    desc: 'Crisp high-readability design with clean neutral surfaces and focused deep teal accents.',
+    primaryColor: '#0F766E',
+    bgPreview: '#F7FAF9',
+    borderPreview: '#D2DFDC',
+    accentPreview: '#0F766E'
   },
   {
     id: 'dark',
     name: 'Midnight Void (Dark)',
     category: 'core',
-    desc: 'Low-strain OLED dark mode with deep navy slate surfaces and neon indigo accents.',
-    primaryColor: '#818CF8',
-    bgPreview: '#0B0F19',
-    borderPreview: '#1E293B',
-    accentPreview: '#818CF8'
+    desc: 'Low-strain OLED dark mode with deep neutral slate surfaces and mint teal accents.',
+    primaryColor: '#5EEAD4',
+    bgPreview: '#111B1B',
+    borderPreview: '#344743',
+    accentPreview: '#5EEAD4'
   }
 ];
 
@@ -83,7 +83,7 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Custom Theme & Workspace Studio State
-  const [customAccent, setCustomAccent] = useState('#6366F1');
+  const [customAccent, setCustomAccent] = useState('#0F766E');
   const [glassIntensity, setGlassIntensity] = useState('modern');
   const [cornerRadius, setCornerRadius] = useState('12px');
   const [fontScale, setFontScale] = useState('100%');
@@ -206,7 +206,7 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
   };
 
   const accentPresets = [
-    { name: 'Indigo', color: '#6366F1' },
+    { name: 'Teal', color: '#0F766E' },
     { name: 'Cyan', color: '#00F0FF' },
     { name: 'Emerald', color: '#10B981' },
     { name: 'Violet', color: '#A855F7' },

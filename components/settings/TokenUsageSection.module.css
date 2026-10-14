@@ -125,7 +125,7 @@
 
 .budgetFill {
   height: 100%;
-  background: var(--sf-color-primary, #4F46E5);
+  background: var(--sf-color-primary, #0F766E);
   transition: width 0.3s ease;
 }
 

@@ -227,8 +227,10 @@ export function AddCourseModal({ isOpen, onClose, onSuccess }: AddCourseModalPro
         }
       }
 
+      const extracted = extractMultipleYouTubeUrls(url.trim());
       const payload = {
         url: url.trim(),
+        urls: extracted.length > 1 ? extracted : undefined,
         title: courseName.trim() || previewData?.title || undefined,
         description: description.trim() || undefined,
         skillDomain: skillDomain || 'Systems Architecture',

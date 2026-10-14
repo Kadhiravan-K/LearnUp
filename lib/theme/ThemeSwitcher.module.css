@@ -94,7 +94,7 @@
   height: 20px;
   border-radius: var(--sf-radius-full);
   background: var(--sf-color-primary);
-  color: #ffffff;
+  color: var(--sf-color-text-on-primary, #ffffff);
   font-size: 0.75rem;
   font-weight: var(--sf-font-bold);
 }
@@ -139,39 +139,39 @@
 /* Light Theme Preview */
 .previewLight,
 .previewDefault {
-  background: #F8FAFC;
-  border-color: #E2E8F0;
+  background: #F7FAF9;
+  border-color: #D2DFDC;
 }
 .previewLight .previewBar,
 .previewDefault .previewBar {
   height: 8px;
   width: 60%;
-  background: #6366F1;
+  background: #0F766E;
   border-radius: 4px;
 }
 .previewLight .previewSurface,
 .previewDefault .previewSurface {
   height: 32px;
   background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #D2DFDC;
   border-radius: 4px;
 }
 
 /* Dark Theme Preview */
 .previewDark {
-  background: #0B0F19;
-  border-color: #1E293B;
+  background: #111B1B;
+  border-color: #344743;
 }
 .previewDark .previewBar {
   height: 8px;
   width: 60%;
-  background: #818CF8;
+  background: #5EEAD4;
   border-radius: 4px;
 }
 .previewDark .previewSurface {
   height: 32px;
-  background: #111827;
-  border: 1px solid #1E293B;
+  background: #1D2B2A;
+  border: 1px solid #344743;
   border-radius: 4px;
 }
 

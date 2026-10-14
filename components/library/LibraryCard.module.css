@@ -160,9 +160,9 @@
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--sf-color-primary, #6366f1);
-  background-color: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: var(--sf-color-primary, #0F766E);
+  background-color: var(--sf-color-primary-light);
+  border: 1px solid var(--sf-color-primary);
   border-radius: 4px;
   padding: 2px 7px;
   width: fit-content;
@@ -224,7 +224,7 @@
 .ctaBtn {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--sf-color-primary, #6366f1);
+  color: var(--sf-color-primary, #0F766E);
   letter-spacing: 0.01em;
   cursor: pointer;
 }

@@ -1,15 +1,27 @@
 import { z } from 'zod';
 import { AppError } from '../errors';
 
-export const importRequestSchema = z.object({
-  url: z.string().trim().min(1, 'URL is required').max(2048, 'URL exceeds maximum length of 2048 characters'),
-  title: z.string().trim().max(500).optional().nullable(),
-  description: z.string().trim().max(50000).optional().nullable(),
-  skillDomain: z.string().trim().max(200).optional().nullable(),
-  tags: z.array(z.string().trim().max(100)).optional().nullable(),
-  customThumbnailUrl: z.union([z.string().url().max(2048), z.literal('')]).optional().nullable(),
-  selectedVideoIds: z.array(z.string()).optional().nullable()
-});
+export const importRequestSchema = z
+  .object({
+    url: z.string().trim().max(10000, 'URL exceeds maximum length').optional(),
+    urls: z.array(z.string().trim().min(1).max(2048)).max(100).optional(),
+    title: z.string().trim().max(500).optional().nullable(),
+    description: z.string().trim().max(50000).optional().nullable(),
+    skillDomain: z.string().trim().max(200).optional().nullable(),
+    tags: z.array(z.string().trim().max(100)).optional().nullable(),
+    customThumbnailUrl: z.union([z.string().url().max(2048), z.literal('')]).optional().nullable(),
+    selectedVideoIds: z
+      .array(z.string().trim().min(1, 'Video ID cannot be empty').max(64, 'Video ID is too long'))
+      .optional()
+      .nullable()
+  })
+  .refine(
+    (data) => Boolean(data.url && data.url.length > 0) || Boolean(data.urls && data.urls.length > 0),
+    {
+      message: 'URL is required',
+      path: ['url']
+    }
+  );
 
 export const previewCourseSchema = z
   .object({

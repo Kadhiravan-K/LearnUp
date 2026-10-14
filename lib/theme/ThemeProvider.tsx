@@ -18,6 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== 'undefined') {
       document.documentElement.style.removeProperty('--sf-color-primary');
       document.documentElement.setAttribute('data-theme', effective);
+      document.documentElement.style.colorScheme = effective;
     }
   }, []);
 

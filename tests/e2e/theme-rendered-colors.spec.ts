@@ -36,13 +36,13 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
 
     const emptyState = page.getByText('No rewards to display').locator('..');
     await expect.poll(() => emptyState.evaluate((element) => getComputedStyle(element).backgroundColor))
-      .toBe('rgb(248, 250, 252)');
+      .toBe('rgb(247, 250, 249)');
 
     await page.evaluate(() => localStorage.setItem('LearnUp_theme', 'dark'));
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.getByText('No rewards to display')).toBeVisible();
     await expect.poll(() => emptyState.evaluate((element) => getComputedStyle(element).backgroundColor))
-      .toBe('rgb(11, 15, 25)');
+      .toBe('rgb(17, 27, 27)');
 
     await context.close();
   });
@@ -97,12 +97,12 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     expect(defaultStyles.theme).toBe('light');
-    expect(defaultStyles.bodyBg).toBe('rgb(248, 250, 252)');
-    expect(defaultStyles.bodyColor).toBe('rgb(15, 23, 42)');
-    expect(normalizeHex(defaultStyles.varBg)).toBe('#f8fafc');
+    expect(defaultStyles.bodyBg).toBe('rgb(247, 250, 249)');
+    expect(defaultStyles.bodyColor).toBe('rgb(19, 43, 41)');
+    expect(normalizeHex(defaultStyles.varBg)).toBe('#f7faf9');
     expect(normalizeHex(defaultStyles.varSurface)).toBe('#ffffff');
-    expect(normalizeHex(defaultStyles.varTextPrimary)).toBe('#0f172a');
-    expect(normalizeHex(defaultStyles.varPrimary)).toBe('#6366f1');
+    expect(normalizeHex(defaultStyles.varTextPrimary)).toBe('#132b29');
+    expect(normalizeHex(defaultStyles.varPrimary)).toBe('#0f766e');
 
     // 5. Verify explicit light mode
     await page.evaluate(() => {
@@ -123,9 +123,9 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     expect(lightStyles.theme).toBe('light');
-    expect(lightStyles.bodyBg).toBe('rgb(248, 250, 252)');
-    expect(lightStyles.bodyColor).toBe('rgb(15, 23, 42)');
-    expect(normalizeHex(lightStyles.varBg)).toBe('#f8fafc');
+    expect(lightStyles.bodyBg).toBe('rgb(247, 250, 249)');
+    expect(lightStyles.bodyColor).toBe('rgb(19, 43, 41)');
+    expect(normalizeHex(lightStyles.varBg)).toBe('#f7faf9');
     expect(normalizeHex(lightStyles.varSurface)).toBe('#ffffff');
 
     // 6. Switch to dark
@@ -152,12 +152,12 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     expect(darkStyles.theme).toBe('dark');
-    expect(darkStyles.bodyBg).toBe('rgb(11, 15, 25)');
-    expect(darkStyles.bodyColor).toBe('rgb(248, 250, 252)');
-    expect(normalizeHex(darkStyles.varBg)).toBe('#0b0f19');
-    expect(normalizeHex(darkStyles.varSurface)).toBe('#111827');
-    expect(normalizeHex(darkStyles.varTextPrimary)).toBe('#f8fafc');
-    expect(normalizeHex(darkStyles.varPrimary)).toBe('#818cf8');
+    expect(darkStyles.bodyBg).toBe('rgb(17, 27, 27)');
+    expect(darkStyles.bodyColor).toBe('rgb(237, 247, 244)');
+    expect(normalizeHex(darkStyles.varBg)).toBe('#111b1b');
+    expect(normalizeHex(darkStyles.varSurface)).toBe('#1d2b2a');
+    expect(normalizeHex(darkStyles.varTextPrimary)).toBe('#edf7f4');
+    expect(normalizeHex(darkStyles.varPrimary)).toBe('#5eead4');
 
     // 9. Switch back to light
     await page.evaluate(() => {
@@ -183,12 +183,12 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     expect(lightAgainStyles.theme).toBe('light');
-    expect(lightAgainStyles.bodyBg).toBe('rgb(248, 250, 252)');
-    expect(lightAgainStyles.bodyColor).toBe('rgb(15, 23, 42)');
-    expect(normalizeHex(lightAgainStyles.varBg)).toBe('#f8fafc');
+    expect(lightAgainStyles.bodyBg).toBe('rgb(247, 250, 249)');
+    expect(lightAgainStyles.bodyColor).toBe('rgb(19, 43, 41)');
+    expect(normalizeHex(lightAgainStyles.varBg)).toBe('#f7faf9');
     expect(normalizeHex(lightAgainStyles.varSurface)).toBe('#ffffff');
-    expect(normalizeHex(lightAgainStyles.varTextPrimary)).toBe('#0f172a');
-    expect(normalizeHex(lightAgainStyles.varPrimary)).toBe('#6366f1');
+    expect(normalizeHex(lightAgainStyles.varTextPrimary)).toBe('#132b29');
+    expect(normalizeHex(lightAgainStyles.varPrimary)).toBe('#0f766e');
 
     await page.goto('/settings?tab=customization', { waitUntil: 'domcontentloaded' });
     await page.getByRole('button', { name: 'Apply Workspace Theme' }).waitFor();
@@ -206,7 +206,7 @@ test.describe('Theme Rendered Colors & Real Refresh Regression', () => {
     });
 
     expect(darkAfterWorkspaceTheme.theme).toBe('dark');
-    expect(normalizeHex(darkAfterWorkspaceTheme.primary)).toBe('#818cf8');
+    expect(normalizeHex(darkAfterWorkspaceTheme.primary)).toBe('#5eead4');
     expect(darkAfterWorkspaceTheme.inlinePrimary).toBe('');
 
     await context.close();

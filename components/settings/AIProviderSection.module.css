@@ -317,6 +317,6 @@
 .telemetryValHighlight {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #4F46E5;
+  color: var(--sf-color-primary, #0F766E);
   font-family: monospace;
 }

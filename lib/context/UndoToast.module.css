@@ -85,8 +85,8 @@
 }
 
 .undoButton {
-  background-color: #6366F1;
-  color: #FFFFFF;
+  background-color: var(--sf-color-primary, #0F766E);
+  color: var(--sf-color-text-on-primary, #FFFFFF);
   border: none;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -97,7 +97,7 @@
 }
 
 .undoButton:hover {
-  background-color: #4F46E5;
+  background-color: var(--sf-color-primary-hover, #0D9488);
   transform: scale(1.03);
 }
 
@@ -126,7 +126,7 @@
   bottom: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, #6366F1, #38BDF8);
+  background: linear-gradient(90deg, var(--sf-color-primary, #0F766E), #2DD4BF);
   border-radius: 0 0 0 var(--sf-radius-xl, 12px);
   transition: width 0.05s linear;
 }

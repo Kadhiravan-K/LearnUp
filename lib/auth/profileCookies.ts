@@ -143,7 +143,7 @@ export function addOrUpdateSavedProfile(
       id: `profile-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: defaultDisplayName,
       initials: defaultDisplayName.slice(0, 2).toUpperCase(),
-      color: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+      color: 'linear-gradient(135deg, #0F766E 0%, #0D9488 100%)',
       lastActive: new Date().toISOString(),
       lockType: 'none',
       ...profileData,
