@@ -2,9 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePlayerShortcuts, PlayerShortcuts, DEFAULT_PLAYER_SHORTCUTS } from '@/lib/hooks/usePlayerShortcuts';
-import { useLearnUpTheme } from '@/lib/theme/ThemeProvider';
-import { ExtendedThemeId } from '@/lib/theme';
-import { useIsPluginEnabled, setPluginStatus, getPluginStatus } from '@/lib/hooks/useIsPluginEnabled';
 import { Button } from '@/components/ui/Button/Button';
 import styles from './CustomizationSection.module.css';
 
@@ -12,13 +9,11 @@ export interface CustomizationSectionProps {
   onNotify?: (msg: string) => void;
 }
 
-interface ThemeOption {
-  id: ExtendedThemeId;
-  pluginId?: string;
+export interface ThemeOption {
+  id: 'light' | 'dark';
   name: string;
   category: 'core' | 'premium_plugin';
   desc: string;
-  badge?: string;
   primaryColor: string;
   bgPreview: string;
   borderPreview: string;
@@ -49,65 +44,67 @@ export const THEME_OPTIONS: ThemeOption[] = [
 ];
 
 export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'player' | 'theme'>('theme');
+  const [activeSubTab, setActiveSubTab] = useState<'workspace' | 'player' | 'ai_motion'>('workspace');
   const { shortcuts, saveShortcuts, resetShortcuts } = usePlayerShortcuts();
-  const { theme, setTheme } = useLearnUpTheme();
 
-  // Check Workspace Customization Studio plugin state
-  const isCustomizationPluginEnabled = useIsPluginEnabled('workspace_customization_studio', true);
+  // Sidebar Behavior State
+  const [sidebarBehavior, setSidebarBehavior] = useState<'expanded' | 'collapsed' | 'hover'>('expanded');
 
-  // Track enabled state for all plugins
-  const [pluginsMap, setPluginsMap] = useState<Record<string, boolean>>({});
+  // Dashboard Widget Visibility State
+  const [widgetToggles, setWidgetToggles] = useState({
+    showHeatmap: true,
+    showStats: true,
+    showRadar: true,
+    showAssistant: true
+  });
 
-  const refreshPluginStatuses = () => {
-    const map: Record<string, boolean> = {};
-    THEME_OPTIONS.forEach((opt) => {
-      if (opt.pluginId) {
-        map[opt.pluginId] = getPluginStatus(opt.pluginId, true);
-      }
-    });
-    setPluginsMap(map);
-  };
-
-  useEffect(() => {
-    refreshPluginStatuses();
-    const handleUpdate = () => refreshPluginStatuses();
-    window.addEventListener('LearnUp_plugins_updated', handleUpdate);
-    return () => window.removeEventListener('LearnUp_plugins_updated', handleUpdate);
-  }, []);
-
-  // Media Player Engine Preference
+  // Media Player Engine & Shortcuts State
   const [playerEngine, setPlayerEngine] = useState<'custom_player' | 'youtube_native'>('custom_player');
   const [recordingField, setRecordingField] = useState<keyof PlayerShortcuts | null>(null);
   const [localShortcuts, setLocalShortcuts] = useState<PlayerShortcuts>(shortcuts);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Custom Theme & Workspace Studio State
-  const [customAccent, setCustomAccent] = useState('#0F766E');
-  const [glassIntensity, setGlassIntensity] = useState('modern');
-  const [cornerRadius, setCornerRadius] = useState('12px');
-  const [fontScale, setFontScale] = useState('100%');
-  const [highContrastVideo, setHighContrastVideo] = useState(false);
+  // Motion & Accessibility State
+  const [reduceMotion, setReduceMotion] = useState(false);
   const [ambientGlow, setAmbientGlow] = useState(true);
+  const [highContrastVideo, setHighContrastVideo] = useState(false);
 
+  // AI Presentation Preferences
+  const [richUiDefault, setRichUiDefault] = useState(true);
+  const [showTokenMetrics, setShowTokenMetrics] = useState(true);
+
+  // Load from localStorage on mount
   useEffect(() => {
     try {
+      const storedSidebar = localStorage.getItem('LearnUp_sidebar_behavior');
+      if (storedSidebar === 'expanded' || storedSidebar === 'collapsed' || storedSidebar === 'hover') {
+        setSidebarBehavior(storedSidebar);
+      }
+
+      const storedWidgets = localStorage.getItem('LearnUp_dashboard_widgets');
+      if (storedWidgets) {
+        setWidgetToggles(JSON.parse(storedWidgets));
+      }
+
       const storedEngine = localStorage.getItem('LearnUp_player_engine');
       if (storedEngine === 'youtube_native' || storedEngine === 'custom_player') {
         setPlayerEngine(storedEngine);
       }
-      const storedAccent = localStorage.getItem('LearnUp_custom_accent');
-      if (storedAccent) setCustomAccent(storedAccent);
-      const storedGlass = localStorage.getItem('LearnUp_glass_intensity');
-      if (storedGlass) setGlassIntensity(storedGlass);
-      const storedRadius = localStorage.getItem('LearnUp_corner_radius');
-      if (storedRadius) setCornerRadius(storedRadius);
-      const storedFontScale = localStorage.getItem('LearnUp_font_scale');
-      if (storedFontScale) setFontScale(storedFontScale);
-      const storedContrast = localStorage.getItem('LearnUp_high_contrast_video');
-      if (storedContrast) setHighContrastVideo(storedContrast === 'true');
+
+      const storedReduceMotion = localStorage.getItem('LearnUp_reduce_motion');
+      if (storedReduceMotion) setReduceMotion(storedReduceMotion === 'true');
+
       const storedGlow = localStorage.getItem('LearnUp_ambient_glow');
       if (storedGlow) setAmbientGlow(storedGlow === 'true');
+
+      const storedContrast = localStorage.getItem('LearnUp_high_contrast_video');
+      if (storedContrast) setHighContrastVideo(storedContrast === 'true');
+
+      const storedRichUi = localStorage.getItem('LearnUp_ai_rich_ui_default');
+      if (storedRichUi) setRichUiDefault(storedRichUi === 'true');
+
+      const storedTokenMetrics = localStorage.getItem('LearnUp_show_token_metrics');
+      if (storedTokenMetrics) setShowTokenMetrics(storedTokenMetrics === 'true');
     } catch {}
   }, []);
 
@@ -115,7 +112,7 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
     setLocalShortcuts(shortcuts);
   }, [shortcuts]);
 
-  // Handle shortcut recording
+  // Handle shortcut key recording
   useEffect(() => {
     if (!recordingField) return;
 
@@ -141,10 +138,32 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
   }, [recordingField]);
 
+  // Sidebar behavior change
+  const handleSelectSidebarBehavior = (val: 'expanded' | 'collapsed' | 'hover') => {
+    setSidebarBehavior(val);
+    try {
+      localStorage.setItem('LearnUp_sidebar_behavior', val);
+      window.dispatchEvent(new CustomEvent('LearnUp_sidebar_changed', { detail: val }));
+    } catch {}
+    if (onNotify) onNotify(`Sidebar behavior set to: ${val}`);
+  };
+
+  // Toggle widget visibility
+  const handleToggleWidget = (key: keyof typeof widgetToggles) => {
+    const next = { ...widgetToggles, [key]: !widgetToggles[key] };
+    setWidgetToggles(next);
+    try {
+      localStorage.setItem('LearnUp_dashboard_widgets', JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent('LearnUp_widgets_changed', { detail: next }));
+    } catch {}
+  };
+
+  // Save player shortcuts & engine
   const handleSavePlayerConfig = () => {
     saveShortcuts(localShortcuts);
     try {
       localStorage.setItem('LearnUp_player_engine', playerEngine);
+      window.dispatchEvent(new CustomEvent('LearnUp_player_engine_changed', { detail: playerEngine }));
     } catch {}
     setSavedSuccess(true);
     if (onNotify) onNotify('Player shortcuts & engine saved successfully!');
@@ -157,435 +176,343 @@ export function CustomizationSection({ onNotify }: CustomizationSectionProps) {
     if (onNotify) onNotify('Restored default shortcut mappings.');
   };
 
-  const handleToggleThemePlugin = (e: React.MouseEvent, pluginId: string) => {
-    e.stopPropagation();
-    const currentStatus = pluginsMap[pluginId] ?? true;
-    const newStatus = !currentStatus;
-    setPluginStatus(pluginId, newStatus);
-    refreshPluginStatuses();
-    if (onNotify) {
-      onNotify(newStatus ? 'Theme plugin enabled.' : 'Theme plugin disabled.');
-    }
-    // If we just disabled the currently active theme, switch back to light or dark
-    if (!newStatus) {
-      const activeOpt = THEME_OPTIONS.find((t) => t.id === theme);
-      if (activeOpt?.pluginId === pluginId) {
-        setTheme('dark');
-      }
-    }
-  };
-
-  const handleSelectTheme = (opt: ThemeOption) => {
-    if (opt.pluginId) {
-      const isEnabled = pluginsMap[opt.pluginId] ?? true;
-      if (!isEnabled) {
-        if (onNotify) onNotify(`Please enable the "${opt.name}" plugin first.`);
-        return;
-      }
-    }
-    setTheme(opt.id);
-    if (onNotify) onNotify(`Activated ${opt.id.toUpperCase()} theme.`);
-  };
-
-  const handleSaveThemeConfig = () => {
+  // Toggle Reduce Motion
+  const handleToggleReduceMotion = () => {
+    const next = !reduceMotion;
+    setReduceMotion(next);
     try {
-      localStorage.setItem('LearnUp_custom_accent', customAccent);
-      localStorage.setItem('LearnUp_glass_intensity', glassIntensity);
-      localStorage.setItem('LearnUp_corner_radius', cornerRadius);
-      localStorage.setItem('LearnUp_font_scale', fontScale);
-      localStorage.setItem('LearnUp_high_contrast_video', String(highContrastVideo));
-      localStorage.setItem('LearnUp_ambient_glow', String(ambientGlow));
-
-      // Apply CSS variables live
-      document.documentElement.style.setProperty('--sf-color-primary', customAccent);
-      document.documentElement.style.setProperty('--sf-radius-xl', cornerRadius);
+      localStorage.setItem('LearnUp_reduce_motion', String(next));
+      document.documentElement.setAttribute('data-reduced-motion', String(next));
     } catch {}
-    setSavedSuccess(true);
-    if (onNotify) onNotify('Custom workspace theme applied successfully!');
-    setTimeout(() => setSavedSuccess(false), 2500);
   };
 
-  const accentPresets = [
-    { name: 'Teal', color: '#0F766E' },
-    { name: 'Cyan', color: '#00F0FF' },
-    { name: 'Emerald', color: '#10B981' },
-    { name: 'Violet', color: '#A855F7' },
-    { name: 'Amber', color: '#EAB308' },
-    { name: 'Rose', color: '#F43F5E' },
-    { name: 'Cobalt', color: '#2563EB' },
-    { name: 'Matrix Green', color: '#00FF66' }
-  ];
+  // Toggle Ambient Glow
+  const handleToggleAmbientGlow = () => {
+    const next = !ambientGlow;
+    setAmbientGlow(next);
+    try {
+      localStorage.setItem('LearnUp_ambient_glow', String(next));
+    } catch {}
+  };
 
-  const shortcutLabels: Record<keyof PlayerShortcuts, string> = {
-    togglePlay: 'Play / Pause Video',
-    seekBackward: 'Seek Backward 10 Seconds',
-    seekForward: 'Seek Forward 10 Seconds',
-    speedBoost: '2X Speed Boost Modifier',
-    toggleCaptions: 'Toggle Subtitles / CC',
-    toggleMute: 'Toggle Audio Mute',
-    toggleFullscreen: 'Toggle Fullscreen',
-    volumeUp: 'Increase Audio Volume (+5%)',
-    volumeDown: 'Decrease Audio Volume (-5%)'
+  // Toggle High Contrast Video
+  const handleToggleHighContrast = () => {
+    const next = !highContrastVideo;
+    setHighContrastVideo(next);
+    try {
+      localStorage.setItem('LearnUp_high_contrast_video', String(next));
+    } catch {}
+  };
+
+  // Toggle Rich UI Default
+  const handleToggleRichUiDefault = () => {
+    const next = !richUiDefault;
+    setRichUiDefault(next);
+    try {
+      localStorage.setItem('LearnUp_ai_rich_ui_default', String(next));
+    } catch {}
+    if (onNotify) onNotify(`Rich AI Output default: ${next ? 'Enabled' : 'Disabled'}`);
+  };
+
+  // Toggle Token Metrics
+  const handleToggleTokenMetrics = () => {
+    const next = !showTokenMetrics;
+    setShowTokenMetrics(next);
+    try {
+      localStorage.setItem('LearnUp_show_token_metrics', String(next));
+    } catch {}
   };
 
   return (
-    <div className={styles.section}>
+    <section id="customization" className={styles.section} aria-labelledby="customization-heading">
       <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h2 className={styles.title}>Customization Studio</h2>
-          <span className={styles.badge}>THEMES &amp; WORKSPACE</span>
+        <div className={styles.titleArea}>
+          <span className={styles.icon}>🛠️</span>
+          <div>
+            <h2 id="customization-heading" className={styles.title}>Workspace &amp; Learning Customization</h2>
+            <p className={styles.subtext}>
+              Configure sidebar behavior, dashboard layout, media playback shortcuts, motion, and AI presentation.
+            </p>
+          </div>
         </div>
-        <p className={styles.subtitle}>
-          Tailor your workspace aesthetic, install premium themes, configure media player gestures, and map custom hotkeys.
-        </p>
       </div>
 
-      {/* Sub-tab Navigation */}
-      <div className={styles.subTabs}>
+      {/* Subtabs Navigation */}
+      <div className={styles.subtabsNav} role="tablist" aria-label="Customization categories">
         <button
           type="button"
-          className={`${styles.subTabBtn} ${activeSubTab === 'theme' ? styles.subTabActive : ''}`}
-          onClick={() => setActiveSubTab('theme')}
+          className={`${styles.subtabBtn} ${activeSubTab === 'workspace' ? styles.subtabActive : ''}`}
+          onClick={() => setActiveSubTab('workspace')}
+          role="tab"
+          aria-selected={activeSubTab === 'workspace'}
         >
-          <span>🎨</span> Workspace &amp; Custom Themes ({THEME_OPTIONS.length})
+          📂 Sidebar &amp; Dashboard
         </button>
         <button
           type="button"
-          className={`${styles.subTabBtn} ${activeSubTab === 'player' ? styles.subTabActive : ''}`}
+          className={`${styles.subtabBtn} ${activeSubTab === 'player' ? styles.subtabActive : ''}`}
           onClick={() => setActiveSubTab('player')}
+          role="tab"
+          aria-selected={activeSubTab === 'player'}
         >
-          <span>🎬</span> Media Player &amp; Shortcuts
+          ⌨️ Player Engine &amp; Shortcuts
+        </button>
+        <button
+          type="button"
+          className={`${styles.subtabBtn} ${activeSubTab === 'ai_motion' ? styles.subtabActive : ''}`}
+          onClick={() => setActiveSubTab('ai_motion')}
+          role="tab"
+          aria-selected={activeSubTab === 'ai_motion'}
+        >
+          ✨ Motion &amp; AI Presentation
         </button>
       </div>
 
-      {activeSubTab === 'theme' ? (
-        <>
-          {/* Card 1: Theme Selector Grid */}
-          <div className={styles.card}>
-            <div className={styles.cardTitleRow}>
-              <div>
-                <h3 className={styles.cardTitle}>Theme Engine &amp; Modular Plugin Themes</h3>
-                <p className={styles.cardSubtitle}>
-                  Select from core themes or activate individual theme plugins tailored to your focus environment.
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.themesGrid}>
-              {THEME_OPTIONS.map((opt) => {
-                const isActive = theme === opt.id;
-                const isPlugin = Boolean(opt.pluginId);
-                const isPluginEnabled = opt.pluginId ? (pluginsMap[opt.pluginId] ?? true) : true;
-
-                return (
-                  <div
-                    key={opt.id}
-                    className={`${styles.themeCard} ${isActive ? styles.themeCardActive : ''} ${
-                      !isPluginEnabled ? styles.themeCardDisabled : ''
-                    }`}
-                    onClick={() => handleSelectTheme(opt)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Select ${opt.name}`}
-                  >
-                    <div
-                      className={styles.themePreviewBox}
-                      style={{
-                        background: opt.bgPreview,
-                        borderColor: opt.borderPreview
-                      }}
-                    >
-                      <div
-                        className={styles.themePreviewSwatch}
-                        style={{ backgroundColor: opt.primaryColor }}
-                      />
-                      <div
-                        className={styles.themePreviewSwatchSub}
-                        style={{ backgroundColor: opt.accentPreview }}
-                      />
-                      {isActive && <span className={styles.activeCheck}>✓ ACTIVE</span>}
-                    </div>
-
-                    <div className={styles.themeInfo}>
-                      <div className={styles.themeHeaderRow}>
-                        <span className={styles.themeName}>{opt.name}</span>
-                        {opt.badge && <span className={styles.themeBadge}>{opt.badge}</span>}
-                      </div>
-                      <p className={styles.themeDesc}>{opt.desc}</p>
-                    </div>
-
-                    {isPlugin && opt.pluginId && (
-                      <div className={styles.themePluginControls}>
-                        <span
-                          className={`${styles.themePluginStatus} ${
-                            isPluginEnabled ? styles.themePluginStatusActive : styles.themePluginStatusDisabled
-                          }`}
-                        >
-                          <span>{isPluginEnabled ? '● Plugin Enabled' : '○ Disabled'}</span>
-                        </span>
-                        <button
-                          type="button"
-                          className={styles.themePluginToggleBtn}
-                          onClick={(e) => handleToggleThemePlugin(e, opt.pluginId!)}
-                          title={isPluginEnabled ? 'Disable this theme plugin' : 'Enable this theme plugin'}
-                        >
-                          {isPluginEnabled ? 'Turn OFF' : 'Turn ON'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+      {/* 1. Sidebar & Dashboard Subtab */}
+      {activeSubTab === 'workspace' && (
+        <div className={styles.subtabContent}>
+          {/* Sidebar Behavior */}
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>SIDEBAR BEHAVIOR</span>
+            <p className={styles.subtext}>Choose default navigation state for desktop viewports.</p>
+            <div className={styles.segmentedControl} role="radiogroup" aria-label="Sidebar behavior">
+              <button
+                type="button"
+                className={`${styles.segmentBtn} ${sidebarBehavior === 'expanded' ? styles.segmentActive : ''}`}
+                onClick={() => handleSelectSidebarBehavior('expanded')}
+                role="radio"
+                aria-checked={sidebarBehavior === 'expanded'}
+              >
+                Always Expanded
+              </button>
+              <button
+                type="button"
+                className={`${styles.segmentBtn} ${sidebarBehavior === 'collapsed' ? styles.segmentActive : ''}`}
+                onClick={() => handleSelectSidebarBehavior('collapsed')}
+                role="radio"
+                aria-checked={sidebarBehavior === 'collapsed'}
+              >
+                Compact Icons
+              </button>
+              <button
+                type="button"
+                className={`${styles.segmentBtn} ${sidebarBehavior === 'hover' ? styles.segmentActive : ''}`}
+                onClick={() => handleSelectSidebarBehavior('hover')}
+                role="radio"
+                aria-checked={sidebarBehavior === 'hover'}
+              >
+                Hover Peek
+              </button>
             </div>
           </div>
 
-          {/* Card 2: Workspace Customization Studio */}
-          {isCustomizationPluginEnabled ? (
-            <div className={styles.card}>
-              <div className={styles.cardTitleRow}>
-                <div>
-                  <h3 className={styles.cardTitle}>Workspace Aesthetic Customization</h3>
-                  <p className={styles.cardSubtitle}>
-                    Fine-tune custom accent colors, glassmorphism intensity, corner radius, and font scaling.
-                  </p>
+          {/* Dashboard Widgets Visibility */}
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>DASHBOARD WIDGETS VISIBILITY</span>
+            <p className={styles.subtext}>Enable or disable telemetry cards rendered on the home dashboard.</p>
+            <div className={styles.toggleList}>
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Focus Heatmap Matrix</span>
+                  <span className={styles.toggleDesc}>Weekly 7-day study consistency and time distribution.</span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setPluginStatus('workspace_customization_studio', false)}
-                  title="Disable Workspace Customization Studio Plugin"
-                >
-                  Turn OFF Plugin
-                </Button>
-              </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={widgetToggles.showHeatmap}
+                  onChange={() => handleToggleWidget('showHeatmap')}
+                />
+              </label>
 
-              <div className={styles.themeGrid}>
-                {/* Primary Accent Picker */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Custom Workspace Primary Accent</label>
-                  <div className={styles.colorInputRow}>
-                    <input
-                      type="color"
-                      value={customAccent}
-                      onChange={(e) => setCustomAccent(e.target.value)}
-                      className={styles.colorPicker}
-                      aria-label="Custom accent color picker"
-                    />
-                    <input
-                      type="text"
-                      value={customAccent}
-                      onChange={(e) => setCustomAccent(e.target.value)}
-                      className={styles.hexInput}
-                      aria-label="Hex color value"
-                    />
-                  </div>
-                  {/* Preset Pills */}
-                  <div className={styles.presetPills}>
-                    {accentPresets.map((p) => (
-                      <button
-                        key={p.name}
-                        type="button"
-                        className={styles.presetPill}
-                        onClick={() => setCustomAccent(p.color)}
-                        style={{ borderLeftColor: p.color }}
-                      >
-                        <span className={styles.pillDot} style={{ backgroundColor: p.color }} />
-                        <span>{p.name}</span>
-                      </button>
-                    ))}
-                  </div>
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Productivity &amp; Course Stats</span>
+                  <span className={styles.toggleDesc}>Completion rate, total hours studied, and streaks.</span>
                 </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={widgetToggles.showStats}
+                  onChange={() => handleToggleWidget('showStats')}
+                />
+              </label>
 
-                {/* Glassmorphism Intensity */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Glassmorphism &amp; Frosted HUD Blur</label>
-                  <select
-                    value={glassIntensity}
-                    onChange={(e) => setGlassIntensity(e.target.value)}
-                    className={styles.select}
-                  >
-                    <option value="subtle">Subtle Blur (8px)</option>
-                    <option value="modern">Modern Translucent (16px - Default)</option>
-                    <option value="deep">Deep Frosted Glass (24px)</option>
-                    <option value="solid">Solid Background (No Blur)</option>
-                  </select>
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Skill Domain Radar</span>
+                  <span className={styles.toggleDesc}>Multidimensional proficiency map across learning topics.</span>
                 </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={widgetToggles.showRadar}
+                  onChange={() => handleToggleWidget('showRadar')}
+                />
+              </label>
 
-                {/* Corner Radius Density */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Corner Radius Style</label>
-                  <select
-                    value={cornerRadius}
-                    onChange={(e) => setCornerRadius(e.target.value)}
-                    className={styles.select}
-                  >
-                    <option value="4px">Sharp Engineering (4px)</option>
-                    <option value="8px">Balanced Modern (8px)</option>
-                    <option value="12px">Smooth Aesthetic (12px - Default)</option>
-                    <option value="16px">Organic Soft (16px)</option>
-                  </select>
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>AI Study Assistant Quick Launcher</span>
+                  <span className={styles.toggleDesc}>Socratic doubt solving and active lecture recall widget.</span>
                 </div>
-
-                {/* Base Font Scale */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Base UI Font Scale</label>
-                  <select
-                    value={fontScale}
-                    onChange={(e) => setFontScale(e.target.value)}
-                    className={styles.select}
-                  >
-                    <option value="90%">Compact Information Density (90%)</option>
-                    <option value="100%">Standard Balanced (100% - Default)</option>
-                    <option value="110%">Spacious Readability (110%)</option>
-                  </select>
-                </div>
-
-                {/* Video High Contrast */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>High-Contrast Video Overlay Assist</label>
-                  <select
-                    value={highContrastVideo ? 'true' : 'false'}
-                    onChange={(e) => setHighContrastVideo(e.target.value === 'true')}
-                    className={styles.select}
-                  >
-                    <option value="false">Standard Dynamic Range (Off)</option>
-                    <option value="true">High-Contrast Sharp Highlights (On)</option>
-                  </select>
-                </div>
-
-                {/* Ambient Glow */}
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Cinema Mode Spatial Ambient Backglow</label>
-                  <select
-                    value={ambientGlow ? 'true' : 'false'}
-                    onChange={(e) => setAmbientGlow(e.target.value === 'true')}
-                    className={styles.select}
-                  >
-                    <option value="true">Enabled (Adaptive Hue Glow)</option>
-                    <option value="false">Disabled (Minimalist Pure Black)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.actionFooter}>
-                {savedSuccess && (
-                  <div className={styles.savedToast}>
-                    <span>✓</span> Custom workspace theme applied!
-                  </div>
-                )}
-                <Button size="md" onClick={handleSaveThemeConfig}>
-                  Apply Workspace Theme
-                </Button>
-              </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={widgetToggles.showAssistant}
+                  onChange={() => handleToggleWidget('showAssistant')}
+                />
+              </label>
             </div>
-          ) : (
-            <div className={styles.pluginDisabledBanner}>
-              <span className={styles.pluginDisabledIcon}>🎨</span>
-              <h3 className={styles.pluginDisabledTitle}>Workspace Customization Studio Plugin is Disabled</h3>
-              <p className={styles.pluginDisabledDesc}>
-                Turn on the Workspace Customization Studio plugin to unlock hex color pickers, multi-tier glassmorphism blur, and border radius styling.
-              </p>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setPluginStatus('workspace_customization_studio', true)}
-              >
-                Turn ON Customization Studio Plugin
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        /* Media Player Engine & Shortcuts */
-        <>
-          <div className={styles.card}>
-            <div className={styles.cardTitleRow}>
-              <div>
-                <h3 className={styles.cardTitle}>Media Playback Engine</h3>
-                <p className={styles.cardSubtitle}>
-                  Choose between the custom gesture player or native YouTube embed.
-                </p>
-              </div>
-            </div>
+          </div>
+        </div>
+      )}
 
-            <div className={styles.engineGrid}>
-              <div
-                className={`${styles.engineOption} ${playerEngine === 'custom_player' ? styles.engineActive : ''}`}
+      {/* 2. Player Engine & Shortcuts Subtab */}
+      {activeSubTab === 'player' && (
+        <div className={styles.subtabContent}>
+          {/* Engine Choice */}
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>MEDIA PLAYER ENGINE</span>
+            <p className={styles.subtext}>Select the rendering engine used for course playback.</p>
+            <div className={styles.segmentedControl}>
+              <button
+                type="button"
+                className={`${styles.segmentBtn} ${playerEngine === 'custom_player' ? styles.segmentActive : ''}`}
                 onClick={() => setPlayerEngine('custom_player')}
               >
-                <div className={styles.engineRadio} />
-                <div className={styles.engineDetails}>
-                  <span className={styles.engineName}>⚡ Custom Video Player (Recommended)</span>
-                  <span className={styles.engineDesc}>
-                    Auto device-adaptive HUD, swipe brightness &amp; volume gesture zones, 2X speed hold, transparent glass overlays, and custom hotkeys.
-                  </span>
-                </div>
-              </div>
-
-              <div
-                className={`${styles.engineOption} ${playerEngine === 'youtube_native' ? styles.engineActive : ''}`}
+                LearnUp Custom Player (Keyboard HUD &amp; Notes)
+              </button>
+              <button
+                type="button"
+                className={`${styles.segmentBtn} ${playerEngine === 'youtube_native' ? styles.segmentActive : ''}`}
                 onClick={() => setPlayerEngine('youtube_native')}
               >
-                <div className={styles.engineRadio} />
-                <div className={styles.engineDetails}>
-                  <span className={styles.engineName}>▶️ Standard YouTube Player</span>
-                  <span className={styles.engineDesc}>
-                    Uses official YouTube default player controls, standard progress bar, and native controls overlay.
+                Standard YouTube IFrame
+              </button>
+            </div>
+          </div>
+
+          {/* Shortcuts Grid */}
+          <div className={styles.group}>
+            <div className={styles.shortcutsHeader}>
+              <span className={styles.groupLabel}>KEYBOARD SHORTCUT BINDINGS</span>
+              <button type="button" className={styles.resetBtn} onClick={handleResetShortcuts}>
+                Restore Defaults
+              </button>
+            </div>
+            <div className={styles.shortcutsGrid}>
+              {[
+                { field: 'togglePlay' as const, label: 'Play / Pause Video' },
+                { field: 'seekBackward' as const, label: 'Seek Backward (5s)' },
+                { field: 'seekForward' as const, label: 'Seek Forward (5s)' },
+                { field: 'toggleFullscreen' as const, label: 'Toggle Fullscreen' },
+                { field: 'speedBoost' as const, label: 'Speed Boost (2x)' }
+              ].map(({ field, label }) => (
+                <div key={field} className={styles.shortcutRow}>
+                  <span className={styles.shortcutLabel}>{label}</span>
+                  <button
+                    type="button"
+                    className={`${styles.keyBadge} ${recordingField === field ? styles.keyRecording : ''}`}
+                    onClick={() => setRecordingField(recordingField === field ? null : field)}
+                  >
+                    {recordingField === field ? 'Press any key...' : localShortcuts[field]}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.saveActionRow}>
+              <Button onClick={handleSavePlayerConfig} variant="primary">
+                {savedSuccess ? '✓ Saved!' : 'Save Player Settings'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Motion & AI Presentation Subtab */}
+      {activeSubTab === 'ai_motion' && (
+        <div className={styles.subtabContent}>
+          {/* Motion Preferences */}
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>MOTION &amp; VISUAL COMFORT</span>
+            <div className={styles.toggleList}>
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Reduce UI Animations</span>
+                  <span className={styles.toggleDesc}>Disables smooth panel sliding and motion transitions.</span>
+                </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={reduceMotion}
+                  onChange={handleToggleReduceMotion}
+                />
+              </label>
+
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Ambient Video Glow</span>
+                  <span className={styles.toggleDesc}>Casts a gentle dynamic halo around the media player.</span>
+                </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={ambientGlow}
+                  onChange={handleToggleAmbientGlow}
+                />
+              </label>
+
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>High-Contrast Video Frame</span>
+                  <span className={styles.toggleDesc}>Adds a distinct border around video playback on dark backgrounds.</span>
+                </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={highContrastVideo}
+                  onChange={handleToggleHighContrast}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* AI Presentation Preferences */}
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>AI ASSISTANT PRESENTATION</span>
+            <div className={styles.toggleList}>
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Rich AI Generative UI Default</span>
+                  <span className={styles.toggleDesc}>
+                    When enabled, the assistant formats responses with interactive flashcards, timelines, and Mermaid diagrams by default.
                   </span>
                 </div>
-              </div>
-            </div>
-          </div>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={richUiDefault}
+                  onChange={handleToggleRichUiDefault}
+                />
+              </label>
 
-          <div className={styles.card}>
-            <div className={styles.cardTitleRow}>
-              <div>
-                <h3 className={styles.cardTitle}>Custom Player Shortcut Keys</h3>
-                <p className={styles.cardSubtitle}>
-                  Click &apos;Change Key&apos; on any action, then press any key on your keyboard to map your hotkey.
-                </p>
-              </div>
-              <Button variant="secondary" size="sm" onClick={handleResetShortcuts}>
-                Restore Defaults
-              </Button>
-            </div>
-
-            <div className={styles.shortcutTable}>
-              {(Object.keys(localShortcuts) as Array<keyof PlayerShortcuts>).map((key) => {
-                const isRecording = recordingField === key;
-                return (
-                  <div key={key} className={styles.shortcutRow}>
-                    <span className={styles.shortcutAction}>{shortcutLabels[key] || key}</span>
-                    <div className={styles.shortcutInputArea}>
-                      <span className={styles.shortcutKeyBadge}>
-                        {isRecording ? 'Press any key...' : localShortcuts[key]}
-                      </span>
-                      <button
-                        type="button"
-                        className={`${styles.recordBtn} ${isRecording ? styles.recordingActive : ''}`}
-                        onClick={() => setRecordingField(isRecording ? null : key)}
-                      >
-                        {isRecording ? 'Cancel' : 'Change Key'}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className={styles.actionFooter}>
-              {savedSuccess && (
-                <div className={styles.savedToast}>
-                  <span>✓</span> Player shortcuts saved!
+              <label className={styles.toggleRow}>
+                <div className={styles.toggleInfo}>
+                  <span className={styles.toggleTitle}>Token Telemetry &amp; Metrics Badge</span>
+                  <span className={styles.toggleDesc}>Displays context window size and token usage indicators in the AI header.</span>
                 </div>
-              )}
-              <Button size="md" onClick={handleSavePlayerConfig}>
-                Save Player Shortcuts
-              </Button>
+                <input
+                  type="checkbox"
+                  className={styles.checkboxInput}
+                  checked={showTokenMetrics}
+                  onChange={handleToggleTokenMetrics}
+                />
+              </label>
             </div>
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </section>
   );
 }

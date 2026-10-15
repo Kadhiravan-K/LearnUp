@@ -90,7 +90,7 @@ describe('LearnUp Theme System — Visual QA & Integration Verification', () => 
     });
 
     it('includes light and dark themes in settings CustomizationSection options', () => {
-      const optionIds = THEME_OPTIONS.map((o) => o.id);
+      const optionIds = THEME_OPTIONS.map((o: any) => o.id);
       expect(optionIds).toHaveLength(2);
       expect(optionIds).toContain('light');
       expect(optionIds).toContain('dark');

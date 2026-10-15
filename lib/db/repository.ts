@@ -403,47 +403,58 @@ export class LearningItemRepository implements ILearningItemRepository {
         duration_formatted: v.durationFormatted || '00:00'
       }));
 
-      let { data: insertedVideos, error: childError } = await client
-        .from('learning_item_videos')
-        .insert(fullRows)
-        .select('*');
+      const CHUNK_SIZE = 50;
+      const allInsertedVideos: LearningItemVideo[] = [];
 
-      // Fallback to core columns for child videos
-      if (childError) {
-        const coreRows = videos.map((v) => ({
-          learning_item_id: playlistId,
-          youtube_video_id: v.videoId,
-          title: v.title,
-          thumbnail_url: v.thumbnailUrl,
-          source_position: v.sourcePosition
-        }));
-
-        const fallbackChildren = await client
+      for (let i = 0; i < fullRows.length; i += CHUNK_SIZE) {
+        const chunk = fullRows.slice(i, i + CHUNK_SIZE);
+        let { data: insertedChunk, error: childError } = await client
           .from('learning_item_videos')
-          .insert(coreRows)
+          .insert(chunk)
           .select('*');
 
-        if (!fallbackChildren.error) {
-          insertedVideos = fallbackChildren.data;
-          childError = null;
+        // Fallback to core columns for child videos
+        if (childError) {
+          const coreChunk = chunk.map((v) => ({
+            learning_item_id: v.learning_item_id,
+            youtube_video_id: v.youtube_video_id,
+            title: v.title,
+            thumbnail_url: v.thumbnail_url,
+            source_position: v.source_position
+          }));
+
+          const fallbackChildren = await client
+            .from('learning_item_videos')
+            .insert(coreChunk)
+            .select('*');
+
+          if (!fallbackChildren.error) {
+            insertedChunk = fallbackChildren.data;
+            childError = null;
+          }
         }
-      }
 
-      if (childError) {
-        logger.error('Failed to insert child videos, executing rollback compensation', {
-          operation: 'createPlaylistItemWithVideos:children',
-          playlistId,
-          error: childError.message
-        });
+        if (childError) {
+          logger.error('Failed to insert child videos, executing rollback compensation', {
+            operation: 'createPlaylistItemWithVideos:children',
+            playlistId,
+            chunkIndex: i,
+            error: childError.message
+          });
 
-        // Compensating action: clean up the parent row so we don't leave an incomplete/false-success state (FR-014)
-        await client.from('learning_items').delete().eq('id', playlistId).eq('user_id', item.userId);
+          // Compensating action: clean up the parent row so we don't leave an incomplete/false-success state (FR-014)
+          await client.from('learning_items').delete().eq('id', playlistId).eq('user_id', item.userId);
 
-        throw new AppError(
-          'DATABASE_ERROR',
-          'Failed to import all playlist items. No partial data was saved.',
-          500
-        );
+          throw new AppError(
+            'DATABASE_ERROR',
+            'Failed to import all playlist items. No partial data was saved.',
+            500
+          );
+        }
+
+        if (insertedChunk) {
+          allInsertedVideos.push(...(insertedChunk as LearningItemVideo[]));
+        }
       }
 
       // 3. Mark parent as 'ready'
@@ -466,7 +477,7 @@ export class LearningItemRepository implements ILearningItemRepository {
       return {
         ...(updatedParent || parent),
         status: 'ready',
-        videos: (insertedVideos as LearningItemVideo[]) || []
+        videos: allInsertedVideos
       };
     }
 

@@ -5,7 +5,7 @@
 
 export type CoreThemeId = 'light' | 'dark';
 
-export type ExtendedThemeId = 'light' | 'dark';
+export type ExtendedThemeId = 'light' | 'dark' | 'system';
 
 export interface ThemeColors {
   primary: string;

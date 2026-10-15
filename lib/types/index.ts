@@ -183,6 +183,39 @@ export interface PomodoroCycleConfig {
 
 // Community & LearnUp Templates
 export type TemplateCategory = 'roadmap' | 'playlist' | 'focus' | 'workflow';
+export type TemplateDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+export interface RoadmapTemplateNode {
+  node_number: string;
+  title: string;
+  description: string;
+  tags?: string[];
+}
+
+export interface RoadmapTemplatePayload {
+  type: 'roadmap';
+  title: string;
+  description: string;
+  category?: string;
+  nodes: RoadmapTemplateNode[];
+}
+
+export interface PlaylistTemplatePayload {
+  type: 'playlist';
+  title: string;
+  description: string;
+  sampleVideoUrl?: string;
+  url?: string;
+}
+
+export interface FocusTemplatePayload {
+  type: 'focus';
+  title: string;
+  focusMinutes: number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
+  soundscape?: string;
+}
 
 export interface CommunityTemplate {
   id: string;
@@ -195,7 +228,13 @@ export interface CommunityTemplate {
   rating: number;
   previewItemsCount: number;
   estimatedDuration: string;
-  data: any;
+  difficulty?: TemplateDifficulty;
+  isCurated?: boolean;
+  verifiedSource?: string;
+  prerequisites?: string[];
+  learningOutcomes?: string[];
+  version?: string;
+  data: RoadmapTemplatePayload | PlaylistTemplatePayload | FocusTemplatePayload | any;
 }
 
 export interface UserSettings {

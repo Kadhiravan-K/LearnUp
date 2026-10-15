@@ -169,7 +169,8 @@ export class YouTubeClient implements IYouTubeClient {
   private async executeFetch(url: string, operation: string, context: Record<string, unknown>): Promise<any> {
     try {
       const response = await fetch(url, {
-        headers: { Accept: 'application/json' }
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(12000)
       });
 
       if (!response.ok) {
@@ -190,8 +191,11 @@ export class YouTubeClient implements IYouTubeClient {
         if (status === 404 || data?.error?.code === 404) {
           throw new AppError('NOT_FOUND', 'Requested YouTube resource was not found.', 404);
         }
-        if (status === 403 || data?.error?.code === 403) {
+        if (status === 403 || data?.error?.code === 403 || status === 429) {
           throw new AppError('YOUTUBE_ERROR', 'YouTube API quota limit reached or access restricted.', 503);
+        }
+        if (status === 504) {
+          throw new AppError('YOUTUBE_ERROR', 'YouTube request timed out. Please try again.', 504);
         }
         throw new AppError('YOUTUBE_ERROR', 'Unable to reach YouTube service', 502);
       }
@@ -576,7 +580,12 @@ export class YouTubeClient implements IYouTubeClient {
       throw new AppError('NOT_FOUND', 'Requested YouTube resource was not found.', 404);
     }
 
-    if (firstReason === 'quotaExceeded' || firstReason === 'dailyLimitExceeded') {
+    if (
+      response.status === 429 ||
+      firstReason === 'quotaExceeded' ||
+      firstReason === 'dailyLimitExceeded' ||
+      firstReason === 'rateLimitExceeded'
+    ) {
       throw new AppError(
         'YOUTUBE_ERROR',
         'YouTube API quota limit reached. Please try again later.',

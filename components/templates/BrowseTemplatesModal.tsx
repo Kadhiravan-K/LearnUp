@@ -1,13 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { CommunityTemplate, TemplateCategory } from '@/lib/types';
+import { CommunityTemplate, TemplateCategory, TemplateDifficulty } from '@/lib/types';
 import {
   getCommunityTemplates,
   saveContributedTemplate,
-  deleteContributedTemplate
+  deleteContributedTemplate,
+  sanitizeText
 } from '@/lib/templates/communityTemplates';
+import {
+  MarketplaceItem,
+  MarketplaceCategoryTab,
+  MarketplaceDomain,
+  MarketplaceSortOption
+} from '@/lib/marketplace/types';
+import {
+  UNIFIED_MARKETPLACE_ITEMS,
+  filterMarketplaceItems,
+  getInstalledMarketplaceItemIds,
+  toggleInstallMarketplaceItem
+} from '@/lib/marketplace/registry';
 import { Button } from '@/components/ui/Button/Button';
 import styles from './BrowseTemplatesModal.module.css';
 
@@ -17,35 +30,104 @@ export interface BrowseTemplatesModalProps {
   onNotify?: (msg: string) => void;
 }
 
+const CATEGORY_TABS: Array<{ id: MarketplaceCategoryTab; label: string; icon: string }> = [
+  { id: 'for_you', label: 'For You', icon: '✨' },
+  { id: 'discover', label: 'Discover All', icon: '🌐' },
+  { id: 'templates', label: 'Templates', icon: '📋' },
+  { id: 'agents', label: 'AI Agents', icon: '🤖' },
+  { id: 'skills', label: 'Skills', icon: '⚡' },
+  { id: 'plugins', label: 'Feature Packs & Plugins', icon: '🧩' },
+  { id: 'connectors', label: 'Connectors', icon: '🔗' }
+];
+
+const DOMAINS_LIST: Array<MarketplaceDomain | 'all'> = [
+  'all',
+  'Software Engineering',
+  'Embedded Engineering',
+  'Design Engineering',
+  'HR & Recruitment',
+  'Leadership / CEO',
+  'SEO & Marketing',
+  'Data Science',
+  'Education',
+  'Healthcare Education'
+];
+
 export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTemplatesModalProps) {
   const router = useRouter();
-  const [templates, setTemplates] = useState<CommunityTemplate[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Unified Discovery States
+  const [activeTab, setActiveTab] = useState<MarketplaceCategoryTab>('for_you');
+  const [selectedDomain, setSelectedDomain] = useState<string>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [aiOnly, setAiOnly] = useState(false);
+  const [installedOnly, setInstalledOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<MarketplaceSortOption>('relevance');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // Installed IDs set for real-time reactive UI
+  const [installedIds, setInstalledIds] = useState<Set<string>>(new Set());
+
+  // Action states
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Contribute Form State
+  // Preview Drawer State (can preview MarketplaceItem or CommunityTemplate)
+  const [previewItem, setPreviewItem] = useState<MarketplaceItem | null>(null);
+
+  // User Contribution Drawer State
   const [isContributing, setIsContributing] = useState(false);
   const [contribTitle, setContribTitle] = useState('');
   const [contribCategory, setContribCategory] = useState<TemplateCategory>('roadmap');
+  const [contribDifficulty, setContribDifficulty] = useState<TemplateDifficulty>('intermediate');
   const [contribDesc, setContribDesc] = useState('');
   const [contribAuthor, setContribAuthor] = useState('');
   const [contribTags, setContribTags] = useState('');
   const [contribDuration, setContribDuration] = useState('20 Hours');
   const [contribPayloadUrl, setContribPayloadUrl] = useState('');
 
-  const loadTemplates = () => {
-    setTemplates(getCommunityTemplates());
-  };
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Load installed items
+  const refreshInstalled = useCallback(() => {
+    setInstalledIds(getInstalledMarketplaceItemIds());
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      loadTemplates();
+      refreshInstalled();
+      setErrorMsg(null);
     }
-  }, [isOpen]);
+  }, [isOpen, refreshInstalled]);
 
-  if (!isOpen) return null;
+  // Keyboard accessibility: ESC to close preview or modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (previewItem) {
+          setPreviewItem(null);
+        } else if (isContributing) {
+          setIsContributing(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, previewItem, isContributing, onClose]);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -53,147 +135,174 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  const filteredTemplates = templates.filter((tpl) => {
-    if (selectedCategory !== 'all' && tpl.category !== selectedCategory) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        tpl.title.toLowerCase().includes(q) ||
-        tpl.description.toLowerCase().includes(q) ||
-        tpl.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-        tpl.author.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  // Filtered and sorted items
+  const filteredItems = useMemo(() => {
+    void installedIds;
+    return filterMarketplaceItems(
+      UNIFIED_MARKETPLACE_ITEMS,
+      {
+        searchQuery: debouncedQuery,
+        categoryTab: activeTab,
+        domain: selectedDomain,
+        difficulty: selectedDifficulty,
+        aiOnly,
+        installedOnly,
+        verifiedOnly,
+        sortBy
+      },
+      ['Software Engineering', 'Data Science'] // User's active course domains
+    );
+  }, [
+    debouncedQuery,
+    activeTab,
+    selectedDomain,
+    selectedDifficulty,
+    aiOnly,
+    installedOnly,
+    verifiedOnly,
+    sortBy,
+    installedIds
+  ]);
 
-  const handleUseTemplate = async (tpl: CommunityTemplate) => {
-    setDownloadingId(tpl.id);
+  /**
+   * Installs or uninstalls a tool/pack/agent/skill
+   */
+  const handleToggleInstall = (id: string, title: string) => {
+    const isNowInstalled = toggleInstallMarketplaceItem(id);
+    refreshInstalled();
+    showToast(
+      isNowInstalled
+        ? `✓ Installed "${title}" into your workspace.`
+        : `Removed "${title}" from installed workspace tools.`
+    );
+  };
+
+  /**
+   * Instantiates a template into the user's private account
+   */
+  const handleUseTemplate = async (item: MarketplaceItem) => {
+    setDownloadingId(item.id);
+    setErrorMsg(null);
 
     try {
-      if (tpl.category === 'roadmap') {
-        try {
-          await fetch('/api/roadmaps', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title: tpl.data?.title || tpl.title,
-              description: tpl.data?.description || tpl.description
-            })
-          });
-        } catch {}
-        showToast(`Template "${tpl.title}" imported into your Roadmaps!`);
-        setDownloadingId(null);
+      if (item.data?.type === 'roadmap' || item.id.includes('roadmap') || item.tags.includes('Roadmap')) {
+        const res = await fetch('/api/roadmaps', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: item.title,
+            description: item.description,
+            category: item.domain
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData?.error?.message || 'Failed to create roadmap track in database.');
+        }
+
+        const created = await res.json();
+        const trackId = created?.data?.id;
+
+        if (trackId && Array.isArray(item.data?.nodes) && item.data.nodes.length > 0) {
+          for (const node of item.data.nodes) {
+            await fetch(`/api/roadmaps/${trackId}/nodes`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                title: node.title,
+                description: node.description || '',
+                tags: node.tags || []
+              })
+            });
+          }
+        }
+
+        showToast(`✓ Roadmap track "${item.title}" created!`);
         setTimeout(() => {
           onClose();
           router.push('/roadmaps');
-        }, 1000);
-      } else if (tpl.category === 'playlist') {
-        const urlToImport = tpl.data?.sampleVideoUrl || tpl.data?.url;
-        if (urlToImport) {
-          try {
-            await fetch('/api/learning-items', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ url: urlToImport })
-            });
-            window.dispatchEvent(new CustomEvent('LearnUp_library_refresh'));
-          } catch {}
-        }
-        showToast(`Course "${tpl.title}" imported to your Library!`);
-        setDownloadingId(null);
-        setTimeout(() => {
-          onClose();
-          router.push('/library');
-        }, 1000);
-      } else if (tpl.category === 'focus') {
-        try {
-          localStorage.setItem(
-            'LearnUp_pomodoro_config',
-            JSON.stringify({
-              focusDurationMinutes: tpl.data?.focusMinutes || 90,
-              shortBreakMinutes: tpl.data?.shortBreakMinutes || 20,
-              longBreakMinutes: tpl.data?.longBreakMinutes || 30,
-              intervalsBeforeLongBreak: 4,
-              autoStartBreaks: true,
-              autoStartSprints: true
-            })
-          );
-        } catch {}
-        showToast(`Focus Cadence "${tpl.title}" configured in your timer!`);
-        setDownloadingId(null);
-        setTimeout(() => {
-          onClose();
-          router.push('/focus');
-        }, 1000);
-      } else {
-        showToast(`Template "${tpl.title}" applied!`);
-        setDownloadingId(null);
-        setTimeout(() => {
-          onClose();
-        }, 1000);
+        }, 1200);
+        return;
       }
-    } catch {
+
+      const sampleVideoUrl = item.data?.sampleVideoUrl;
+      if (sampleVideoUrl) {
+        showToast(`✓ Importing video series for "${item.title}"...`);
+        setTimeout(() => {
+          onClose();
+          router.push(`/library?import=${encodeURIComponent(sampleVideoUrl)}`);
+        }, 1000);
+        return;
+      }
+
+      // Default: mark installed
+      handleToggleInstall(item.id, item.title);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to instantiate blueprint.';
+      setErrorMsg(msg);
+      showToast(`Error: ${msg}`);
+    } finally {
       setDownloadingId(null);
-      showToast('Could not complete template import.');
     }
   };
 
+  /**
+   * Submits a user-contributed blueprint
+   */
   const handleCreateContribution = (e: React.FormEvent) => {
     e.preventDefault();
     if (!contribTitle.trim() || !contribDesc.trim()) {
-      showToast('Please fill in title and description.');
+      setErrorMsg('Please provide a title and description.');
       return;
     }
 
-    const tagArray = contribTags
-      .split(',')
-      .map((t) => t.trim().replace(/^#/, ''))
-      .filter(Boolean);
+    try {
+      saveContributedTemplate({
+        title: sanitizeText(contribTitle),
+        description: sanitizeText(contribDesc),
+        category: contribCategory,
+        author: sanitizeText(contribAuthor || 'Community Contributor'),
+        tags: contribTags
+          .split(',')
+          .map((t) => sanitizeText(t.trim()))
+          .filter(Boolean),
+        estimatedDuration: sanitizeText(contribDuration || '15 Hours'),
+        difficulty: contribDifficulty,
+        data: {
+          type: contribCategory,
+          title: sanitizeText(contribTitle),
+          description: sanitizeText(contribDesc),
+          sampleVideoUrl: contribPayloadUrl.trim() || undefined
+        }
+      });
 
-    saveContributedTemplate({
-      title: contribTitle.trim(),
-      description: contribDesc.trim(),
-      category: contribCategory,
-      author: contribAuthor.trim() || 'Community Contributor',
-      tags: tagArray.length > 0 ? tagArray : ['Community', contribCategory],
-      previewItemsCount: 6,
-      estimatedDuration: contribDuration || '15 Hours',
-      data: {
-        type: contribCategory,
-        title: contribTitle.trim(),
-        description: contribDesc.trim(),
-        sampleVideoUrl: contribPayloadUrl.trim() || undefined
-      }
-    });
-
-    showToast(`Template "${contribTitle}" shared successfully!`);
-    setIsContributing(false);
-    setContribTitle('');
-    setContribDesc('');
-    setContribTags('');
-    setContribPayloadUrl('');
-    loadTemplates();
+      showToast(`✓ Blueprint "${contribTitle}" contributed successfully!`);
+      setIsContributing(false);
+      setContribTitle('');
+      setContribDesc('');
+      setContribAuthor('');
+      setContribTags('');
+      setContribPayloadUrl('');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Failed to save contribution.');
+    }
   };
 
-  const handleDeleteContribution = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    deleteContributedTemplate(id);
-    showToast('Contributed blueprint removed.');
-    loadTemplates();
-  };
-
-  const categories: Array<{ id: string; label: string; icon: string }> = [
-    { id: 'all', label: 'All Blueprints', icon: '🌐' },
-    { id: 'roadmap', label: 'Roadmap Tracks', icon: '🗺️' },
-    { id: 'playlist', label: 'Playlists & Courses', icon: '📺' },
-    { id: 'focus', label: 'Focus Workflows', icon: '⏱️' }
-  ];
+  if (!isOpen) return null;
 
   return (
-    <div className={styles.modalBackdrop} onClick={onClose} role="dialog" aria-modal="true">
-      <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
-        {toastMsg && <div className={styles.toastBanner}>{toastMsg}</div>}
+    <div
+      className={styles.modalOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="marketplace-title"
+    >
+      <div className={styles.modalBackdrop} onClick={onClose} />
+
+      <div className={styles.modalContent}>
+        {/* Toast Notification */}
+        {toastMsg && <div className={styles.toastNotification}>{toastMsg}</div>}
 
         {/* Modal Header */}
         <div className={styles.header}>
@@ -201,11 +310,13 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
             <div className={styles.headerIcon}>🧭</div>
             <div>
               <div className={styles.titleRow}>
-                <h2 className={styles.title}>Browse Community Templates</h2>
-                <span className={styles.cloudBadge}>COMMUNITY VAULT</span>
+                <h2 id="marketplace-title" className={styles.title}>
+                  Unified Discover &amp; AI Marketplace
+                </h2>
+                <span className={styles.cloudBadge}>LEARNUP 2.0</span>
               </div>
               <p className={styles.subtitle}>
-                Download peer-reviewed learning roadmaps, curated course playlists, and calibrated focus workflows.
+                Discover certified study roadmaps, interactive AI agents, reusable skills, installable feature packs, and tools.
               </p>
             </div>
           </div>
@@ -215,6 +326,7 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
               type="button"
               className={styles.contributeHeaderBtn}
               onClick={() => setIsContributing(!isContributing)}
+              aria-expanded={isContributing}
             >
               <span>{isContributing ? '✕ Close Form' : '+ Share Blueprint'}</span>
             </button>
@@ -222,14 +334,14 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
               type="button"
               className={styles.closeBtn}
               onClick={onClose}
-              aria-label="Close templates browser"
+              aria-label="Close marketplace browser"
             >
               ✕
             </button>
           </div>
         </div>
 
-        {/* Contribution Drawer */}
+        {/* User Contribution Drawer */}
         {isContributing && (
           <form onSubmit={handleCreateContribution} className={styles.contributeOverlay}>
             <div className={styles.formHeader}>
@@ -276,6 +388,19 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
               </div>
 
               <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Difficulty Level</label>
+                <select
+                  value={contribDifficulty}
+                  onChange={(e) => setContribDifficulty(e.target.value as TemplateDifficulty)}
+                  className={styles.formSelect}
+                >
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Your Name / Handle</label>
                 <input
                   type="text"
@@ -308,8 +433,8 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>YouTube Playlist / Video URL (Optional)</label>
+              <div className={styles.formGroupFull}>
+                <label className={styles.formLabel}>Resource URL (Optional Course or Playlist)</label>
                 <input
                   type="url"
                   placeholder="https://www.youtube.com/playlist?list=..."
@@ -331,123 +456,352 @@ export function BrowseTemplatesModal({ isOpen, onClose, onNotify }: BrowseTempla
           </form>
         )}
 
-        {/* Search & Category Filter Bar */}
+        {/* Search & Navigation Bar */}
         <div className={styles.filterBar}>
           <div className={styles.searchWrapper}>
             <span className={styles.searchIcon}>🔍</span>
             <input
               type="text"
-              placeholder="Search templates by subject, author, keyword (e.g., Rust, PyTorch, Math)..."
+              placeholder="Search marketplace by name, keyword, skill, or publisher (e.g. Interview, Rust, PyTorch)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={styles.searchInput}
+              aria-label="Search unified marketplace"
             />
             {searchQuery && (
               <button
                 type="button"
                 className={styles.clearSearchBtn}
                 onClick={() => setSearchQuery('')}
+                aria-label="Clear search query"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className={styles.categoryPills}>
-            {categories.map((c) => (
+          {/* Unified Category Tabs */}
+          <div className={styles.categoryPills} role="tablist" aria-label="Marketplace categories">
+            {CATEGORY_TABS.map((tab) => (
               <button
-                key={c.id}
+                key={tab.id}
                 type="button"
-                className={`${styles.catPill} ${selectedCategory === c.id ? styles.catPillActive : ''}`}
-                onClick={() => setSelectedCategory(c.id)}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                className={`${styles.catPill} ${activeTab === tab.id ? styles.catPillActive : ''}`}
+                onClick={() => setActiveTab(tab.id)}
               >
-                <span>{c.icon}</span>
-                <span>{c.label}</span>
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
+
+          {/* Secondary Filters (Domain, Difficulty, AI Only, Installed, Sort) */}
+          <div className={styles.secondaryFiltersRow}>
+            <div className={styles.filterControls}>
+              <select
+                value={selectedDomain}
+                onChange={(e) => setSelectedDomain(e.target.value)}
+                className={styles.filterSelect}
+                aria-label="Filter by domain"
+              >
+                <option value="all">All Domains</option>
+                {DOMAINS_LIST.filter((d) => d !== 'all').map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedDifficulty}
+                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                className={styles.filterSelect}
+                aria-label="Filter by difficulty"
+              >
+                <option value="all">All Levels</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as MarketplaceSortOption)}
+                className={styles.filterSelect}
+                aria-label="Sort items"
+              >
+                <option value="relevance">Featured &bull; Relevance</option>
+                <option value="highest_rated">Highest Rated (Verified)</option>
+                <option value="most_installed">Most Installed</option>
+                <option value="recently_updated">Recently Updated</option>
+                <option value="alphabetical">Alphabetical (A-Z)</option>
+              </select>
+
+              {/* Filter Toggles */}
+              <label className={styles.filterCheckboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={aiOnly}
+                  onChange={(e) => setAiOnly(e.target.checked)}
+                />
+                <span>🤖 AI-Powered</span>
+              </label>
+
+              <label className={styles.filterCheckboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={installedOnly}
+                  onChange={(e) => setInstalledOnly(e.target.checked)}
+                />
+                <span>📦 Installed Only</span>
+              </label>
+            </div>
+
+            <span className={styles.resultsCount}>
+              Showing {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'}
+            </span>
+          </div>
         </div>
 
-        {/* Templates Grid */}
+        {/* Error message banner */}
+        {errorMsg && (
+          <div className={styles.errorBanner} role="alert">
+            <span>⚠️ {errorMsg}</span>
+            <button type="button" onClick={() => setErrorMsg(null)} className={styles.errorDismissBtn}>
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Marketplace Grid */}
         <div className={styles.templatesGrid}>
-          {filteredTemplates.length === 0 ? (
+          {filteredItems.length === 0 ? (
             <div className={styles.emptyResults}>
               <div className={styles.emptyIcon}>🔍</div>
-              <h3>No templates found matching your search</h3>
-              <p>Try searching for different keywords or select &quot;All Blueprints&quot;.</p>
+              <h3>No items found matching your filters</h3>
+              <p>Try searching for different keywords or clear your active filters.</p>
+              <Button
+                size="sm"
+                variant="secondary"
+                style={{ marginTop: '12px' }}
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedDomain('all');
+                  setSelectedDifficulty('all');
+                  setAiOnly(false);
+                  setInstalledOnly(false);
+                  setActiveTab('discover');
+                }}
+              >
+                Reset All Filters
+              </Button>
             </div>
           ) : (
-            filteredTemplates.map((tpl) => {
-              const isUserContributed = tpl.id.startsWith('contributed_');
+            filteredItems.map((item) => {
+              const isInstalled = installedIds.has(item.id);
+              const isTemplate = item.kind === 'template';
 
               return (
-                <div key={tpl.id} className={styles.templateCard}>
+                <div key={item.id} className={styles.templateCard}>
                   <div className={styles.cardHeader}>
                     <div className={styles.cardBadgeRow}>
-                      <span
-                        className={`${styles.categoryBadge} ${
-                          tpl.category === 'roadmap'
-                            ? styles.badgeRoadmap
-                            : tpl.category === 'playlist'
-                            ? styles.badgePlaylist
-                            : styles.badgeFocus
-                        }`}
-                      >
-                        {tpl.category.toUpperCase()}
+                      <span className={`${styles.categoryBadge} ${styles.badgeKind}`}>
+                        {item.kind.replace('_', ' ').toUpperCase()}
                       </span>
-                      {isUserContributed && (
-                        <span className={`${styles.categoryBadge} ${styles.badgeContributed}`}>
-                          CONTRIBUTED
+
+                      {item.isAiPowered && (
+                        <span className={`${styles.categoryBadge} ${styles.badgeAi}`}>
+                          🤖 AI
                         </span>
                       )}
-                      <span className={styles.ratingBadge}>★ {tpl.rating}</span>
-                    </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span className={styles.durationBadge}>⏱ {tpl.estimatedDuration}</span>
-                      {isUserContributed && (
-                        <button
-                          type="button"
-                          className={styles.deleteCardBtn}
-                          onClick={(e) => handleDeleteContribution(tpl.id, e)}
-                          title="Delete this template"
-                        >
-                          🗑️
-                        </button>
+                      {item.isVerifiedPublisher && (
+                        <span className={`${styles.categoryBadge} ${styles.badgeCurated}`}>
+                          ✓ VERIFIED
+                        </span>
+                      )}
+
+                      {item.difficulty && (
+                        <span className={`${styles.difficultyBadge} ${styles.difficultyBeginner}`}>
+                          {item.difficulty}
+                        </span>
                       )}
                     </div>
+
+                    <span className={styles.domainBadge}>{item.domain}</span>
                   </div>
 
-                  <h3 className={styles.templateTitle}>{tpl.title}</h3>
-                  <p className={styles.templateDesc}>{tpl.description}</p>
+                  <div className={styles.cardBody}>
+                    <h3 className={styles.cardTitle}>{item.title}</h3>
+                    <p className={styles.cardDesc}>{item.description}</p>
 
-                  <div className={styles.tagsRow}>
-                    {tpl.tags.map((tag) => (
-                      <span key={tag} className={styles.tagPill}>
-                        #{tag}
-                      </span>
-                    ))}
+                    {item.medicalDisclaimer && (
+                      <div className={styles.medicalNotice}>
+                        ℹ️ {item.medicalDisclaimer}
+                      </div>
+                    )}
+
+                    <div className={styles.tagsRow}>
+                      {item.tags.slice(0, 4).map((tag, tIdx) => (
+                        <span key={tIdx} className={styles.tagPill}>
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   <div className={styles.cardFooter}>
-                    <div className={styles.authorMeta}>
-                      <span className={styles.authorName}>By {tpl.author}</span>
-                      <span className={styles.downloadsCount}>⬇ {tpl.downloadsCount.toLocaleString()} downloads</span>
+                    <div className={styles.metaRow}>
+                      <span className={styles.authorName}>By {item.publisher}</span>
+                      <span className={styles.ratingText}>
+                        ★ {item.rating > 0 ? item.rating.toFixed(1) : 'New'} ({item.installCount} installs)
+                      </span>
                     </div>
 
-                    <Button
-                      size="sm"
-                      onClick={() => handleUseTemplate(tpl)}
-                      disabled={downloadingId === tpl.id}
-                    >
-                      {downloadingId === tpl.id ? 'Importing...' : 'Use Template ⬇'}
-                    </Button>
+                    <div className={styles.cardActions}>
+                      <button
+                        type="button"
+                        className={styles.previewBtn}
+                        onClick={() => setPreviewItem(item)}
+                      >
+                        Details
+                      </button>
+
+                      {isTemplate ? (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() => handleUseTemplate(item)}
+                          disabled={downloadingId === item.id}
+                        >
+                          {downloadingId === item.id ? 'Importing...' : 'Use Blueprint'}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant={isInstalled ? 'secondary' : 'primary'}
+                          onClick={() => handleToggleInstall(item.id, item.title)}
+                        >
+                          {isInstalled ? '✓ Installed' : '+ Install'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })
           )}
         </div>
+
+        {/* Item Details / Preview Drawer */}
+        {previewItem && (
+          <div className={styles.previewOverlay}>
+            <div className={styles.previewBackdrop} onClick={() => setPreviewItem(null)} />
+            <div className={styles.previewDrawer}>
+              <div className={styles.previewHeader}>
+                <div>
+                  <div className={styles.previewBadges}>
+                    <span className={styles.categoryBadge}>{previewItem.kind.toUpperCase()}</span>
+                    <span className={styles.domainBadge}>{previewItem.domain}</span>
+                    {previewItem.isVerifiedPublisher && (
+                      <span className={`${styles.categoryBadge} ${styles.badgeCurated}`}>
+                        ✓ VERIFIED PUBLISHER
+                      </span>
+                    )}
+                  </div>
+                  <h3 className={styles.previewTitle}>{previewItem.title}</h3>
+                  <span className={styles.previewAuthor}>
+                    Published by {previewItem.publisher} &bull; v{previewItem.version} &bull; {previewItem.pricing.toUpperCase()}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={styles.closePreviewBtn}
+                  onClick={() => setPreviewItem(null)}
+                  aria-label="Close details drawer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className={styles.previewBody}>
+                <p className={styles.previewDesc}>{previewItem.description}</p>
+
+                {previewItem.medicalDisclaimer && (
+                  <div className={styles.medicalNotice}>
+                    ⚠️ <strong>Academic Notice:</strong> {previewItem.medicalDisclaimer}
+                  </div>
+                )}
+
+                {/* Included Agents and Skills (for feature packs) */}
+                {previewItem.includedAgents && previewItem.includedAgents.length > 0 && (
+                  <div className={styles.previewSection}>
+                    <h4>🤖 Included AI Agents:</h4>
+                    <ul className={styles.previewList}>
+                      {previewItem.includedAgents.map((ag, i) => (
+                        <li key={i}>{ag}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {previewItem.includedSkills && previewItem.includedSkills.length > 0 && (
+                  <div className={styles.previewSection}>
+                    <h4>⚡ Included Capabilities &amp; Skills:</h4>
+                    <ul className={styles.previewList}>
+                      {previewItem.includedSkills.map((sk, i) => (
+                        <li key={i}>{sk}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Permissions */}
+                {previewItem.permissions && previewItem.permissions.length > 0 && (
+                  <div className={styles.previewSection}>
+                    <h4>🔒 Requested Sandbox Permissions:</h4>
+                    <div className={styles.tagsRow}>
+                      {previewItem.permissions.map((p, i) => (
+                        <span key={i} className={styles.tagPill}>
+                          perm:{p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.previewFooter}>
+                <Button variant="secondary" onClick={() => setPreviewItem(null)}>
+                  Close
+                </Button>
+
+                {previewItem.kind === 'template' ? (
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      handleUseTemplate(previewItem);
+                      setPreviewItem(null);
+                    }}
+                  >
+                    Use This Blueprint
+                  </Button>
+                ) : (
+                  <Button
+                    variant={installedIds.has(previewItem.id) ? 'secondary' : 'primary'}
+                    onClick={() => {
+                      handleToggleInstall(previewItem.id, previewItem.title);
+                    }}
+                  >
+                    {installedIds.has(previewItem.id) ? 'Uninstall Item' : 'Install to Workspace'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

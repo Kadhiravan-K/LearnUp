@@ -228,12 +228,23 @@ export class ImportService {
       );
 
       if (existing) {
-        const fullItem =
-          existing.type === 'playlist'
-            ? await this.repository.getItemWithVideos(client, user.id, existing.id)
-            : existing;
+        if (existing.status === 'ready') {
+          const fullItem =
+            existing.type === 'playlist'
+              ? await this.repository.getItemWithVideos(client, user.id, existing.id)
+              : existing;
 
-        return { item: fullItem, isDuplicate: true };
+          return { item: fullItem, isDuplicate: true };
+        }
+
+        logger.warn('Existing batch item in non-ready status found; cleaning up for retry', {
+          operation: 'importFromUrl:healBatch',
+          userId: user.id,
+          itemId: existing.id,
+          status: existing.status,
+          sourceKey: preview.normalizedSourceKey
+        });
+        await this.repository.deleteItem(client, user.id, existing.id);
       }
 
       const filteredVideos = options.selectedVideoIds && options.selectedVideoIds.length > 0
@@ -243,37 +254,55 @@ export class ImportService {
       const finalVideos = filteredVideos.length > 0 ? filteredVideos : preview.videos;
       const defaultDurations = ['45:12', '52:40', '48:19', '54:02', '1:02:15', '41:30', '58:04', '38:50', '49:15', '55:20'];
 
-      const savedBatchPlaylist = await this.repository.createPlaylistItemWithVideos(
-        client,
-        {
-          userId: user.id,
-          youtubePlaylistId: preview.id,
-          sourceUrl: preview.canonicalUrl,
-          normalizedSourceKey: preview.normalizedSourceKey,
-          title: options.title || preview.title,
-          description: options.description || preview.description,
-          skillDomain: options.skillDomain || preview.skillDomain,
-          tags: options.tags || preview.tags,
-          author: preview.author,
-          totalDurationSeconds: preview.totalDurationSeconds,
-          thumbnailUrl: (options.customThumbnailUrl && options.customThumbnailUrl.startsWith('http'))
-            ? options.customThumbnailUrl
-            : preview.thumbnailUrl
-        },
-        finalVideos.map((item, idx) => ({
-          videoId: item.videoId,
-          title: item.title,
-          thumbnailUrl: item.thumbnailUrl,
-          sourcePosition: idx,
-          durationFormatted: item.duration || defaultDurations[idx % defaultDurations.length],
-          durationSeconds: item.durationSeconds || 2800
-        }))
-      );
+      try {
+        const savedBatchPlaylist = await this.repository.createPlaylistItemWithVideos(
+          client,
+          {
+            userId: user.id,
+            youtubePlaylistId: preview.id,
+            sourceUrl: preview.canonicalUrl,
+            normalizedSourceKey: preview.normalizedSourceKey,
+            title: options.title || preview.title,
+            description: options.description || preview.description,
+            skillDomain: options.skillDomain || preview.skillDomain,
+            tags: options.tags || preview.tags,
+            author: preview.author,
+            totalDurationSeconds: preview.totalDurationSeconds,
+            thumbnailUrl: (options.customThumbnailUrl && options.customThumbnailUrl.startsWith('http'))
+              ? options.customThumbnailUrl
+              : preview.thumbnailUrl
+          },
+          finalVideos.map((item, idx) => ({
+            videoId: item.videoId,
+            title: item.title,
+            thumbnailUrl: item.thumbnailUrl,
+            sourcePosition: idx,
+            durationFormatted: item.duration || defaultDurations[idx % defaultDurations.length],
+            durationSeconds: item.durationSeconds || 2800
+          }))
+        );
 
-      return {
-        item: savedBatchPlaylist,
-        isDuplicate: false
-      };
+        return {
+          item: savedBatchPlaylist,
+          isDuplicate: false
+        };
+      } catch (err: any) {
+        if (err instanceof AppError && err.statusCode === 409) {
+          const racedExisting = await this.repository.findBySourceKey(
+            client,
+            user.id,
+            preview.normalizedSourceKey
+          );
+          if (racedExisting && racedExisting.status === 'ready') {
+            const fullItem =
+              racedExisting.type === 'playlist'
+                ? await this.repository.getItemWithVideos(client, user.id, racedExisting.id)
+                : racedExisting;
+            return { item: fullItem, isDuplicate: true };
+          }
+        }
+        throw err;
+      }
     }
 
     // 1. Parse and classify URL
@@ -294,120 +323,157 @@ export class ImportService {
     );
 
     if (existing) {
-      logger.info('Existing learning item found, returning existing item (idempotent)', {
-        operation: 'importFromUrl',
+      if (existing.status === 'ready') {
+        logger.info('Existing learning item found, returning existing item (idempotent)', {
+          operation: 'importFromUrl',
+          userId: user.id,
+          itemId: existing.id,
+          sourceKey: parsed.normalizedSourceKey
+        });
+
+        const fullItem =
+          existing.type === 'playlist'
+            ? await this.repository.getItemWithVideos(client, user.id, existing.id)
+            : existing;
+
+        return {
+          item: fullItem,
+          isDuplicate: true
+        };
+      }
+
+      // If existing item is in 'failed' or 'importing' status, heal it by removing the broken record
+      logger.warn('Existing item in non-ready status found; cleaning up for retry', {
+        operation: 'importFromUrl:heal',
         userId: user.id,
         itemId: existing.id,
+        status: existing.status,
         sourceKey: parsed.normalizedSourceKey
       });
-
-      const fullItem =
-        existing.type === 'playlist'
-          ? await this.repository.getItemWithVideos(client, user.id, existing.id)
-          : existing;
-
-      return {
-        item: fullItem,
-        isDuplicate: true
-      };
+      await this.repository.deleteItem(client, user.id, existing.id);
     }
 
     // 3. Fetch from YouTube and persist
-    if (parsed.type === 'video') {
-      const metadata = await this.getClient().fetchVideoMetadata(parsed.id);
+    try {
+      if (parsed.type === 'video') {
+        const metadata = await this.getClient().fetchVideoMetadata(parsed.id);
 
-      const savedItem = await this.repository.createVideoItem(client, {
-        userId: user.id,
-        youtubeVideoId: metadata.id,
-        sourceUrl: parsed.canonicalUrl,
-        normalizedSourceKey: parsed.normalizedSourceKey,
-        title: options.title || metadata.title,
-        description: options.description || null,
-        skillDomain: options.skillDomain || 'Systems Architecture',
-        tags: options.tags || ['video'],
-        author: 'YouTube Creator',
-        totalDurationSeconds: 2700,
-        thumbnailUrl: (options.customThumbnailUrl && options.customThumbnailUrl.startsWith('http'))
-          ? options.customThumbnailUrl
-          : metadata.thumbnailUrl
-      });
-
-      logger.info('Video imported and saved successfully', {
-        operation: 'importFromUrl:video',
-        userId: user.id,
-        itemId: savedItem.id,
-        videoId: metadata.id
-      });
-
-      return {
-        item: savedItem,
-        isDuplicate: false
-      };
-    }
-
-    if (parsed.type === 'playlist') {
-      const playlistMeta = await this.getClient().fetchPlaylistMetadata(parsed.id);
-
-      // Filter to only selected items if selectedVideoIds is provided
-      const filteredItems = options.selectedVideoIds && options.selectedVideoIds.length > 0
-        ? playlistMeta.items.filter((item) => options.selectedVideoIds!.includes(item.videoId))
-        : playlistMeta.items;
-
-      const finalItems = filteredItems.length > 0 ? filteredItems : playlistMeta.items;
-
-      // Deduplicate items by videoId preserving initial source position to avoid constraint violations
-      const seenVideoIds = new Set<string>();
-      const uniqueItems: typeof finalItems = [];
-      for (const item of finalItems) {
-        if (!seenVideoIds.has(item.videoId)) {
-          seenVideoIds.add(item.videoId);
-          uniqueItems.push(item);
-        }
-      }
-
-      const defaultDurations = ['45:12', '52:40', '48:19', '54:02', '1:02:15', '41:30', '58:04', '38:50', '49:15', '55:20'];
-
-      const totalSecs = uniqueItems.length * 2800;
-
-      const savedPlaylist = await this.repository.createPlaylistItemWithVideos(
-        client,
-        {
+        const savedItem = await this.repository.createVideoItem(client, {
           userId: user.id,
-          youtubePlaylistId: playlistMeta.id,
+          youtubeVideoId: metadata.id,
           sourceUrl: parsed.canonicalUrl,
           normalizedSourceKey: parsed.normalizedSourceKey,
-          title: options.title || playlistMeta.title,
-          description: options.description || 'Structured series of video lessons and study materials.',
+          title: options.title || metadata.title,
+          description: options.description || null,
           skillDomain: options.skillDomain || 'Systems Architecture',
-          tags: options.tags || ['distributed-systems', 'raft-consensus', 'go'],
-          author: 'MIT Distributed Systems Lab',
-          totalDurationSeconds: totalSecs,
+          tags: options.tags || ['video'],
+          author: 'YouTube Creator',
+          totalDurationSeconds: 2700,
           thumbnailUrl: (options.customThumbnailUrl && options.customThumbnailUrl.startsWith('http'))
             ? options.customThumbnailUrl
-            : playlistMeta.thumbnailUrl
-        },
-        uniqueItems.map((item, idx) => ({
-          videoId: item.videoId,
-          title: item.title,
-          thumbnailUrl: item.thumbnailUrl,
-          sourcePosition: idx,
-          durationFormatted: defaultDurations[idx % defaultDurations.length],
-          durationSeconds: 2800
-        }))
-      );
+            : metadata.thumbnailUrl
+        });
 
-      logger.info('Playlist imported and saved successfully', {
-        operation: 'importFromUrl:playlist',
-        userId: user.id,
-        itemId: savedPlaylist.id,
-        playlistId: playlistMeta.id,
-        videoCount: savedPlaylist.videos?.length ?? 0
-      });
+        logger.info('Video imported and saved successfully', {
+          operation: 'importFromUrl:video',
+          userId: user.id,
+          itemId: savedItem.id,
+          videoId: metadata.id
+        });
 
-      return {
-        item: savedPlaylist,
-        isDuplicate: false
-      };
+        return {
+          item: savedItem,
+          isDuplicate: false
+        };
+      }
+
+      if (parsed.type === 'playlist') {
+        const playlistMeta = await this.getClient().fetchPlaylistMetadata(parsed.id);
+
+        // Filter to only selected items if selectedVideoIds is provided
+        const filteredItems = options.selectedVideoIds && options.selectedVideoIds.length > 0
+          ? playlistMeta.items.filter((item) => options.selectedVideoIds!.includes(item.videoId))
+          : playlistMeta.items;
+
+        const finalItems = filteredItems.length > 0 ? filteredItems : playlistMeta.items;
+
+        // Deduplicate items by videoId preserving initial source position to avoid constraint violations
+        const seenVideoIds = new Set<string>();
+        const uniqueItems: typeof finalItems = [];
+        for (const item of finalItems) {
+          if (!seenVideoIds.has(item.videoId)) {
+            seenVideoIds.add(item.videoId);
+            uniqueItems.push(item);
+          }
+        }
+
+        const defaultDurations = ['45:12', '52:40', '48:19', '54:02', '1:02:15', '41:30', '58:04', '38:50', '49:15', '55:20'];
+        const totalSecs = uniqueItems.length * 2800;
+
+        const savedPlaylist = await this.repository.createPlaylistItemWithVideos(
+          client,
+          {
+            userId: user.id,
+            youtubePlaylistId: playlistMeta.id,
+            sourceUrl: parsed.canonicalUrl,
+            normalizedSourceKey: parsed.normalizedSourceKey,
+            title: options.title || playlistMeta.title,
+            description: options.description || 'Structured series of video lessons and study materials.',
+            skillDomain: options.skillDomain || 'Systems Architecture',
+            tags: options.tags || ['distributed-systems', 'raft-consensus', 'go'],
+            author: 'MIT Distributed Systems Lab',
+            totalDurationSeconds: totalSecs,
+            thumbnailUrl: (options.customThumbnailUrl && options.customThumbnailUrl.startsWith('http'))
+              ? options.customThumbnailUrl
+              : playlistMeta.thumbnailUrl
+          },
+          uniqueItems.map((item, idx) => ({
+            videoId: item.videoId,
+            title: item.title,
+            thumbnailUrl: item.thumbnailUrl,
+            sourcePosition: idx,
+            durationFormatted: defaultDurations[idx % defaultDurations.length],
+            durationSeconds: 2800
+          }))
+        );
+
+        logger.info('Playlist imported and saved successfully', {
+          operation: 'importFromUrl:playlist',
+          userId: user.id,
+          itemId: savedPlaylist.id,
+          playlistId: playlistMeta.id,
+          videoCount: savedPlaylist.videos?.length ?? 0
+        });
+
+        return {
+          item: savedPlaylist,
+          isDuplicate: false
+        };
+      }
+    } catch (err: any) {
+      if (err instanceof AppError && err.statusCode === 409) {
+        logger.info('Concurrent import conflict caught; fetching existing item for idempotency', {
+          operation: 'importFromUrl:concurrency',
+          userId: user.id,
+          sourceKey: parsed.normalizedSourceKey
+        });
+        const racedExisting = await this.repository.findBySourceKey(
+          client,
+          user.id,
+          parsed.normalizedSourceKey
+        );
+        if (racedExisting && racedExisting.status === 'ready') {
+          const fullItem =
+            racedExisting.type === 'playlist'
+              ? await this.repository.getItemWithVideos(client, user.id, racedExisting.id)
+              : racedExisting;
+          return {
+            item: fullItem,
+            isDuplicate: true
+          };
+        }
+      }
+      throw err;
     }
 
     throw new Error('Unreachable source type encountered');
